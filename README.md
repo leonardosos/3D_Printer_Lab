@@ -4,7 +4,7 @@ This repository is related to the University group project
 # 3D Printers Lab  
 ## Distributed and Internet of Things Software Architectures Exam
 
-**Leonardo Brighenti**  **Simone Giovanardi**  **Lorenzo Sartorelli**  		
+**Leonardo Brighenti** -- **Simone Giovanardi** -- **Lorenzo Sartorelli**  		
 
 ---
 
