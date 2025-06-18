@@ -73,9 +73,9 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 | Device      | Number | Sensor | Actuator | Read                                    | Write                                   |
 |-------------|--------|--------|----------|----------------------------------------|-----------------------------------------|
 | 3D Printer  | 3      | Yes    | Yes      | - Print assignments<br>- Job commands  | - Temperature data<br>- Print progress<br>- Status updates |
-| Room        | 1      | Yes    | No       | N/A                                    | - Temperature readings<br>- Anomaly detection data |
+| Room        | 1      | Yes    | No       | N/A                                    | - Temperature readings |
 | Robot       | 1      | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
-| Fan         | 1      | No     | Yes      | - Speed commands<br>- Emergency signals| - Speed control<br>- Status feedback   |
+| Fan         | 1      | No     | Yes      | - Speed commands| N/A   |
 
 ---
 
