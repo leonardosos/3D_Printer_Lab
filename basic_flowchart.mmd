@@ -32,6 +32,7 @@ JobHandler <--> Planning
 
 ST --> TempGlobal 
 ST --> PrinterMon
+%% JobHandler --> PrinterMon (Real topic subscription)
 JobHandler --> ST
 
 Planning <--> Robot
