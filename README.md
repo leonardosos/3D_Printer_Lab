@@ -1,6 +1,6 @@
 # IoT_Project : 3D Printers Lab
 
-This repository contains the implementation of a distributed IoT system for automated 3D printing lab management, developed as part of the **Distributed and Internet of Things Software Architectures** course.
+This repository contains the implementation of a distributed IoT system for automated 3D printing lab management, developed as part of the **Distributed and Internet of Things Software Architectures** course. (The project is not related to any other course.)
 
 ## Team Members
 
@@ -67,6 +67,17 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 #### Communication Schemas
 
 - [Communication Schemas and Message Types](communication.md)
+
+## Devices
+
+| Device      | Number | Sensor | Actuator | Read                                    | Write                                   |
+|-------------|--------|--------|----------|----------------------------------------|-----------------------------------------|
+| 3D Printer  | 3      | Yes    | Yes      | - Print assignments<br>- Job commands  | - Temperature data<br>- Print progress<br>- Status updates |
+| Room        | 1      | Yes    | No       | N/A                                    | - Temperature readings<br>- Anomaly detection data |
+| Robot       | 1      | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
+| Fan         | 1      | No     | Yes      | - Speed commands<br>- Emergency signals| - Speed control<br>- Status feedback   |
+
+---
 
 ## Official documentation
 
