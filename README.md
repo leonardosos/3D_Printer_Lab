@@ -88,3 +88,8 @@ Here you can find the official documentation related to metods of public librari
 Below you can find the helpful methods for pub/sub:
 
 <https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html>
+
+## Meeting Notes
+
+- [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
+
