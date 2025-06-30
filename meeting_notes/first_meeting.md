@@ -11,9 +11,7 @@ Devono essere semplici, senza introdurre tool esterni complicati.
 - Può essere implementata con un sidecar, ma questo dettaglio va solo accennato nella presentazione.
 - All'interno del codice, si può gestire tutto nello stesso servizio/classe.
 
-## CONFIGURAZIONE
-
-Usare file di configurazione per tutte le impostazioni, evitando hardcoded.
+(Usare file di configurazione per tutte le impostazioni, evitando hardcoded.)
 
 ## ARCHITETTURA
 
@@ -25,11 +23,11 @@ Deve risultare modulare, facilmente scalabile e leggibile.
 
 Deve essere stilizzata in modo semplice.
 
-Evitare CSS complessi e meccanismi di comunicazione strani o opachi che complicano l'integrazione.
+Evitare CSS complessi e meccanismi di comunicazione strani o opachi che complicano l'integrazione. (può chiedere come avviene la comunicazione tra frontend e backend)
 
 ## TOPIC E ARCHITETTURA MODULARE
 
-L'architettura deve permettere di vedere chiaramente i componenti e supportare la scalabilità automatica delle operazioni.
+L'architettura deve permettere di vedere chiaramente i componenti e supportare la scalabilità automatica delle operazioni in base all'aumento dei device.
 
 Evitare valori hardcoded, ad esempio trattare i topic tramite ID dinamici.
 
@@ -43,9 +41,9 @@ Consigliato creare un diagramma delle classi per ogni microservizio principale:
 
 ## SUGGERIMENTI FINALI
 
-Capire bene:
+Prima di fare codice definire per ogni classe e microservizio:
 
 - Strutture dati utilizzate
-- Interfacce
+- Interfacce di comunicazione
 - Tipi di sanity check
 - Metodi delle classi principali
