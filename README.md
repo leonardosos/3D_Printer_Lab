@@ -92,4 +92,3 @@ Below you can find the helpful methods for pub/sub:
 ## Meeting Notes
 
 - [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
-
