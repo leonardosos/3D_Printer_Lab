@@ -1,0 +1,38 @@
+graph TD
+    subgraph S["S-Tier: Complex Implementation"]
+        GUI["🧑‍💻 User Interface (GUI)"]
+        APIGW["🛰 API Gateway"]
+        QueueMgr["📋 Priority Queue Manager"]
+        JobHandler["🧠 Job Handler"]
+    end
+    
+    subgraph A["A-Tier: Medium Implementation"]
+        Planning["🧭 Robot Management"]
+        Anomaly["⚠️ Anomaly Detection"]
+        PrinterMon["🖨 Printer Monitoring"]
+    end
+    
+    subgraph B["B-Tier: Easy Implementation"]
+        Robot["🤖 ROB Robot"]
+        ST["🧱 ST Printer"]
+        TempGlobal["🌡 Global Temperature"]
+        FanCtrl["🌀 Fan Controller"]
+    end
+    
+    subgraph C["C-Tier: Super Easy Implementation"]
+        Fan["💨 Fan Unit"]
+        TempSensor["🌡 Room Temp Sensor"]
+    end
+    
+    %% Force vertical layout
+    S ~~~ A ~~~ B ~~~ C
+    
+    classDef stier fill:#ff8000,stroke:#000,color:#000
+    classDef atier fill:#ffff00,stroke:#000,color:#000
+    classDef btier fill:#80ff00,stroke:#000,color:#000
+    classDef ctier fill:#00ff00,stroke:#000,color:#000
+    
+    class GUI,APIGW,QueueMgr,JobHandler stier
+    class Planning,Anomaly,PrinterMon atier
+    class Robot,ST,TempGlobal,FanCtrl btier
+    class Fan,TempSensor ctier

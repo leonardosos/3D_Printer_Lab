@@ -8,6 +8,10 @@ This repository contains the implementation of a distributed IoT system for auto
 - **Simone Giovanardi**
 - **Lorenzo Sartorelli**
 
+## Meeting Notes
+
+- [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
+
 ## Application Scenario
 
 **An automated lab involved in the production of 3D printed objects**.
@@ -59,10 +63,10 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 
 ### Project Documentation
 
-#### Flowchart
+#### Flowchart schemas
 
-- [Basic Flowchart](basic_flowchart.mmd)
-- [Full Flowchart with MQTT Topics](full_flowchart.mmd)
+- [Basic Flowchart](flowchart/basic_flowchart.mmd)
+- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd)
 
 #### Communication Schemas
 
@@ -89,6 +93,3 @@ Below you can find the helpful methods for pub/sub:
 
 <https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html>
 
-## Meeting Notes
-
-- [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
