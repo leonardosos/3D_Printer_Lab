@@ -12,6 +12,10 @@ This repository contains the implementation of a distributed IoT system for auto
 
 - [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
 
+## Tier List for division of work
+
+- [Tier List](flowchart/tier_list.mmd)
+
 ## Application Scenario
 
 **An automated lab involved in the production of 3D printed objects**.
