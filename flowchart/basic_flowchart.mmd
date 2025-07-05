@@ -1,0 +1,49 @@
+flowchart TB
+
+%% User Interaction Layer
+GUI["🧑‍💻 User Interface (GUI)"]
+
+%% HTTP Communication Layer
+APIGW["🛰 API Gateway"]
+QueueMgr["📋 Priority Queue Manager"]
+TempGlobal["🌡 Global Temperature"]
+PrinterMon["🖨 Printer Monitoring"]
+
+%% MQTT Communication Layer
+JobHandler["🧠 Job Handler"]
+Planning["🧭 Robot Management"]
+ST["🧱 ST Printer"]
+Anomaly["⚠️ Anomaly Detection"]
+FanCtrl["🌀 Fan Controller"]
+
+%% Device Layer (emoji-enhanced)
+Robot["🤖 ROB Robot"]
+Fan["💨 Fan Unit"]
+TempSensor["🌡 Room Temp Sensor"]
+
+%% Data Flow 
+GUI o--o|HTTP| APIGW
+APIGW o--o|HTTP| QueueMgr
+APIGW o--o|HTTP| TempGlobal
+QueueMgr o--o|HTTP| JobHandler
+
+TempSensor --> TempGlobal
+JobHandler <--> Planning
+
+ST --> TempGlobal 
+ST --> PrinterMon
+%% JobHandler --> PrinterMon (Real topic subscription)
+JobHandler --> ST
+
+Planning <--> Robot
+Robot --> PrinterMon
+Robot --> JobHandler 
+
+APIGW o--o|HTTP| PrinterMon
+
+TempGlobal --> FanCtrl
+FanCtrl --> Fan
+
+TempSensor --> Anomaly
+ST --> Anomaly
+Anomaly --> FanCtrl
