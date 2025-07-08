@@ -2,11 +2,11 @@
 
 Below is a proposed set of message‐types and JSON schemas for all of the HTTP and MQTT interactions in your 3D-printer-farm microservice architecture. Each "type" has a name, a list of fields (with types) and a small example payload.
 
-## 1) HTTP APIs (JSON over REST)
+## 1. HTTP APIs (JSON over REST)
 
-### a) Queue Manager (jobs)
+### 1.1 Queue Manager (jobs)
 
-#### GET /jobs
+#### 1.1.1 GET /jobs
 
 **Response type:**
 
@@ -42,7 +42,7 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 }
 ```
 
-#### POST /jobs
+#### 1.1.2 POST /jobs
 
 **Request type:**
 
@@ -66,7 +66,7 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 { "modelId": "model-789", "priority": 5 }
 ```
 
-#### PUT /jobs/{jobId}
+#### 1.1.3 PUT /jobs/{jobId}
 
 **Request type:**
 
@@ -105,13 +105,13 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 }
 ```
 
-#### DELETE /jobs/{jobId}
+#### 1.1.4 DELETE /jobs/{jobId}
 
 **Response:** 204 No Content
 
-### b) Global Temperature Service
+### 1.2 Global Temperature Service
 
-#### GET /temperature/global
+#### 1.2.1 GET /temperature/global
 
 **Response type:**
 
@@ -157,9 +157,9 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 }
 ```
 
-### c) Printer Monitoring Service
+### 1.3 Printer Monitoring Service
 
-#### GET /printers/status
+#### 1.3.1 GET /printers/status
 
 **Response type:**
 
@@ -193,13 +193,13 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 }
 ```
 
-## 2) MQTT Topics (JSON payloads)
+## 2. MQTT Topics (JSON payloads)
 
 All topics follow the pattern `device/<component>/<ID>/<event>`.
 
-### a) Temperature readings
+### 2.1 Temperature Readings
 
-#### Topic: device/room/temperature
+#### 2.1.1 Topic: device/room/temperature
 
 **Type:** TemperatureReading
 
@@ -214,7 +214,7 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 { "sensorId": "room-sensor-1", "temperature": 22.9, "unit": "C", "timestamp": "2025-06-15T08:31:20Z" }
 ```
 
-#### Topic: device/printer/{printerId}/temperature
+#### 2.1.2 Topic: device/printer/{printerId}/temperature
 
 Same schema as above, plus printerId field:
 
@@ -229,9 +229,9 @@ Same schema as above, plus printerId field:
 }
 ```
 
-### b) Print‐job assignment & progress
+### 2.2 Print Job Assignment & Progress
 
-#### Topic: device/printer/{printerId}/assignment
+#### 2.2.1 Topic: device/printer/{printerId}/assignment
 
 **Type:** PrinterAssignment
 
@@ -255,7 +255,7 @@ Same schema as above, plus printerId field:
 }
 ```
 
-#### Topic: device/printer/{printerId}/progress
+#### 2.2.2 Topic: device/printer/{printerId}/progress
 
 **Type:** PrinterProgress
 
@@ -277,9 +277,9 @@ Same schema as above, plus printerId field:
 }
 ```
 
-### c) Robot (plate‐changer) coordination
+### 2.3 Robot (Plate-Changer) Coordination
 
-#### Topic: device/robot/{robotId}/coordinates
+#### 2.3.1 Topic: device/robot/{robotId}/coordinates
 
 **Type:** RobotCommand
 
@@ -296,7 +296,7 @@ Same schema as above, plus printerId field:
 { "robotId": "rob-1", "x": 120, "y": 45, "z": 10, "speed": 200, "timestamp": "2025-06-15T08:32:05Z" }
 ```
 
-#### Topic: device/robot/{robotId}/progress
+#### 2.3.2 Topic: device/robot/{robotId}/progress
 
 **Type:** RobotProgress
 
@@ -312,9 +312,9 @@ Same schema as above, plus printerId field:
 { "robotId": "rob-1", "action": "pick", "status": "in_progress", "timestamp": "2025-06-15T08:32:10Z" }
 ```
 
-### d) Fan control & safety
+### 2.4 Fan Control & Safety
 
-#### Topic: device/fan/controller/speed
+#### 2.4.1 Topic: device/fan/controller/speed
 
 **Type:** FanSpeedCommand
 
@@ -328,7 +328,7 @@ Same schema as above, plus printerId field:
 { "speed": 75, "unit": "percent" }
 ```
 
-#### Topic: device/fan/{fanId}/speed
+#### 2.4.2 Topic: device/fan/{fanId}/speed
 
 **Type:** FanSpeedStatus
 
@@ -343,46 +343,20 @@ Same schema as above, plus printerId field:
 { "fanId": "fan-1", "speed": 75, "actual": 72, "timestamp": "2025-06-15T08:32:15Z" }
 ```
 
-#### Topic: device/fan/controller/emergency
+#### 2.4.3 Topic: device/fan/controller/emergency
 
 **Type:** EmergencyCommand
 
-- `action` - "shutdown"|"restart"|"auto"
-- `reason?` - string (human‐readable)
-- `timestamp` - string (ISO 8601)
-
-**Example:**
-
-```json
-{ "action": "shutdown", "reason": "overheat", "timestamp": "2025-06-15T08:32:20Z" }
-```
-
-### e) Anomaly alerts
-
-#### Topic: anomaly/alert
-
-**Type:** AnomalyAlert
-
-- `alertId` - string
-- `type` - "overheat"|"under_temperature"|"thermal_runaway"|"sensor_error"
+- `action` - "shutdown"|"restart"
+- `type` - "overheat"|"thermal_runaway"
 - `source` - "printer"|"room"
 - `id` - string (e.g. printerId or sensorId)
-- `value` - number (measured temp or error code)
-- `threshold` - number (configured limit)
 - `timestamp` - string (ISO 8601)
 
 **Example:**
 
 ```json
-{
-  "alertId": "alert-321",
-  "type": "overheat",
-  "source": "printer",
-  "id": "printer-2",
-  "value": 260.5,
-  "threshold": 250,
-  "timestamp": "2025-06-15T08:32:25Z"
-}
+{ "action": "shutdown", "type": "overheat", "source": "printer", "id": "printer-2", "timestamp": "2025-06-15T08:32:20Z" }
 ```
 
 ---
