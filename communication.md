@@ -66,6 +66,45 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 { "modelId": "model-789", "priority": 5 }
 ```
 
+#### PUT /jobs/{jobId}
+
+**Request type:**
+
+```json
+{
+  "priority?": "number",     // update job priority
+  "printerId?": "string"     // reassign to different printer
+}
+```
+
+**Response type:**
+
+```json
+{ "job": Job }
+```
+
+**Example request:**
+
+```json
+{ "priority": 15 }
+```
+
+**Example response:**
+
+```json
+{
+  "job": {
+    "id": "job-123",
+    "modelId": "model-456",
+    "assignedPrinterId": null,
+    "priority": 15,
+    "status": "pending",
+    "submittedAt": "2025-06-15T08:30:00Z",
+    "updatedAt": "2025-06-15T08:35:00Z"
+  }
+}
+```
+
 #### DELETE /jobs/{jobId}
 
 **Response:** 204 No Content
@@ -78,16 +117,44 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 
 ```json
 {
-  "temperature": "number",    // in °C
-  "source": "room"|"printer",
-  "timestamp": "string"       // ISO 8601
+  "temperatures": [
+    {
+      "temperature": "number",    // in °C
+      "source": "room"|"printer",
+      "sourceId": "string",       // sensor ID or printer ID
+      "timestamp": "string"       // ISO 8601
+    }
+  ],
+  "lastUpdated": "string"         // ISO 8601
 }
 ```
 
 **Example:**
 
 ```json
-{ "temperature": 22.7, "source": "room", "timestamp": "2025-06-15T08:31:10Z" }
+{
+  "temperatures": [
+    { 
+      "temperature": 22.7, 
+      "source": "room", 
+      "sourceId": "room-sensor-1", 
+      "timestamp": "2025-06-15T08:31:10Z" 
+    },
+    { 
+      "temperature": 205.3, 
+      "source": "printer", 
+      "sourceId": "printer-1", 
+      "timestamp": "2025-06-15T08:31:15Z" 
+    },
+    { 
+      "temperature": 198.7, 
+      "source": "printer", 
+      "sourceId": "printer-2", 
+      "timestamp": "2025-06-15T08:31:12Z" 
+    }
+  ],
+  "lastUpdated": "2025-06-15T08:31:15Z"
+}
 ```
 
 ### c) Printer Monitoring Service
