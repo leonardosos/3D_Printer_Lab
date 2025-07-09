@@ -195,7 +195,7 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
 
 ## 2. MQTT Topics (JSON payloads)
 
-All topics follow the pattern `device/<component>/<ID>/<event>`.
+All topics follow the pattern `device/<component>/<ID>/<event>`.  
 
 ### 2.1 Temperature Readings
 
@@ -231,27 +231,24 @@ Same schema as above, plus printerId field:
 
 ### 2.2 Print Job Assignment & Progress
 
-#### 2.2.1 Topic: device/printer/{printerId}/assignment
+#### 2.2.1 Topic: device/printers
 
-**Type:** PrinterAssignment
+**Type:** PrinterStatusUpdate
 
-- `printerId` - string
-- `jobId` - string
-- `modelUrl` - string (where to fetch the STL/GCODE)
-- `filamentType` - "PLA"|"ABS"|"PETG"|…
-- `estimatedTimeSec` - number (in seconds)
-- `timestamp` - string (ISO 8601)
+- `printers` – array of objects:
+  - `printerId` – string
+  - `status` – "work" | "finish"
+  - `timestamp` – string (ISO 8601)
 
 **Example:**
 
 ```json
 {
-  "printerId": "printer-1",
-  "jobId": "job-123",
-  "modelUrl": "https://…/model-456.gcode",
-  "filamentType": "PLA",
-  "estimatedTimeSec": 3600,
-  "timestamp": "2025-06-15T08:31:25Z"
+  "printers": [
+    { "printerId": "printer-1", "status": "work", "timestamp": "2025-07-09T10:00:00Z" },
+    { "printerId": "printer-2", "status": "finish", "timestamp": "2025-07-09T10:00:00Z" },
+    { "printerId": "printer-3", "status": "work", "timestamp": "2025-07-09T10:00:00Z" }
+  ]
 }
 ```
 

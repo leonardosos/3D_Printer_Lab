@@ -12,9 +12,15 @@ This repository contains the implementation of a distributed IoT system for auto
 
 - [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
 
-## Tier List for division of work
+## Components Explanation
 
-- [Tier List](flowchart/tier_list.mmd)
+Difficult Tier: [Tier List](flowchart/tier_list.mmd)
+
+Leonardo:
+
+- [Anomaly Detection (AT)](anomaly_detection/README.md)
+- [Web Interface (GUI)](web-ui/README.md)
+- [Printer ST](st_printer/README.md)
 
 ## Application Scenario
 
@@ -72,6 +78,8 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 - [Basic Flowchart](flowchart/basic_flowchart.mmd)
 - [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd)
 
+On the full flowchart, where reported up and down arrows indicate the direction of the communication.
+
 #### Communication Schemas
 
 - [Communication Schemas and Message Types](communication.md)
@@ -96,4 +104,3 @@ Here you can find the official documentation related to metods of public librari
 Below you can find the helpful methods for pub/sub:
 
 <https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html>
-

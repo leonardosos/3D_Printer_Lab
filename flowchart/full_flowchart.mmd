@@ -27,16 +27,18 @@ APIGW o--o|HTTP: get, post, delete, put| QueueMgr
 APIGW o--o|HTTP: get| TempGlobal
 QueueMgr o--o|HTTP: get| JobHandler
 
-JobHandler -->|device/printer/-ID-| Planning
+JobHandler -->|device/printers| Planning
 
 TempSensor -->|device/room/temperature| TempGlobal
 
 ST -->|device/printer/-ID-/temperature| TempGlobal 
 ST -->|device/printer/-ID-/progress| PrinterMon
 JobHandler -->|device/printer/-ID-/assignement| PrinterMon
-JobHandler <-->|device/printer/-ID-/progress device/printer/-ID-/assignement| ST
+JobHandler <-->|down:-> device/printer/-ID-/assignement
+up:-> device/printer/-ID-/progress | ST
 
-Planning <-->|device/robot/-ID-/coordinates device/robot/-ID-/progress| Robot
+Planning <-->|down:-> device/robot/-ID-/coordinates 
+up:-> device/robot/-ID-/progress| Robot
 Robot -->|device/robot/-ID-/progress| PrinterMon
 Robot -->|device/robot/-ID-/progress| JobHandler 
 
