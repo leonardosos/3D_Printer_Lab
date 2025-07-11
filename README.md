@@ -106,3 +106,38 @@ Here you can find the official documentation related to metods of public librari
 Below you can find the helpful methods for pub/sub:
 
 <https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html>
+
+### Docker
+
+follow "Install using the apt repository": <https://docs.docker.com/engine/install/ubuntu/#installation-methods>
+
+#### Post-installation permissions problems
+
+running the following command tests if you have the correct permissions to run Docker commands without `sudo`:
+
+```bash
+docker ps
+```
+
+You might encounter an error like this:
+
+```bash
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.51/containers/json": dial unix /var/run/docker.sock: connect: permission denied
+```
+
+Follow the instructions in the Docker documentation to resolve this issue:
+<https://docs.docker.com/engine/install/linux-postinstall/>
+
+### MQTT Broker - Eclipse Mosquitto
+
+This section provides a guide for setting up and customizing an MQTT broker using Eclipse Mosquitto. We use the official eclipse-mosquitto Docker image on Docker Hub: <https://hub.docker.com/_/eclipse-mosquitto>.
+
+The version used in this project is `2.0.21`.
+
+The docker dowload command is:
+
+```bash
+docker pull eclipse-mosquitto:2.0.21
+```
+
+Follow [the instructions in the README file](mqtt-broker/README.md) to set up the broker with custom configurations, including local configuration files, data persistence, and logging.
