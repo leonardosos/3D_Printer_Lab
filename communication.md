@@ -4,9 +4,11 @@
 
 Below is a proposed set of message‐types and JSON schemas for all of the HTTP and MQTT interactions in your 3D-printer-farm microservice architecture. Each "type" has a name, a list of fields (with types) and a small example payload.
 
+Every microservice or device can validate incoming JSON against the appropriate schema and serialize outgoing data in a consistent, self-describing format.
+
 ## Table of Contents
 
-1. [1. HTTP APIs (JSON over REST)](#1-http-apis-json-over-rest)
+1. [HTTP APIs (JSON over REST)](#1-http-apis-json-over-rest)
     - [1.1 Queue Manager (jobs)](#11-queue-manager-jobs)
         - [1.1.1 GET /jobs](#111-get-jobs)
         - [1.1.2 POST /jobs](#112-post-jobs)
@@ -16,7 +18,7 @@ Below is a proposed set of message‐types and JSON schemas for all of the HTTP 
         - [1.2.1 GET /temperature/global](#121-get-temperatureglobal)
     - [1.3 Printer Monitoring Service](#13-printer-monitoring-service)
         - [1.3.1 GET /printers/status](#131-get-printersstatus)
-2. [2. MQTT Topics (JSON payloads)](#2-mqtt-topics-json-payloads)
+2. [MQTT Topics (JSON payloads)](#2-mqtt-topics-json-payloads)
     - [2.1 Temperature Readings](#21-temperature-readings)
         - [2.1.1 device/room/temperature](#211-topic-deviceroomtemperature)
         - [2.1.2 device/printer/{printerId}/temperature](#212-topic-deviceprinterprinteridtemperature)
@@ -422,7 +424,3 @@ Same schema as above, plus printerId field:
 ```json
 { "action": "shutdown", "type": "overheat", "source": "printer", "id": "printer-2", "timestamp": "2025-06-15T08:32:20Z" }
 ```
-
----
-
-With these definitions in place, every microservice or device can validate incoming JSON against the appropriate schema and serialize outgoing data in a consistent, self-describing format.
