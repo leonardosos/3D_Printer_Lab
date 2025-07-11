@@ -1,5 +1,3 @@
-work in progress
-
 # ST Printer Service
 
 ## Architecture Position
@@ -7,23 +5,32 @@ work in progress
 The ST Printer service operates as an MQTT-based microservice that simulates individual 3D printer behavior within the automated printing lab. Each printer instance:
 
 - Receives print job assignments from the Job Handler
-- Reports temperature readings for monitoring and safety
-- Publishes print progress updates for coordination
-- Communicates with the Robot Management system for plate handling
+- Reports temperature readings for monitoring (global temperature) and safety (anomaly detection)
+- Publishes print progress updates for coordination with the Job Handler and Printer Monitoring Service
 
 ```text
 ┌─────────────────┐    MQTT Topics      ┌─────────────────┐
-│   Job Handler   │ ──────────────────► │   ST Printer    │
+│   Job Handler   │ ──────────────────► │                 │
 │                 │ device/printer/     │                 │
 │                 │ {id}/assignment     │                 │
+│                 │                     │                 │
+################### publish separation ###########################
 │                 │                     │                 │
 │                 │      MQTT Topics    │                 │
 │                 │ ◄────────────────── │                 │
 │                 │ device/printer/     │                 │
-└─────────────────┘ {id}/progress       │                 │
+└─────────────────┘ {id}/progress       │                 |
+                                        │                 │
+                                        │   ST Printer    │
+┌─────────────────┐    MQTT Topics      │                 │
+│   Printer       │   device/printer/   │                 │
+│   Monitoring    │    {id}/progress    │                 │
+│   Service       │ ◄────────────────── │                 │
+│                 │                     │                 │
+└─────────────────┘                     │                 │
                                         │                 │
 ┌──────────────────┐    MQTT Topics     │                 │
-│Global Temperature│ ◄──────────────────│                 │
+│Global Temperature│ ◄───────────────── │                 │
 │                  │ device/printer/    │                 │
 └──────────────────┘ {id}/temperature   └─────────────────┘
                                                 │
@@ -35,6 +42,7 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
                                         │                  │
                                         │Printer Monitoring│
                                         └──────────────────┘
+
 ```
 
 ## Communication Protocols
@@ -44,7 +52,7 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
 #### Print Job Assignment
 
 - **Topic**: `device/printer/{printerId}/assignment`
-- **Type**: 2.2.1) PrinterAssignment
+- **Type**: 2.2.3) PrinterAssignment
 - **Purpose**: Receive print job assignments with model files and specifications
 
 ### MQTT Publications
@@ -61,28 +69,32 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
 - **Type**: 2.2.2) PrinterProgress
 - **Purpose**: Report current print status and completion percentage
 
-Types defined in [communication.md](../communication.md)
+See [communication.md](../communication.md) for
 
 ## Printer Features
 
 ### Print Job Management
 
 - **Assignment Processing**: Receives and validates print job assignments
-- **Model File Handling**: Downloads and processes GCODE files from provided URLs
+- **Model File Handling**: Processes GCODE files from provided URLs (assumes local files)
 - **Print Simulation**: Simulates realistic printing behavior with time progression
 - **Status Tracking**: Maintains current job state and progress information
 
 ### Temperature Simulation
 
-- **Realistic Temperature Curves**: Simulates heating up, printing, and cooling down phases
-- **Thermal Behavior**: Models realistic temperature fluctuations during printing
-- **Safety Limits**: Respects configured temperature thresholds and operating ranges
+- **Realistic Temperature Curves**: Simulates heating up, printing, and cooling down phases given the nozzle and bed temperatures in the PrinterAssignment
+- **Thermal Behavior**: Simulates temperature fluctuations during printing
+- **Safety Monitoring**: Often reports temperature anomalies for anomaly detection checks
 
-### Error Handling
+### Printer Configuration and Operating Parameters
 
-- **Job Validation**: Validates incoming print assignments
-- **Error Recovery**: Handles network issues and malformed messages
-- **Status Reporting**: Reports error conditions and recovery attempts
+- printer ID
+- printer type (e.g., Prusa MK3S, Creality Ender 3, Bambulab X1)
+- filament type
+- nozzle diameter
+- max nozzle temperature, temp rate
+- max bed temperature, temp rate
+- print speed (function based on filament type, nozzle diameter, layer height, infill)
 
 ## Journey
 
@@ -118,13 +130,6 @@ The ST Printer Service follows a complete print job lifecycle:
 - **Plate Ready**: Signal that printed object is ready for collection
 - **Status Reset**: Return to "idle" status awaiting robot collection
 
-### 5. Error Handling Phase
-
-- **Error Detection**: Monitor for simulation errors or invalid states
-- **Error Reporting**: Publish "error" status with diagnostic information
-- **Recovery Attempts**: Attempt to recover from transient errors
-- **Manual Intervention**: Report persistent errors requiring attention
-
 ## Separation of Concerns
 
 The architecture follows a clear separation where:
@@ -141,11 +146,16 @@ The architecture follows a clear separation where:
   - Time management
   - State transitions
 
+- PrintJob encapsulates job-specific data:
+  - Job parameters and metadata
+  - Validation logic
+  - Status tracking
+
 ## Service Class Structure
 
 ```mermaid
 classDiagram
-    class STBinaryPrintingService {
+    class PrintingService {
         -mqtt_client: MQTTClient
         -printer_id: str
         -config: dict
@@ -211,50 +221,7 @@ classDiagram
         +calculate_progress(current_time: datetime): float
     }
 
-    STBinaryPrintingService --> PrintingSimulator : uses
-    STBinaryPrintingService --> PrintJob : manages
+    PrintingService --> PrintingSimulator : uses
+    PrintingService --> PrintJob : manages
     PrintingSimulator --> PrintJob : references
 ```
-
-## Class Concerns
-
-### STBinaryPrintingService
-
-**Primary Concern**: MQTT Communication and Service Orchestration
-
-- **MQTT Management**: Handles MQTT connections, subscriptions, and publications
-- **Service Lifecycle**: Manages service startup, operation, and shutdown
-- **Assignment Processing**: Receives and validates print job assignments
-- **Status Communication**: Reports printer status, progress, and temperature
-- **Error Handling**: Manages communication errors and service failures
-- **Configuration Management**: Loads and maintains printer configuration
-
-### PrintingSimulator
-
-**Primary Concern**: Print Process Simulation and Physics Modeling
-
-- **Time Management**: Calculates print progress based on elapsed time
-- **Temperature Modeling**: Simulates realistic heating and cooling curves
-- **Progress Calculation**: Determines completion percentage and remaining time
-- **State Management**: Tracks current simulation state and transitions
-- **Physics Simulation**: Models realistic 3D printing behavior patterns
-
-### PrintJob
-
-**Primary Concern**: Job Data Management and Validation
-
-- **Job Information**: Stores and manages print job parameters and metadata
-- **Data Validation**: Ensures job parameters are valid and complete
-- **Status Tracking**: Maintains current job status and state information
-- **Progress Calculation**: Provides job-specific progress calculation methods
-- **Data Integrity**: Ensures job data consistency throughout the printing process
-
-## Configuration
-
-The ST Printer service uses a configuration file to define:
-
-- **Printer Parameters**: Nozzle temperature ranges, heating rates, cooling curves
-- **MQTT Settings**: Broker connection details, topic patterns, QoS levels
-- **Simulation Settings**: Update intervals, progress reporting frequency
-- **Error Handling**: Retry attempts, timeout values, error thresholds
-- **Safety Limits**: Maximum temperatures, emergency shutdown

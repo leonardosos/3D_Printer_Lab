@@ -84,6 +84,8 @@ On the full flowchart, where reported up and down arrows indicate the direction 
 
 - [Communication Schemas and Message Types](communication.md)
 
+- [Port Schema Flowchart](flowchart/port_flowchart.mmd)
+
 ## Devices
 
 | Device      | Number | Sensor | Actuator | Read                                    | Write                                   |

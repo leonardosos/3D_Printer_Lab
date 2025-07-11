@@ -1,6 +1,38 @@
-# 3D Printer Farm Microservice Message Schemas
+# Unified Message Schemas for 3D Printer Farm Microservices
+
+## Overview
 
 Below is a proposed set of message‐types and JSON schemas for all of the HTTP and MQTT interactions in your 3D-printer-farm microservice architecture. Each "type" has a name, a list of fields (with types) and a small example payload.
+
+## Table of Contents
+
+1. [1. HTTP APIs (JSON over REST)](#1-http-apis-json-over-rest)
+    - [1.1 Queue Manager (jobs)](#11-queue-manager-jobs)
+        - [1.1.1 GET /jobs](#111-get-jobs)
+        - [1.1.2 POST /jobs](#112-post-jobs)
+        - [1.1.3 PUT /jobs/{jobId}](#113-put-jobsjobid)
+        - [1.1.4 DELETE /jobs/{jobId}](#114-delete-jobsjobid)
+    - [1.2 Global Temperature Service](#12-global-temperature-service)
+        - [1.2.1 GET /temperature/global](#121-get-temperatureglobal)
+    - [1.3 Printer Monitoring Service](#13-printer-monitoring-service)
+        - [1.3.1 GET /printers/status](#131-get-printersstatus)
+2. [2. MQTT Topics (JSON payloads)](#2-mqtt-topics-json-payloads)
+    - [2.1 Temperature Readings](#21-temperature-readings)
+        - [2.1.1 device/room/temperature](#211-topic-deviceroomtemperature)
+        - [2.1.2 device/printer/{printerId}/temperature](#212-topic-deviceprinterprinteridtemperature)
+    - [2.2 Print Job Assignment & Progress](#22-print-job-assignment--progress)
+        - [2.2.1 device/printers](#221-topic-deviceprinters)
+        - [2.2.2 device/printer/{printerId}/progress](#222-topic-deviceprinterprinteridprogress)
+        - [2.2.3 device/printer/{printerId}/assignment](#223-topic-deviceprinterprinteridassignment)
+    - [2.3 Robot (Plate-Changer) Coordination](#23-robot-plate-changer-coordination)
+        - [2.3.1 device/robot/{robotId}/coordinates](#231-topic-devicerobotrobotidcoordinates)
+        - [2.3.2 device/robot/{robotId}/progress](#232-topic-devicerobotrobotidprogress)
+    - [2.4 Fan Control & Safety](#24-fan-control--safety)
+        - [2.4.1 device/fan/controller/speed](#241-topic-devicefancontrollerspeed)
+        - [2.4.2 device/fan/{fanId}/speed](#242-topic-devicefanfanidspeed)
+        - [2.4.3 device/fan/controller/emergency](#243-topic-devicefancontrolleremergency)
+
+---
 
 ## 1. HTTP APIs (JSON over REST)
 
@@ -271,6 +303,41 @@ Same schema as above, plus printerId field:
   "status": "printing",
   "progress": 42,
   "timestamp": "2025-06-15T08:32:00Z"
+}
+```
+
+#### 2.2.3 Topic: device/printer/{printerId}/assignment
+
+**Type:** PrinterAssignment
+
+- `jobId` - string
+- `modelUrl` - string (URL to GCODE/model file)
+- `filamentType` - string
+- `estimatedTime` - number (seconds)
+- `priority` - number
+- `assignedAt` - string (ISO 8601)
+- `parameters` - dictionary
+  - `layerHeight` - number (mm)
+  - `infill` - number (percentage)
+  - `nozzleTemp` - number (°C)
+  - `bedTemp` - number (°C)
+
+**Example:**
+
+```json
+{
+  "jobId": "job-123",
+  "modelUrl": "models/model-456.gcode",
+  "filamentType": "PLA",
+  "estimatedTime": 3600,
+  "priority": 10,
+  "assignedAt": "2025-06-15T08:30:00Z",
+  "parameters": {
+    "layerHeight": 0.2,
+    "infill": 20,
+    "nozzleTemp": 210,
+    "bedTemp": 60
+  }
 }
 ```
 

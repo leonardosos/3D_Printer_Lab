@@ -1,0 +1,61 @@
+flowchart TB
+
+%% User Interaction Layer
+GUI["🧑‍💻 User Interface (GUI, port 8000)"]
+
+%% HTTP Communication Layer
+APIGW["🛰 API Gateway 
+(port 8080)"]
+QueueMgr["📋 Priority Queue Manager 
+(port 8090)"]
+TempGlobal["🌡 Global Temperature 
+(port 8100)"]
+PrinterMon["🖨 Printer Monitoring 
+(port 8110)"]
+
+%% MQTT Communication Layer
+JobHandler["🧠 Job Handler 
+(port 1883)"]
+Planning["🧭 Robot Management 
+(port 8120)"]
+ST["🧱 ST Printer 
+(port 8130)"]
+Anomaly["⚠️ Anomaly Detection 
+(port 8140)"]
+FanCtrl["🌀 Fan Controller 
+(port 8150)"]
+
+%% Device Layer (emoji-enhanced)
+Robot["🤖 ROB Robot
+(port 8160)"]
+Fan["💨 Fan Unit
+(port 8170)"]
+TempSensor["🌡 Room Temp Sensor
+(port 8180)"]
+
+%% Data Flow 
+GUI o--o|HTTP| APIGW
+APIGW o--o|HTTP| QueueMgr
+APIGW o--o|HTTP| TempGlobal
+QueueMgr o--o|HTTP| JobHandler
+
+TempSensor --> TempGlobal
+JobHandler <--> Planning
+
+ST --> TempGlobal 
+ST --> PrinterMon
+%% JobHandler --> PrinterMon (Real topic subscription)
+JobHandler --> ST
+
+Planning <--> Robot
+Robot --> PrinterMon
+Robot --> JobHandler 
+
+APIGW o--o|HTTP| PrinterMon
+
+TempGlobal --> FanCtrl
+FanCtrl --> Fan
+
+TempSensor --> Anomaly
+ST --> Anomaly
+Anomaly --> FanCtrl

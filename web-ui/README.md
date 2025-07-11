@@ -7,7 +7,7 @@ The Web UI service operates **outside** the API Gateway as a frontend client tha
 ```text
 ┌─────────────────┐    HTTP Requests  ┌─────────────────┐
 │   Web Browser   │ ────────────────► │   Web Server    │ ◄── Outside API Gateway
-│   (Users)       │ ◄──────────────── │   (Port 7071)   │     (Client of backend APIs)
+│   (Users)       │ ◄──────────────── │                 │     (Client of backend APIs)
 └─────────────────┘    HTML Pages     └─────────────────┘
                                               │
                                               │ External API Calls
@@ -15,7 +15,7 @@ The Web UI service operates **outside** the API Gateway as a frontend client tha
                                               ▼
                                       ┌─────────────────┐
                                       │   API Gateway   │ ◄── Entry point for APIs
-                                      │   (Port 8080)   │     (Routes to backend)
+                                      │                 │     (Routes to backend)
                                       └─────────────────┘
                                               │
                                               │ Routes to
