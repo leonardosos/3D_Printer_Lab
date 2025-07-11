@@ -22,6 +22,21 @@ Leonardo:
 - [Web Interface (GUI)](web-ui/README.md)
 - [Printer ST](st_printer/README.md)
 
+Simone:
+
+Lorenzo:
+
+## Project Structure
+
+This project is organized into multiple components, each handling a specific aspect of the IoT system. Every component has its own folder containing a `README.md` with details about its functionality and usage. Each service is containerized with a dedicated `Dockerfile`, and the root directory includes a `docker-compose.yml` file to build and deploy the entire system seamlessly.
+
+**Broker Folders:**
+
+The broker related folders are used to set up and test the MQTT broker, which is essential for communication between the various components of the IoT system. The MQTT broker is implemented using Eclipse Mosquitto, a lightweight and widely used MQTT broker. For more information, see [mqtt-broker/README.md](mqtt-broker/README.md) and the section "MQTT Broker - Eclipse Mosquitto."
+
+- **mqtt-broker**: Configuration and setup for the MQTT broker using Eclipse Mosquitto.
+- **mqtt-tester**: Scripts for local testing of MQTT communication with the broker only for local testing purposes. -> **Note**: This is not part of the final project and is used only for testing purposes.
+
 ## Application Scenario
 
 **An automated lab involved in the production of 3D printed objects**.
@@ -134,10 +149,8 @@ This section provides a guide for setting up and customizing an MQTT broker usin
 
 The version used in this project is `2.0.21`.
 
-The docker dowload command is:
+Follow [the instructions in the README file](mqtt-broker/README.md):
 
-```bash
-docker pull eclipse-mosquitto:2.0.21
-```
-
-Follow [the instructions in the README file](mqtt-broker/README.md) to set up the broker with custom configurations, including local configuration files, data persistence, and logging.
+- to set up the broker with custom configurations, including local configuration files, data persistence, and logging.
+- to run the broker with specific parameters such as port mapping, restart policies, and daemon mode.
+- to stop the broker when needed.

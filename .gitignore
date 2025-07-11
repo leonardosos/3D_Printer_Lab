@@ -10,9 +10,6 @@ __pycache__/
 env/
 venv/
 
-# MQTT Tester -> comment so far, then will be implemented
-mqtt-tester/
-
 # MQTT Broker data and log files
 mqtt-broker/data/*
 mqtt-broker/log/*

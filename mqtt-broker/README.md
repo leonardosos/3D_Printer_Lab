@@ -4,11 +4,34 @@ In this configuration we are going to use the default Eclipse Mosquitto Broker a
 
 The target used image and version for this playground is: `eclipse-mosquitto:2.0.21`
 
-Docker pull command to download the image is:
+## Docker pull command to download the image is
 
 ```bash
 docker pull eclipse-mosquitto:2.0.21
 ```
+
+## Docker configuration file
+
+The configuration file used for this playground is `mosquitto.conf` and it is available in the `mqtt-broker` folder of the project. The configuration file is set to enable persistence, log messages to a file, and allow anonymous connections.
+
+```config
+
+    # Enable persistence to store QoS 1 and QoS 2 messages
+    persistence true
+    persistence_location /mosquitto/data/
+
+    # Log messages to a file in the mounted log directory
+    log_dest file /mosquitto/log/mosquitto.log
+
+    # Listen on the default MQTT port
+    listener 1883
+
+    # Allow anonymous connections (default is true)
+    allow_anonymous true
+
+```
+
+## Docker Run command
 
 We are customizing our MQTT Broker using the following customization at runtime:
 
@@ -21,6 +44,29 @@ We are customizing our MQTT Broker using the following customization at runtime:
 
 The resulting Run Linux command is:
 
+Assure to be in the `mqtt-broker` folder of the project before running the command below.
+
 ```bash
-docker run --name=my-mosquitto-broker  -p 1883:1883 -v ${PWD}/mosquitto.conf:/mosquitto/config/mosquitto.conf -v ${PWD}/data:/mosquitto/data -v ${PWD}/log:/mosquitto/log --restart always -d eclipse-mosquitto:2.0.21
+    docker run --name my-mosquitto-broker \
+    -p 1883:1883 \
+    -v ${PWD}/mosquitto.conf:/mosquitto/config/mosquitto.conf \
+    -v ${PWD}/data:/mosquitto/data \
+    -v ${PWD}/log:/mosquitto/log \
+    --restart always \
+    -d eclipse-mosquitto:2.0.21
+```
+
+## Docker Stop command
+
+To restart the existing container, use:
+
+```bash
+docker start my-mosquitto-broker
+```
+
+To stop and remove the container before creating a new one, use:
+
+```bash
+docker stop my-mosquitto-broker
+docker rm my-mosquitto-broker
 ```
