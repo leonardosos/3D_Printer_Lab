@@ -20,7 +20,7 @@ print(dir(CallbackAPIVersion))
 # Configuration variables
 device_id = "test_device_1"
 client_id = "clientId0001-Producer"
-broker_ip = "127.0.0.1"
+broker_ip = "my-mosquitto-broker"  # Use the broker container name ################################################
 broker_port = 1883
 default_topic = "device/{}/temperature".format(device_id)
 message_limit = 1000

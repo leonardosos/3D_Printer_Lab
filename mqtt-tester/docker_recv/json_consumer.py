@@ -24,7 +24,7 @@ def on_message(client, userdata, message):
 
 # Configuration variables
 client_id = "clientId0001-Consumer"
-broker_ip = "127.0.0.1"
+broker_ip = "my-mosquitto-broker"  # Use the broker container name ################################################
 broker_port = 1883
 target_topic_filter = "device/+/temperature"
 message_limit = 1000

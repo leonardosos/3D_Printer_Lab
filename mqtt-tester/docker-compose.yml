@@ -1,4 +1,5 @@
-version: '3.8'
+name: compose-mqtt-tester
+
 
 services:
   broker:
@@ -7,7 +8,7 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./mqtt-broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt-broker/mosquitto_conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./mqtt-broker/data:/mosquitto/data
       - ./mqtt-broker/log:/mosquitto/log
     networks:
@@ -15,7 +16,8 @@ services:
 
   sender:
     build:
-      context: ./mqtt-tester/docker_send
+      context: ./docker_send
+      dockerfile: Dockerfile
     container_name: mqtt_sender
     depends_on:
       - broker
@@ -26,7 +28,8 @@ services:
 
   receiver:
     build:
-      context: ./mqtt-tester/docker_recv
+      context: ./docker_recv
+      dockerfile: Dockerfile
     container_name: mqtt_receiver
     depends_on:
       - broker

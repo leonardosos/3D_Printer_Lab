@@ -124,21 +124,30 @@ Below you can find the helpful methods for pub/sub:
 
 ### Docker
 
-follow "Install using the apt repository": <https://docs.docker.com/engine/install/ubuntu/#installation-methods>
+To install Docker, run the following command:
+
+    sudo snap install docker         # version 28.1.1+1
+
+check if Docker is installed correctly by running:
+
+    # Start Docker daemon
+    sudo snap start docker
+
+    # Check Docker status
+    snap services docker
+
+    # Verify Docker is working
+    docker ps
 
 #### Post-installation permissions problems
 
 running the following command tests if you have the correct permissions to run Docker commands without `sudo`:
 
-```bash
-docker ps
-```
+    docker ps
 
 You might encounter an error like this:
 
-```bash
-permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.51/containers/json": dial unix /var/run/docker.sock: connect: permission denied
-```
+    permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.51/containers/json": dial unix /var/run/docker.sock: connect: permission denied
 
 Follow the instructions in the Docker documentation to resolve this issue:
 <https://docs.docker.com/engine/install/linux-postinstall/>
