@@ -20,7 +20,8 @@ Leonardo:
 
 - [Anomaly Detection (AT)](anomaly_detection/README.md)
 - [Web Interface (GUI)](web-ui/README.md)
-- [Printer ST](st_printer/README.md)
+- [Printer (ST)](st_printer/README.md)
+- [Global Temperatures (GT)](global_temperatures/README.md)
 
 Simone:
 
