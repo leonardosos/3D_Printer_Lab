@@ -1,1 +1,10 @@
 flowchart/flowchart_saved/*
+
+# Byte-compiled
+__pycache__/
+
+# Environments
+.env
+.venv
+env/
+venv/
