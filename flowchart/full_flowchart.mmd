@@ -44,7 +44,7 @@ Robot -->|device/robot/-ID-/progress| JobHandler
 
 APIGW o--o|HTTP: get| PrinterMon
 
-TempGlobal -->|device/fan/controller/speed| FanCtrl
+TempGlobal -->|device/fan/controller/status| FanCtrl
 FanCtrl -->|device/fan/-ID-/speed| Fan
 
 TempSensor -->|device/room/temperature| Anomaly

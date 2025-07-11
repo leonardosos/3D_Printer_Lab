@@ -30,7 +30,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
         - [2.3.1 device/robot/{robotId}/coordinates](#231-topic-devicerobotrobotidcoordinates)
         - [2.3.2 device/robot/{robotId}/progress](#232-topic-devicerobotrobotidprogress)
     - [2.4 Fan Control & Safety](#24-fan-control--safety)
-        - [2.4.1 device/fan/controller/speed](#241-topic-devicefancontrollerspeed)
+        - [2.4.1 device/fan/controller/status](#241-topic-devicefancontrollerstatus)
         - [2.4.2 device/fan/{fanId}/speed](#242-topic-devicefanfanidspeed)
         - [2.4.3 device/fan/controller/emergency](#243-topic-devicefancontrolleremergency)
 
@@ -380,18 +380,17 @@ Same schema as above, plus printerId field:
 
 ### 2.4 Fan Control & Safety
 
-#### 2.4.1 Topic: device/fan/controller/speed
+#### 2.4.1 Topic: device/fan/controller/status
 
-**Type:** FanSpeedCommand
+**Type:** FanControllerTemp
 
-- `speed` - number (0–100%)
-- `unit` - "percent"
+- `speed` - number (0–100)
 - `timestamp?` - string (ISO 8601, optional)
 
 **Example:**
 
 ```json
-{ "speed": 75, "unit": "percent" }
+{ "speed": 75, "timestamp": "2025-06-15T08:32:15Z" }
 ```
 
 #### 2.4.2 Topic: device/fan/{fanId}/speed
