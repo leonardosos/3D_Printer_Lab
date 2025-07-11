@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  broker:
+    image: eclipse-mosquitto:2.0.21
+    container_name: my-mosquitto-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt-broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt-broker/data:/mosquitto/data
+      - ./mqtt-broker/log:/mosquitto/log
+    networks:
+      - mqtt-net
+
+  sender:
+    build:
+      context: ./mqtt-tester/docker_send
+    container_name: mqtt_sender
+    depends_on:
+      - broker
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - mqtt-net
+
+  receiver:
+    build:
+      context: ./mqtt-tester/docker_recv
+    container_name: mqtt_receiver
+    depends_on:
+      - broker
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - mqtt-net
+
+networks:
+  mqtt-net:
+    driver: bridge
