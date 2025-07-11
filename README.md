@@ -30,12 +30,17 @@ Lorenzo:
 
 This project is organized into multiple components, each handling a specific aspect of the IoT system. Every component has its own folder containing a `README.md` with details about its functionality and usage. Each service is containerized with a dedicated `Dockerfile`, and the root directory includes a `docker-compose.yml` file to build and deploy the entire system seamlessly.
 
-**Broker Folders:**
+**Extra folder: Broker Folders:**
 
 The broker related folders are used to set up and test the MQTT broker, which is essential for communication between the various components of the IoT system. The MQTT broker is implemented using Eclipse Mosquitto, a lightweight and widely used MQTT broker. For more information, see [mqtt-broker/README.md](mqtt-broker/README.md) and the section "MQTT Broker - Eclipse Mosquitto."
 
 - **mqtt-broker**: Configuration and setup for the MQTT broker using Eclipse Mosquitto.
-- **mqtt-tester**: Scripts for local testing of MQTT communication with the broker only for local testing purposes. -> **Note**: This is not part of the final project and is used only for testing purposes.
+- **mqtt-tester**:
+  - **local** Scripts for local testing of MQTT communication with the broker only for local testing purposes. -> **Note**: This is not part of the final project and is used only for testing purposes.
+  - **mqtt-tester-docker**: Docker setup for the MQTT tester, allowing for easy deployment and testing of MQTT communication in a containerized environment using Docker and Docker Compose.
+
+---
+---
 
 ## Application Scenario
 
@@ -84,24 +89,7 @@ Returning to **PQM**, it sends files to be printed when requested by the **Job H
 
 The **robot**, once it receives the coordinates, autonomously navigates to the target printer, collects the printed object, and updates **PM** and **JH** with its status for monitoring and coordination.
 
----
-
-### Project Documentation
-
-#### Flowchart schemas
-
-- [Basic Flowchart](flowchart/basic_flowchart.mmd)
-- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd)
-
-On the full flowchart, where reported up and down arrows indicate the direction of the communication.
-
-#### Communication Schemas
-
-- [Communication Schemas and Message Types](communication.md)
-
-- [Port Schema Flowchart](flowchart/port_flowchart.mmd)
-
-## Devices
+### Devices Table
 
 | Device      | Number | Sensor | Actuator | Read                                    | Write                                   |
 |-------------|--------|--------|----------|----------------------------------------|-----------------------------------------|
@@ -111,10 +99,24 @@ On the full flowchart, where reported up and down arrows indicate the direction 
 | Fan         | 1      | No     | Yes      | - Speed commands| N/A   |
 
 ---
+---
 
 ## Official documentation
 
-Here you can find the official documentation related to metods of public libraries used during the project:
+Here you can find the documentation related to metods used during the project:
+
+### Flowchart schemas
+
+Components and their interactions are represented in flowcharts, which help visualize the system architecture and communication patterns.
+
+- [Basic Flowchart of the IoT System](flowchart/basic_flowchart.mmd)
+- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd); 
+  - This flowchart includes arrows indicating the direction of communication between components, with MQTT topics specified for each interaction. Where up: and down: label means the direction of who is sending the message.
+
+### Communication Schemas
+
+- [Communication Schemas and Message Types](communication.md)
+- [Port Schema Flowchart](flowchart/port_flowchart.mmd)
 
 ### PAHO (MQTT)
 
@@ -122,7 +124,7 @@ Below you can find the helpful methods for pub/sub:
 
 <https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html>
 
-### Docker
+### Docker + Docker Compose
 
 To install Docker, run the following command:
 
