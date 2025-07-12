@@ -6,7 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #e0eafc; margin: 0; }
-        header { background: #2d6cdf; color: #fff; padding: 1.5rem 2rem; }
+        header {
+            background: #2d6cdf;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(44, 76, 130, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 2rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #ffd700;
+        }
         .container { max-width: 1100px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44,76,130,0.08); padding: 2rem; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; }
         .printer-card { background: linear-gradient(120deg, #fbc2eb 0%, #a6c1ee 100%); border-radius: 12px; padding: 1.5rem; color: #222; box-shadow: 0 2px 12px rgba(44,76,130,0.07); }
@@ -16,8 +39,6 @@
         .printer-progress { background: #e0eafc; border-radius: 8px; overflow: hidden; height: 18px; margin-bottom: 0.5rem; }
         .printer-progress-bar { background: #2d6cdf; height: 100%; }
         .printer-meta { font-size: 0.9rem; color: #555; }
-        nav a { color: #fff; text-decoration: none; margin-right: 2rem; }
-        nav a:hover { color: #ffd700; }
         footer { text-align: center; padding: 1.5rem 0; color: #888; font-size: 1rem; }
     </style>
 </head>

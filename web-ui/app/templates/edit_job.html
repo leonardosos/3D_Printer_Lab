@@ -6,14 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #e0eafc; margin: 0; }
+        header {
+            background: #2d6cdf;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(44, 76, 130, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 2rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #ffd700;
+        }
         .container { max-width: 500px; margin: 4rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44,76,130,0.08); padding: 2rem; }
         label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
         input[type="text"], input[type="number"] { width: 100%; padding: 0.7rem; margin-bottom: 1.5rem; border-radius: 8px; border: 1px solid #e0eafc; }
         button { background:#2d6cdf;color:#fff;padding:0.7rem 1.5rem;border:none;border-radius:8px;font-weight:600;cursor:pointer; }
         button:hover { background: #f6d365; color: #333; transition: background 0.3s; }
+        a.back-link { display: inline-block; margin-top: 1rem; color: #2d6cdf; text-decoration: none; font-weight: 500; }
+        a.back-link:hover { text-decoration: underline; }
+        footer { text-align: center; padding: 1.5rem 0; color: #888; font-size: 1rem; }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Edit Job Priority</h1>
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">Home</a>
+            <a href="{{ url_for('temperature.temperature_page') }}">Global Temperature</a>
+            <a href="{{ url_for('printers.printers_page') }}">Printer Monitoring</a>
+            <a href="{{ url_for('queue.queue_page') }}">Priority Queue</a>
+        </nav>
+    </header>
     <div class="container">
         <h2>Edit Job Priority</h2>
         {% if job %}
@@ -24,9 +60,14 @@
             <input type="number" id="priority" name="priority" value="{{ job.priority }}" required>
             <button type="submit">Save Changes</button>
         </form>
+        <a class="back-link" href="{{ url_for('queue.queue_page') }}">&#8592; Back to Queue</a>
         {% else %}
         <p>Job not found.</p>
+        <a class="back-link" href="{{ url_for('queue.queue_page') }}">&#8592; Back to Queue</a>
         {% endif %}
     </div>
+    <footer>
+        &copy; {{ year }} IoT Project &mdash; All rights reserved.
+    </footer>
 </body>
 </html>
