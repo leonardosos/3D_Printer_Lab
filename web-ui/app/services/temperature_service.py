@@ -1,5 +1,6 @@
 import requests
 import yaml
+from app.dto.temperature_reading_response_dto import TemperatureReadingDTO
 
 def get_api_base_url():
     with open('app/web_conf.yaml') as f:
@@ -11,5 +12,4 @@ def get_global_temperature():
     response = requests.get(f'{base_url}/temperature/global')
     response.raise_for_status()
     data = response.json()
-    # Extract the list of readings
-    return data.get('temperatures', [])
+    return [TemperatureReadingDTO(**r) for r in data.get('temperatures', [])]

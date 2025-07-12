@@ -1,6 +1,6 @@
 import requests
 import yaml
-from app.model.job import Job
+from app.dto.job_response_dto import JobDTO
 
 def get_api_base_url():
     with open('app/web_conf.yaml') as f:
@@ -12,7 +12,7 @@ def get_job_queue():
     response = requests.get(f'{base_url}/jobs')
     response.raise_for_status()
     data = response.json()
-    return [Job(**item) for item in data.get('jobs', [])]
+    return [JobDTO(**item) for item in data.get('jobs', [])]
 
 def edit_job(job_id, new_priority, new_name=None):
     base_url = get_api_base_url()

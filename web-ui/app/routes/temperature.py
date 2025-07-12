@@ -8,9 +8,9 @@ def temperature_page():
     readings = get_global_temperature()
     sensors = [
         {
-            "name": r.get("sourceId", "Unknown"),
-            "value": r.get("temperature", "N/A"),
-            "last_updated": r.get("timestamp", "N/A")
+            "name": r.sourceId if hasattr(r, "sourceId") else "Unknown",
+            "value": r.temperature if hasattr(r, "temperature") else "N/A",
+            "last_updated": r.timestamp if hasattr(r, "timestamp") else "N/A"
         }
         for r in readings
     ]

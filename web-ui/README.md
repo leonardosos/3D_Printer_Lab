@@ -2,7 +2,7 @@
 
 - [ ] dto ??
 - [ ] docker
-- [ ] porte??
+- [ ] porte -> main port??
 - [ ] table of contents da sistemare
 - [ ] header piu basso
 
@@ -246,7 +246,7 @@ To test the application, you can use the provided mock API server. Run the follo
 move to IoT_Project/web-ui/tests
 
 ```bash
-    python3 mock_webui_api.py
+    python3 fake_api_response.py 
 ```
 
 In this mock server, you can simulate API responses for testing purposes. The mock server runs on port 8080 by default that is used by the API Gateway in production.
