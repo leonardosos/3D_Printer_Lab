@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Temperature</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e0eafc; margin: 0; }
+        header { background: #2d6cdf; color: #fff; padding: 1.5rem 2rem; }
+        .container { max-width: 1000px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44,76,130,0.08); padding: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
+        .sensor-card { background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%); border-radius: 12px; padding: 1.5rem; color: #222; box-shadow: 0 2px 12px rgba(44,76,130,0.07); }
+        .sensor-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .sensor-value { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .sensor-meta { font-size: 0.95rem; color: #555; }
+        nav a { color: #fff; text-decoration: none; margin-right: 2rem; }
+        nav a:hover { color: #ffd700; }
+        footer { text-align: center; padding: 1.5rem 0; color: #888; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Global Temperature</h1>
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">Home</a>
+            <a href="{{ url_for('temperature.temperature_page') }}">Global Temperature</a>
+            <a href="{{ url_for('printers.printers_page') }}">Printer Monitoring</a>
+            <a href="{{ url_for('queue.queue_page') }}">Priority Queue</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>All Temperature Sources</h2>
+        <div class="grid">
+            {% for sensor in sensors %}
+            <div class="sensor-card">
+                <div class="sensor-title">{{ sensor.name }}</div>
+                <div class="sensor-value">{{ sensor.value }}&#8451;</div>
+                <div class="sensor-meta">Last updated: {{ sensor.last_updated }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <footer>
+        &copy; {{ year }} IoT Project &mdash; All rights reserved.
+    </footer>
+</body>
+</html>

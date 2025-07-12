@@ -60,7 +60,7 @@ The Global Temperature service operates as a microservice that:
 - **Type**: 2.4.1) FanControllerTemp
 - **Purpose**: Control fan speed based on temperature analysis
 
-### HTTP API
+### HTTP API - Responses - (through API Gateway)
 
 #### Global Temperature Endpoint
 

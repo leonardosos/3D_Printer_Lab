@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IoT Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #2d6cdf;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(44, 76, 130, 0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 2rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #ffd700;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(44, 76, 130, 0.08);
+        }
+        .cards {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .card {
+            flex: 1 1 250px;
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            color: #333;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(44, 76, 130, 0.07);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.03);
+        }
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+        }
+        .card-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .card-desc {
+            font-size: 1rem;
+            color: #555;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            color: #888;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IoT Monitoring Dashboard</h1>
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">Home</a>
+            <a href="{{ url_for('temperature.temperature_page') }}">Global Temperature</a>
+            <a href="{{ url_for('printers.printers_page') }}">Printer Monitoring</a>
+            <a href="{{ url_for('queue.queue_page') }}">Priority Queue</a>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="cards">
+            <div class="card">
+                <div class="card-title">Global Temperature</div>
+                <div class="card-value">{{ global_temp }}&#8451;</div>
+                <div class="card-desc">Current room temperature.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Printers Online</div>
+                <div class="card-value">{{ printers_online }}</div>
+                <div class="card-desc">Active printers currently available.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Jobs in Queue</div>
+                <div class="card-value">{{ jobs_in_queue }}</div>
+                <div class="card-desc">Pending print jobs in the priority queue.</div>
+            </div>
+        </div>
+        <h2 style="margin-top:2rem;">Quick Links</h2>
+        <ul>
+            <li><a href="{{ url_for('temperature.temperature_page') }}">View all temperature sources</a></li>
+            <li><a href="{{ url_for('printers.printers_page') }}">Monitor printers</a></li>
+            <li><a href="{{ url_for('queue.queue_page') }}">Manage print job queue</a></li>
+        </ul>
+    </div>
+    <footer>
+        &copy; {{ year }} IoT Project &mdash; All rights reserved.
+    </footer>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Priority Queue Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e0eafc; margin: 0; }
+        header { background: #2d6cdf; color: #fff; padding: 1.5rem 2rem; }
+        .container { max-width: 1000px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44,76,130,0.08); padding: 2rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th, td { padding: 1rem; border-bottom: 1px solid #e0eafc; text-align: left; }
+        th { background: #f6d365; color: #333; }
+        tr:hover { background: #f9f9f9; }
+        .actions button { margin-right: 0.5rem; padding: 0.4rem 1rem; border: none; border-radius: 6px; background: #2d6cdf; color: #fff; cursor: pointer; }
+        .actions button.delete { background: #e74c3c; }
+        .actions button.edit { background: #f6d365; color: #333; }
+        nav a { color: #fff; text-decoration: none; margin-right: 2rem; }
+        nav a:hover { color: #ffd700; }
+        footer { text-align: center; padding: 1.5rem 0; color: #888; font-size: 1rem; }
+        button.add-job {
+            background:#f6d365;
+            color:#333;
+            padding:0.7rem 1.5rem;
+            border:none;
+            border-radius:8px;
+            font-weight:600;
+            cursor:pointer;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
+        }
+        button.add-job:hover {
+            background: #2d6cdf;
+            color: #fff;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Priority Queue Management</h1>
+        <nav>
+            <a href="{{ url_for('dashboard.dashboard') }}">Home</a>
+            <a href="{{ url_for('temperature.temperature_page') }}">Global Temperature</a>
+            <a href="{{ url_for('printers.printers_page') }}">Printer Monitoring</a>
+            <a href="{{ url_for('queue.queue_page') }}">Priority Queue</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Print Job Queue</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th>Name</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td>{{ job.id }}</td>
+                    <td>{{ job.name }}</td>
+                    <td>{{ job.priority }}</td>
+                    <td>{{ job.status }}</td>
+                    <td class="actions">
+                        <button class="edit" onclick="location.href='{{ url_for('queue.edit_job', job_id=job.id) }}'">Edit</button>
+                        <form action="{{ url_for('queue.delete_job_route', job_id=job.id) }}" method="post" style="display:inline;">
+                            <button class="delete" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="add-job" onclick="location.href='{{ url_for('queue.add_job_route') }}'">Add New Job</button>
+    </div>
+    <footer>
+        &copy; {{ year }} IoT Project &mdash; All rights reserved.
+    </footer>
+</body>
+</html>

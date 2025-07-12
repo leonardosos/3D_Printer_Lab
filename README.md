@@ -1,5 +1,31 @@
 # IoT_Project : 3D Printers Lab
 
+## Table of Contents
+
+1. [Project Overview](#iot_project--3d-printers-lab)
+2. [Team Members](#team-members)
+3. [Meeting Notes](#meeting-notes)
+4. [Components Explanation](#components-explanation)
+5. [Project Structure](#project-structure)
+6. [Application Scenario](#application-scenario)
+    - [Project Description](#project-description)
+    - [Project Implementation](#project-implementation)
+    - [Devices Table](#devices-table)
+7. [Official Documentation](#official-documentation)
+    - [Flowchart Schemas](#flowchart-schemas)
+    - [Communication Schemas](#communication-schemas)
+    - [PAHO (MQTT)](#paho-mqtt)
+    - [Docker + Docker Compose](#docker--docker-compose)
+        - [Installation](#installation)
+        - [Post-installation Permissions Problems](#post-installation-permissions-problems)
+        - [Docker Compose Command](#docker-compose-command)
+    - [MQTT Broker - Eclipse Mosquitto](#mqtt-broker---eclipse-mosquitto)
+
+---
+---
+
+## Project Overview
+
 This repository contains the implementation of a distributed IoT system for automated 3D printing lab management, developed as part of the **Distributed and Internet of Things Software Architectures** course. (The project is not related to any other course.)
 
 ## Team Members

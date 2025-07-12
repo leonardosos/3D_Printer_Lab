@@ -107,7 +107,6 @@ Every microservice or device can validate incoming JSON against the appropriate 
 ```json
 {
   "priority?": "number",     // update job priority
-  "printerId?": "string"     // reassign to different printer
 }
 ```
 
@@ -148,6 +147,17 @@ Every microservice or device can validate incoming JSON against the appropriate 
 #### 1.2.1 GET /temperature/global
 
 **Response type:**
+
+```json
+{ "temperatures": TemperatureReading[], "lastUpdated": "string" }
+```
+
+**TemperatureReading Schema:**
+
+- `temperature` - number (°C)
+- `source` - "room" | "printer"
+- `sourceId` - string (sensor ID or printer ID)
+- `timestamp` - string (ISO 8601)
 
 ```json
 {
