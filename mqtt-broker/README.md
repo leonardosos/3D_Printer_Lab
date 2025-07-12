@@ -1,18 +1,14 @@
 # MQTT Broker - Eclipse Moquitto
 
-In this configuration we are going to use the default Eclipse Mosquitto Broker already available on Docker Hub at the following link: [https://hub.docker.com/_/eclipse-mosquitto](https://hub.docker.com/_/eclipse-mosquitto)
+In this configuration we are going to use Eclipse Mosquitto Broker already available on Docker Hub at the following link: [https://hub.docker.com/_/eclipse-mosquitto](https://hub.docker.com/_/eclipse-mosquitto)
 
 The target used image and version for this playground is: `eclipse-mosquitto:2.0.21`
 
-## Docker pull command to download the image is
-
-```bash
-docker pull eclipse-mosquitto:2.0.21
-```
+**The mosquitto image can be pulled from Docker Hub and run with docker or using the docker-compose file. Follow the instructions below to set up your chosen method.**
 
 ## Docker configuration file
 
-The configuration file used for this playground is `mosquitto.conf` and it is available in the `mqtt-broker` folder of the project. The configuration file is set to enable persistence, log messages to a file, and allow anonymous connections.
+The configuration file is `mosquitto.conf` and it is available in the `mqtt-broker` folder of the project. The configuration file is set to enable persistence, log messages to a file, and allow anonymous connections.
 
 ```config
 
@@ -31,7 +27,15 @@ The configuration file used for this playground is `mosquitto.conf` and it is av
 
 ```
 
-## Docker Run command
+## Manual Docker pull and Run
+
+### Docker pull command to download the image is
+
+```bash
+docker pull eclipse-mosquitto:2.0.21
+```
+
+### Docker Run command
 
 We are customizing our MQTT Broker using the following customization at runtime:
 
@@ -56,7 +60,7 @@ Assure to be in the `mqtt-broker` folder of the project before running the comma
     -d eclipse-mosquitto:2.0.21
 ```
 
-## Docker Stop command
+### Docker Stop command
 
 To restart the existing container, use:
 
@@ -70,3 +74,7 @@ To stop and remove the container before creating a new one, use:
 docker stop my-mosquitto-broker
 docker rm my-mosquitto-broker
 ```
+
+## Docker Compose Configuration
+
+To use Docker Compose, look for the `docker-compose.yml` file in the root of your project.
