@@ -127,6 +127,8 @@ Below you can find the helpful methods for pub/sub:
 
 ### Docker + Docker Compose
 
+#### Installation
+
 To install Docker, run the following command:
 
     sudo snap install docker         # version 28.1.1+1
@@ -154,6 +156,40 @@ You might encounter an error like this:
 
 Follow the instructions in the Docker documentation to resolve this issue:
 <https://docs.docker.com/engine/install/linux-postinstall/>
+
+#### Docker Compose command
+
+Look the [Docker Compose prof documentation](https://github.com/Distributed-IoT-Software-Arch-Course/iot-microservice-arch-laboratory?tab=readme-ov-file#docker-compose) for more information about the command.
+
+I report the main command here:
+
+Run the application as a daemon in background
+
+    docker-compose up -d
+
+Run the application and force rebuild of images
+
+    docker-compose up --build
+
+You can view active containers associated to the composed application:
+
+    docker-compose ps
+
+View all containers, including stopped ones:
+
+    docker-compose ps -a
+
+View logs of the application:
+
+    docker-compose logs
+
+You can stop the entire application with all its container using:
+
+    docker-compose down
+
+You can stop, remove everything with the following command:
+
+    docker-compose rm -fsv
 
 ### MQTT Broker - Eclipse Mosquitto
 
