@@ -2,23 +2,25 @@
 
 ## Table of Contents
 
-- [Current Architecture Position](#current-architecture-position)
-- [Traffic Flow](#traffic-flow)
-- [Communication Protocols](#communication-protocols)
-  - [Global Temperature Endpoint](#global-temperature-endpoint)
-  - [Printer Monitoring Endpoint](#printer-monitoring-endpoint)
-  - [Priority Queue Management Endpoint](#priority-queue-management-endpoint)
-- [Web Pages Overview](#web-pages-overview)
-- [Web Server Class Diagram](#web-server-class-diagram)
-- [Folder Structure](#folder-structure)
-- [Local](#local)
-  - [Local Run Instructions](#local-run-instructions)
-  - [Local Testing Instructions](#local-testing-instructions)
-- [Docker](#docker)
-  - [Docker Run Instructions](#docker-run-instructions)
-  - [Docker testing instructions](#docker-testing-instructions)
-- [Docker Compose](#docker-compose)
-  - [Note on Docker Compose testing](#note-on-docker-compose-testing)
+1. [Current Architecture Position](#current-architecture-position)
+2. [Web Server is Outside API Gateway](#web-server-is-outside-api-gateway)
+    - [Gateway Traffic Flow](#gateway-traffic-flow)
+3. [Communication Protocols](#communication-protocols)
+    - [Global Temperature Endpoint](#global-temperature-endpoint)
+    - [Printer Monitoring Endpoint](#printer-monitoring-endpoint)
+    - [Priority Queue Management Endpoint](#priority-queue-management-endpoint)
+4. [Web Pages Overview](#web-pages-overview)
+5. [Web Server Class Diagram](#web-server-class-diagram)
+    - [Class Diagram Overview](#class-diagram-overview)
+6. [Folder Structure](#folder-structure)
+7. [Local](#local)
+    - [Local Run Instructions](#local-run-instructions)
+    - [Local Testing Instructions](#local-testing-instructions)
+8. [Docker](#docker)
+    - [Docker Run Instructions](#docker-run-instructions)
+    - [Docker testing instructions](#docker-testing-instructions)
+9. [Docker Compose](#docker-compose)
+    - [Note on Docker Compose testing](#note-on-docker-compose-testing)
 
 ## Current Architecture Position
 
@@ -40,18 +42,25 @@ The Web UI service operates **outside** the API Gateway as a frontend client tha
                                               │
                                               │ Routes to
                                               ▼
-                                   ┌─────────────────────────┐
-                                   │    Backend Services     │
-                                   │  (Inventory, Telemetry) │
-                                   └─────────────────────────┘
+┌─────────────────────────────┬─────────────────────────────┬─────────────────────────────┐
+│  Telemetry Service          │  Printer Service            │  Job Queue Service          │
+│  - GET /temperature/global  │  - GET /printers/status     │  - GET /jobs                │
+│    (Returns temperature     │    (Returns printer status) │    (Returns job queue)      │
+│     readings)               │                             │  - POST /jobs               │
+│                             │                             │    (Add new job)            │
+│                             │                             │  - PUT /jobs/{jobId}        │
+│                             │                             │    (Edit job priority)      │
+│                             │                             │  - DELETE /jobs/{jobId}     │
+│                             │                             │    (Delete job)             │
+└─────────────────────────────┴─────────────────────────────┴─────────────────────────────┘
 ```
 
-### Web Server is Outside API Gateway
+## Web Server is Outside API Gateway
 
 - **Web Server**: Serves HTML pages to browsers, Consumes data from gateway APIs and renders it as HTML, Handles user interface layer (browser-to-server)
 - **API Gateway**: Manages JSON API communication between services
 
-## Traffic Flow
+### Gateway Traffic Flow
 
 1. **Browser** → **Web Server** (HTML requests)
     - User navigate to a URL in the browser, which sends an HTTP request (GET /telemetry/device123) to the Web Server.
@@ -72,36 +81,44 @@ The Web UI service operates **outside** the API Gateway as a frontend client tha
 
 #### Global Temperature Endpoint
 
-- **Endpoint**: `/temperature/global`
+- **Endpoint**: `<api_gateway>/temperature/global`
 - **Method**: GET
 - **Response**: List of all temperature readings (room and printers)
 - **Type**: TemperatureReading[]
 
 #### Printer Monitoring Endpoint
 
-- **Endpoint**: `/printers/status`
+- **Endpoint**: `<api_gateway>/printers/status`
 - **Method**: GET
 - **Response**: List of all printer statuses (job status, progress, last updated)
 - **Type**: PrinterStatus[]
 
 #### Priority Queue Management Endpoint
 
-- **Endpoint**: `/jobs`
+##### **GET**
+
+- **Endpoint**: `<api_gateway>/jobs`
 - **Method**: GET
 - **Response**: List of all print jobs in the queue
 - **Type**: Job[]
 
-- **Endpoint**: `/jobs`
+##### **POST**
+
+- **Endpoint**: `<api_gateway>/jobs`
 - **Method**: POST
 - **Body**: New job data
 - **Response**: Created job details
 
-- **Endpoint**: `/jobs/{jobId}`
+##### **PUT**
+
+- **Endpoint**: `<api_gateway>/jobs/{jobId}`
 - **Method**: PUT
 - **Body**: Updated job priority
 - **Response**: Updated job details
 
-- **Endpoint**: `/jobs/{jobId}`
+##### **DELETE**
+
+- **Endpoint**: `<api_gateway>/jobs/{jobId}`
 - **Method**: DELETE
 - **Response**: Success message (204 No Content)
 
