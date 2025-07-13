@@ -228,3 +228,9 @@ Follow [the instructions in the README file](mqtt-broker/README.md):
 - to set up the broker with custom configurations, including local configuration files, data persistence, and logging.
 - to run the broker with specific parameters such as port mapping, restart policies, and daemon mode.
 - to stop the broker when needed.
+
+#### MQTT Broker testing
+
+To test the MQTT broker, you can use the `mqtt-tester` component. This component is designed to interact with the broker and verify its functionality. It includes scripts for local testing and a Docker and docker-compose setup for containerized testing.
+
+See the [mqtt-tester/README.md](mqtt-tester/README.md) for more details on how to use the MQTT tester.
