@@ -1,11 +1,24 @@
 # Web UI Architecture Overview
 
-- [ ] docker
-- [ ] porte -> main port??
-- [ ] table of contents da sistemare
-- [ ] class diagram da sistemare
-
 ## Table of Contents
+
+- [Current Architecture Position](#current-architecture-position)
+- [Traffic Flow](#traffic-flow)
+- [Communication Protocols](#communication-protocols)
+  - [Global Temperature Endpoint](#global-temperature-endpoint)
+  - [Printer Monitoring Endpoint](#printer-monitoring-endpoint)
+  - [Priority Queue Management Endpoint](#priority-queue-management-endpoint)
+- [Web Pages Overview](#web-pages-overview)
+- [Web Server Class Diagram](#web-server-class-diagram)
+- [Folder Structure](#folder-structure)
+- [Local](#local)
+  - [Local Run Instructions](#local-run-instructions)
+  - [Local Testing Instructions](#local-testing-instructions)
+- [Docker](#docker)
+  - [Docker Run Instructions](#docker-run-instructions)
+  - [Docker testing instructions](#docker-testing-instructions)
+- [Docker Compose](#docker-compose)
+  - [Note on Docker Compose testing](#note-on-docker-compose-testing)
 
 ## Current Architecture Position
 
