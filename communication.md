@@ -303,11 +303,16 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 
 #### 2.2.2 Topic: device/printer/{printerId}/progress
 
+Printer progress updates during a print job.
+It also updates the status of the printer periodically for idle or completed states.
+
+When used for idle the `jobId` is an empty string and `progress` is set 100.
+
 **Type:** PrinterProgress
 
 - `printerId` - string
 - `jobId` - string
-- `status` - "printing"|"paused"|"completed"|"error"
+- `status` - "printing"|"idle"|"completed"|"error"
 - `progress` - number (0–100)
 - `timestamp` - string (ISO 8601)
 

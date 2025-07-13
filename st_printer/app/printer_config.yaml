@@ -1,1 +1,8 @@
 # Printer Parameters
+
+printer_type: "FDM"
+filament_type: "PLA"
+nozzle_diameter: 0.4
+max_nozzle_temp: 250
+temp_rate: 5
+print_speed: 60

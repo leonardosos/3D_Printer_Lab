@@ -491,7 +491,7 @@ To test the application in Docker with mock data, you can run the mock API serve
 
 ## Docker Compose
 
-To run (only, not the tests) the Web UI with Docker Compose, follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
+For Web UI with Docker Compose, follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
 
 ### Note on Docker Compose testing
 

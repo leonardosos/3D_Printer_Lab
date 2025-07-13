@@ -44,15 +44,18 @@ Difficult Tier: [Tier List](flowchart/tier_list.mmd)
 
 Leonardo:
 
-- [Printer (ST)](st_printer/README.md)
 - [Global Temperatures (GT)](global_temperatures/README.md)
 - [Anomaly Detection (AT)](anomaly_detection/README.md)
+- [Printer (ST)](st_printer/README.md)            --> FINISHED
 - [Web Interface (GUI)](web-ui/README.md)         --> FINISHED
 - [mqtt-broker](mqtt-broker/README.md)            --> FINISHED
 - [mqtt-tester](mqtt-tester/README.md)            --> FINISHED
 
 - [ ] API Gateway with authentication?
 - [ ] Persistence on the broker?
+- [ ] QoS (Quality of Service) levels for MQTT messages
+- [ ] Auto ricerca dei devices
+- [ ] Porte di comunicazione tutte diverse??
 
 Simone:
 
@@ -65,6 +68,8 @@ Lorenzo:
 - job handler
 - printer monitoring
 - fan controller
+
+memo:
 
 - aggiungere delete al queue manager
 - cambiare robot communica jobid

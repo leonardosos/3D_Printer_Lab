@@ -1,3 +1,13 @@
+
+
+
+###### this is the test docker-compose.yml file 
+# launch only the MQTT broker service
+
+### -> the ufficial docker-compose.yml file is in the `final__docker-compose.yml` file
+
+
+
 name: composed-mqtt-project
 
 ## ALL PORTS are decided by flowchart/port_flowchart.mmd
@@ -19,21 +29,7 @@ services:
     networks:
       - iot_network
 
-  ### Web UI Service
-  web-ui:
-    build:
-      context: ./web-ui
-      dockerfile: Dockerfile
-    container_name: web-ui-container
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./web-ui/target_web_conf.yaml:/app/web_conf.yaml
-    networks:
-      - iot_network
-    restart: always
-    #depends_on:
-    #  - api-gateway
+
 
 networks:
   iot_network:

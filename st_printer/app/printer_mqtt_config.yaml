@@ -1,4 +1,7 @@
 # MQTT Configuration for Printer
 # This file contains the MQTT configuration for the printer application.
-# ON LOCALHOST
+# Local run
 
+broker_ip: "127.0.0.1"
+broker_port: 1883
+message_limit: 1000

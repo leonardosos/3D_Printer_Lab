@@ -7,7 +7,7 @@ import json
 class PrinterProgressDTO:
     printerId: str
     jobId: str
-    status: str  # "printing"|"paused"|"completed"|"error"
+    status: str  # "printing"|"idle"|"completed"|"error"
     progress: float
     timestamp: str
 
