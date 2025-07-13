@@ -12,4 +12,5 @@ def get_global_temperature():
     response = requests.get(f'{base_url}/temperature/global')
     response.raise_for_status()
     data = response.json()
+    # Create a list of TemperatureReadingDTO from the response data
     return [TemperatureReadingDTO(**r) for r in data.get('temperatures', [])]

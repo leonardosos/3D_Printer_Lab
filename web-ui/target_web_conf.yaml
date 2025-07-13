@@ -3,9 +3,11 @@
 #   -> the port should match the one used in the API Gateway service
 #   -> the URL should point to the API Gateway service in your Docker network
 
+### Look port_flowchart for port flowchart
+
 api_gateway:
-  # Local development
-  base_url: "http://localhost:8080"
+  #Docker with name "api-gateway" and port 8080
+  base_url: "http://api-gateway:8080"
 web:
   host: "0.0.0.0"
   port: 8000

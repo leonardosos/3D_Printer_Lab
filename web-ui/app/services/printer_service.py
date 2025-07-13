@@ -12,4 +12,5 @@ def get_printer_status():
     response = requests.get(f'{base_url}/printers/status')
     response.raise_for_status()
     data = response.json()
+    # Create a list of PrinterStatusDTO from the response data
     return [PrinterStatusDTO(**item) for item in data.get('printers', [])]

@@ -1,11 +1,15 @@
 name: composed-mqtt-project
 
+## ALL PORTS are decided by flowchart/port_flowchart.mmd
+# The ip address is the service name, e.g., `broker` for the MQTT broker, `web-ui` for the web UI
+
 services:
 
   ### MQTT Broker Service
   broker:
     image: eclipse-mosquitto:2.0.21
-    container_name: my-mosquitto-broker
+    container_name: my-mosquitto-broker-container
+    restart: always
     ports:
       - "1883:1883"
     volumes:
@@ -13,37 +17,24 @@ services:
       - ./mqtt-broker/data:/mosquitto/data
       - ./mqtt-broker/log:/mosquitto/log
     networks:
-      - mqtt-net
+      - iot_network
 
-
-  ### Example services for sending and receiving MQTT messages
-  ###   Look mqtt-tester for more details
-  #
-  # sender:
-  #   build:
-  #     context: ./docker_send
-  #     dockerfile: Dockerfile
-  #   container_name: mqtt_sender
-  #   depends_on:
-  #     - broker
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #   networks:
-  #     - mqtt-net
-  #
-  # receiver:
-  #   build:
-  #     context: ./docker_recv
-  #     dockerfile: Dockerfile
-  #   container_name: mqtt_receiver
-  #   depends_on:
-  #     - broker
-  #   environment:
-  #     - PYTHONUNBUFFERED=1
-  #   networks:
-  #     - mqtt-net
-  #
+  ### Web UI Service
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    container_name: web-ui-container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./web-ui/target_web_conf.yaml:/app/web_conf.yaml
+    networks:
+      - iot_network
+    restart: always
+    #depends_on:
+    #  - api-gateway
 
 networks:
-  mqtt-net:
+  iot_network:
     driver: bridge
