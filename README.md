@@ -44,14 +44,33 @@ Difficult Tier: [Tier List](flowchart/tier_list.mmd)
 
 Leonardo:
 
-- [Anomaly Detection (AT)](anomaly_detection/README.md)
-- [Web Interface (GUI)](web-ui/README.md)
 - [Printer (ST)](st_printer/README.md)
 - [Global Temperatures (GT)](global_temperatures/README.md)
+- [Anomaly Detection (AT)](anomaly_detection/README.md)
+- [Web Interface (GUI)](web-ui/README.md)         --> FINISHED
+- [mqtt-broker](mqtt-broker/README.md)            --> FINISHED
+- [mqtt-tester](mqtt-tester/README.md)            --> FINISHED
+
+- [ ] API Gateway with authentication?
+- [ ] Persistence on the broker?
 
 Simone:
 
+- api gateway
+- robot management
+- robot
+
 Lorenzo:
+
+- job handler
+- printer monitoring
+- fan controller
+
+To bo assigned:
+
+- priority queue management
+- fan unit
+- temperature sensor
 
 ## Project Structure
 
