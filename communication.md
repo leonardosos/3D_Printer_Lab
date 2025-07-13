@@ -245,7 +245,7 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 
 #### 2.1.1 Topic: device/room/temperature
 
-**Type:** TemperatureReading
+**Type:** TemperatureReadingRoom
 
 - `sensorId` - string
 - `temperature` - number (°C)
@@ -260,7 +260,12 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 
 #### 2.1.2 Topic: device/printer/{printerId}/temperature
 
-Same schema as above, plus printerId field:
+**Type:** TemperatureReadingPrinter
+
+- `printerId` - string
+- `temperature` - number (°C)
+- `unit` - "C" (fixed)
+- `timestamp` - string (ISO 8601)
 
 **Example:**
 
@@ -332,7 +337,6 @@ Same schema as above, plus printerId field:
   - `layerHeight` - number (mm)
   - `infill` - number (percentage)
   - `nozzleTemp` - number (°C)
-  - `bedTemp` - number (°C)
 
 **Example:**
 
@@ -348,7 +352,6 @@ Same schema as above, plus printerId field:
     "layerHeight": 0.2,
     "infill": 20,
     "nozzleTemp": 210,
-    "bedTemp": 60
   }
 }
 ```

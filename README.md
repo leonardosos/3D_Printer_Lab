@@ -66,7 +66,11 @@ Lorenzo:
 - printer monitoring
 - fan controller
 
-To bo assigned:
+- aggiungere delete al queue manager
+- cambiare robot communica jobid
+- rob robot -> robot
+
+To be assigned:
 
 - priority queue management
 - fan unit
