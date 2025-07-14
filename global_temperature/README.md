@@ -1,5 +1,16 @@
 # Global Temperature Service
 
+TO DO:
+- [ ] http api
+- [ ] service class 
+- [ ] class 
+- [ ] dockering
+- [ ] finish the README.md
+    - [ ] add the table of contents
+    - [ ] fix the class diagram
+    - [ ] add the folder structure with explanation
+    - [ ] add the docker and docker-compose
+
 ## Table of Contents
 
 
@@ -169,3 +180,6 @@ classDiagram
 
     GlobalTemperatureService --> TemperatureAnalyzer : uses
 ```
+
+## Folder Structure
+

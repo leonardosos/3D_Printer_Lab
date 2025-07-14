@@ -3,7 +3,7 @@
 #  service to discover printers
 #  update the printer list
 
-def discover_printers(subscriber, timeout=5, debug=False):
+def discover_printers(subscriber, timeout=60, debug=True):
     """
     Listens for incoming printer temperature messages for a short period,
     and returns a set of discovered printer IDs.

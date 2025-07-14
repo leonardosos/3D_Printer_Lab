@@ -47,16 +47,19 @@ class TemperatureAnalyzer:
                 except Exception as e:
                     raise ValueError(f"Invalid config file: {e}")
         
-    def compute_heat_level(self, room_readings: List[TemperatureReadingRoomDTO], printer_readings: List[TemperatureReadingPrinterDTO]) -> int:
+    def compute_heat_level(self, room_readings: Optional[List[TemperatureReadingRoomDTO]] = None, printer_readings: Optional[List[TemperatureReadingPrinterDTO]] = None) -> int:
         """
         Computes heat level for fan controller based on latest readings.
         Returns an integer heat level (e.g., 0-10).
 
         Is computed 70% from room temperature mapping with thresholds, 
         and 30% from mean from the provided printer readings mapping with thresholds.
+        If only one type of readings is provided, the heat level depends solely on those readings.
+        
+        If no readings are provided, returns 0.
+
+        If printers or room readings are not present, the result will be based all on the available readings.
         """
-        if not room_readings or not printer_readings:
-            raise ValueError("Both room and printer readings must be provided")
 
         # Helper to map temperature to 0-10 scale based on thresholds
         def map_to_scale(temp, low, high):
@@ -67,26 +70,49 @@ class TemperatureAnalyzer:
             else:
                 return int(round((temp - low) / (high - low) * 10))
 
-        # Use the latest room reading
-        latest_room_temp = room_readings[-1].temperature
-        room_low = self.thresholds["room"]["low"]
-        room_high = self.thresholds["room"]["high"]
-        room_score = map_to_scale(latest_room_temp, room_low, room_high)
+        room_score = None
+        printer_score = None
 
-        # Use mean of printer readings
-        printer_temps = [r.temperature for r in printer_readings]
-        mean_printer_temp = sum(printer_temps) / len(printer_temps)
-        printer_low = self.thresholds["printer"]["low"]
-        printer_high = self.thresholds["printer"]["high"]
-        printer_score = map_to_scale(mean_printer_temp, printer_low, printer_high)
+        # Treat None as empty list
+        room_readings = room_readings if room_readings is not None else []
+        printer_readings = printer_readings if printer_readings is not None else []
 
-        # Weighted sum
-        heat_level = 0.7 * room_score + 0.3 * printer_score
+        # Use the latest room reading if available
+        if room_readings:
+            latest_room_temp = room_readings.temperature
+            room_low = self.thresholds["room"]["low"]
+            room_high = self.thresholds["room"]["high"]
+            room_score = map_to_scale(latest_room_temp, room_low, room_high)
+        # Use mean of printer readings if available
+        if printer_readings:
+            printer_temps = [r.temperature for r in printer_readings]
+
+            if self.debug:
+                print(f"[TEMP_ANALYZER DEBUG] Printer temps: {printer_temps}")
+
+            mean_printer_temp = sum(printer_temps) / len(printer_temps)
+            printer_low = self.thresholds["printer"]["low"]
+            printer_high = self.thresholds["printer"]["high"]
+            printer_score = map_to_scale(mean_printer_temp, printer_low, printer_high)
+
+        # Decide final heat level based on available readings
+        if room_score is not None and printer_score is not None:
+            heat_level = 0.7 * room_score + 0.3 * printer_score
+        elif room_score is not None:
+            heat_level = room_score
+        elif printer_score is not None:
+            heat_level = printer_score
+        else:
+            # No readings provided
+            heat_level = 0
+
         heat_level_int = int(round(heat_level))
 
         if self.debug:
-            print(f"[TEMP_ANALYZER DEBUG] Room temp: {latest_room_temp}, mapped: {room_score}")
-            print(f"[TEMP_ANALYZER DEBUG] Printer mean temp: {mean_printer_temp}, mapped: {printer_score}")
+            if room_score is not None:
+                print(f"[TEMP_ANALYZER DEBUG] Room temp: {room_readings.temperature}, mapped: {room_score}")
+            if printer_score is not None:
+                print(f"[TEMP_ANALYZER DEBUG] Printer mean temp: {mean_printer_temp}, mapped: {printer_score}")
             print(f"[TEMP_ANALYZER DEBUG] Final heat level: {heat_level_int}")
 
         return heat_level_int
@@ -115,7 +141,9 @@ if __name__ == "__main__":
     ]
 
     analyzer = TemperatureAnalyzer()
-    heat_level = analyzer.compute_heat_level(room_readings, printer_readings)
+    heat_level = analyzer.compute_heat_level(printer_readings=printer_readings)
+    heat_level = analyzer.compute_heat_level(room_readings=room_readings)
+    heat_level = analyzer.compute_heat_level(room_readings=room_readings, printer_readings=printer_readings)
     print(f"Computed heat level: {heat_level}")
 
 
