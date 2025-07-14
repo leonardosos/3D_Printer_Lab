@@ -307,11 +307,16 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 
 #### 2.2.2 Topic: device/printer/{printerId}/progress
 
-Printer publishes its status on this topic.
+Printer publishes its status on this topic. See [Printer Readme](../printers/README.md) for details.
 
 When the printer is actively printing, it sends updates on the job progress. This includes the current job ID, status, and progress percentage.
 
-When the printer is idle, it sends a status update with status "idle" and a `jobId` of an empty string. The `progress` is set to 100% to indicate no active job.
+When the printer is idle (no job is active or assigned), including on start-up, it **periodically** sends a status update with:
+
+- `printerId`: the printer's ID
+- `status`: "idle"
+- `jobId`: empty string
+- `progress`: 100%
 
 When the printer completes a job, it sends a status update with status "completed" and the just completed job ID.
 
@@ -407,13 +412,13 @@ When the printer completes a job, it sends a status update with status "complete
 
 #### 2.4.1 Topic: device/fan/controller/status
 
-The global temperature service publishes to the fan controller, the overall temperature level in order to communicate the need for cooling (handled by the fan controller).
+The global temperature service publishes to the fan controller, an interpreted temperature level in order to communicate the need for cooling (handled by the fan controller).
 
-It is not an emergency cooling command, but a periodic heat level based on temperature analysis.
+It is not an emergency cooling command, but a **periodic** heat level based on temperature analysis.
 
 **Type:** FanControllerTemp
 
-- `heat_level` - number (0–10)
+- `heat_level` - number (0–10) (0 = no cooling needed, 10 = maximum cooling)
 - `timestamp?` - string (ISO 8601, optional)
 
 **Example:**
