@@ -57,7 +57,7 @@ Simone:
 
 - api gateway
 - robot management
-- robot
+- robot (periodic status update, dynamic number, need to define the ports)
 
 Lorenzo:
 
@@ -144,10 +144,10 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 
 | Device      | Number | Sensor | Actuator | Read                                    | Write                                   |
 |-------------|--------|--------|----------|----------------------------------------|-----------------------------------------|
-| 3D Printer  | 3      | Yes    | Yes      | - Print assignments<br>- Job commands  | - Temperature data<br>- Print progress<br>- Status updates |
-| Room        | 1      | Yes    | No       | N/A                                    | - Temperature readings |
-| Robot       | 1      | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
-| Fan         | 1      | No     | Yes      | - Speed commands| N/A   |
+| 3D Printer  | 3 (dynamic)     | Yes    | Yes      | - Print assignments<br>- Job commands  | - Temperature data<br>- Print progress<br>- Status updates |
+| Room        | 1 (fixed)     | Yes    | No       | N/A                                    | - Temperature readings |
+| Robot       | 1 (dynamic)     | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
+| Fan         | 1 (fixed)     | No     | Yes      | - Speed commands| N/A   |
 
 ---
 ---

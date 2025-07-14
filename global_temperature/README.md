@@ -90,6 +90,11 @@ See [communication.md](../communication.md) for full message schemas.
 
 - Provides HTTP endpoint for retrieving all temperature data
 
+### Configurations file
+
+- Loads configurations on how define the heat level for the fan controller.
+- Load configurations for MQTT broker connection.
+
 ## Journey
 
 The Global Temperature Service follows this workflow:
@@ -104,14 +109,10 @@ The Global Temperature Service follows this workflow:
     - Aggregate temperature readings from room and printers
     - Store readings in temperature history
 
-3. **Analysis Phase**
-    - Check for overheating conditions
-    - Determine if fan speed adjustment is needed
+3. **Heat Level Computation Phase**
+    - Compute the heat level for the fan controller based on temperature analysis
 
-4. **Fan Control Phase**
-    - Publish fan speed commands to Fan Controller
-
-5. **API Serving Phase**
+4. **API Serving Phase**
     - Serve temperature data via HTTP endpoint
 
 ## Separation of Concerns
