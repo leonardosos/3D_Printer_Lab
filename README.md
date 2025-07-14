@@ -11,6 +11,9 @@
     - [Project Description](#project-description)
     - [Project Implementation](#project-implementation)
     - [Devices Table](#devices-table)
+    - [Temperature range](#temperature-range)
+        - [Working Temperature Range](#working-temperature-range)
+        - [Emergency Temperature Range](#emergency-temperature-range)
 7. [Official Documentation](#official-documentation)
     - [Flowchart Schemas](#flowchart-schemas)
     - [Communication Schemas](#communication-schemas)
@@ -148,6 +151,36 @@ The **robot**, once it receives the coordinates, autonomously navigates to the t
 | Room        | 1 (fixed)     | Yes    | No       | N/A                                    | - Temperature readings |
 | Robot       | 1 (dynamic)     | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
 | Fan         | 1 (fixed)     | No     | Yes      | - Speed commands| N/A   |
+
+### Temperature range
+
+#### Working Temperature Range
+
+The working temperature range for the room are:
+
+- Minimum: 10°C
+- Maximum: 50°C
+
+The working temperature range for the printers are:
+
+- Minimum: 10°C
+- Maximum: 300°C
+
+This range is also reported in the configuration file [`config.global_temperature_config.yaml`](global_temperature_config.yaml), used by the **Global Temperature (GT)** service to analyze temperature readings and determine the heat level for the fan controller (see [Readme.md](global_temperature/README.md) for more details).
+
+#### Emergency Temperature Range
+
+The emergency temperature range for the room are:
+
+- Minimum: 5°C  (to avoid printing failures due to low temperatures)
+- Maximum: 60°C
+
+The emergency temperature range for the printers are:
+
+- Minimum: 5°C  (to avoid nozzle clogging)
+- Maximum: 300°C
+
+This range is also reported in the configuration file [`config.anomaly_detection_config.yaml`](anomaly_detection_config.yaml), used by the **Anomaly Detection (AD)** service to analyze temperature readings and determine emergency levels and communicate to fan controller (see [Readme.md](anomaly_detection/README.md) for more details).
 
 ---
 ---

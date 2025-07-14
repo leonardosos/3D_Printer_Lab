@@ -1,5 +1,7 @@
-
 # Global Temperature Service
+
+## Table of Contents
+
 
 ## Architecture Position
 
@@ -84,7 +86,16 @@ See [communication.md](../communication.md) for full message schemas.
 
 - Publishes a heat level to the fan controller based on temperature analysis
 - It's a overall temperature level that indicates the need for cooling, **not emergency cooling**.
-- The commmunication is periodic, not event-driven.
+- The communication is periodic, not event-driven.
+
+### Temperature Analysis
+
+- Analyzes temperature readings against predefined thresholds defined in the configuration file [`config.global_temperature_config.yaml`](global_temperature_config.yaml) in a scale 1 to 10.
+- Determines the heat level for the fan controller based on the following analysis:
+
+  - Computes the average temperature of all printers and maps it to a heat level, based on the thresholds.
+  - From the room temperature, it computes the heat level based on the thresholds.
+  - Then it combines the two heat levels to determine the overall heat level, 70% of the room temperature and 30% of the average printer temperature.
 
 ### API Integration
 

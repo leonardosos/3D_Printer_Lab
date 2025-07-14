@@ -1,0 +1,10 @@
+# Define how to compute the heat level for the fan controller
+# Define the thresholds for room and printer temperatures
+# These thresholds will be used to determine the heat level for the fan controller
+
+room:
+  low: 10
+  high: 50
+printer:
+  low: 10
+  high: 300
