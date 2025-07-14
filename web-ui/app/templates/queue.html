@@ -1,3 +1,9 @@
+<!--
+    This page auto-refreshes every 30 seconds to update printer status.
+    The refresh is handled by a JavaScript setTimeout in the <head> section.
+-->
+        
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +61,13 @@
         }
         footer { text-align: center; padding: 1.5rem 0; color: #888; font-size: 1rem; }
     </style>
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 1000); // Reloads every: 1000 milliseconds (1 second)
+    </script>
+    
 </head>
 <body>
     <header>

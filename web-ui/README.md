@@ -10,16 +10,17 @@
     - [Printer Monitoring Endpoint](#printer-monitoring-endpoint)
     - [Priority Queue Management Endpoint](#priority-queue-management-endpoint)
 4. [Web Pages Overview](#web-pages-overview)
-5. [Web Server Class Diagram](#web-server-class-diagram)
+5. [Web Server Refresh](#web-server-refresh)
+6. [Web Server Class Diagram](#web-server-class-diagram)
     - [Class Diagram Overview](#class-diagram-overview)
-6. [Folder Structure](#folder-structure)
-7. [Local](#local)
+7. [Folder Structure](#folder-structure)
+8. [Local](#local)
     - [Local Run Instructions](#local-run-instructions)
     - [Local Testing Instructions](#local-testing-instructions)
-8. [Docker](#docker)
+9. [Docker](#docker)
     - [Docker Run Instructions](#docker-run-instructions)
     - [Docker testing instructions](#docker-testing-instructions)
-9. [Docker Compose](#docker-compose)
+10. [Docker Compose](#docker-compose)
     - [Note on Docker Compose testing](#note-on-docker-compose-testing)
 
 ## Current Architecture Position
@@ -151,6 +152,10 @@ The Web UI consists of four main pages, each designed for a specific operational
    - **How is done:** Shows a table of print jobs, a side panel for job details, and action buttons to add, edit priority, or delete jobs.
    - *Image below shows the job queue table, details panel, and action buttons.*
    <img src="./images/queue.png" alt="Priority Queue Management" style="width: 800px; object-fit: cover;">
+
+## Web Server Refresh
+
+The Web UI pages automatically refresh every second to ensure users see the latest data without needing to manually reload. This is implemented using a simple JavaScript `setTimeout` function in the `<head>` section of each HTML template.
 
 ## Web Server Class Diagram
 
