@@ -172,12 +172,10 @@ This range is also reported in the configuration file [`config.global_temperatur
 
 The emergency temperature range for the room are:
 
-- Minimum: 5°C  (to avoid printing failures due to low temperatures)
-- Maximum: 60°C
+- Maximum: 50°C
 
 The emergency temperature range for the printers are:
 
-- Minimum: 5°C  (to avoid nozzle clogging)
 - Maximum: 300°C
 
 This range is also reported in the configuration file [`config.anomaly_detection_config.yaml`](anomaly_detection_config.yaml), used by the **Anomaly Detection (AD)** service to analyze temperature readings and determine emergency levels and communicate to fan controller (see [Readme.md](anomaly_detection/README.md) for more details).
