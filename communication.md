@@ -407,15 +407,19 @@ When the printer completes a job, it sends a status update with status "complete
 
 #### 2.4.1 Topic: device/fan/controller/status
 
+The global temperature service publishes to the fan controller, the overall temperature level in order to communicate the need for cooling (handled by the fan controller).
+
+It is not an emergency cooling command, but a periodic heat level based on temperature analysis.
+
 **Type:** FanControllerTemp
 
-- `speed` - number (0–100)
+- `heat_level` - number (0–10)
 - `timestamp?` - string (ISO 8601, optional)
 
 **Example:**
 
 ```json
-{ "speed": 75, "timestamp": "2025-06-15T08:32:15Z" }
+{ "heat_level": 75, "timestamp": "2025-06-15T08:32:15Z" }
 ```
 
 #### 2.4.2 Topic: device/fan/{fanId}/speed

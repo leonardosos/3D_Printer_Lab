@@ -5,9 +5,9 @@
 
 The Global Temperature service operates as a microservice that:
 
-- aggregates and monitors temperature readings from both room sensors and individual 3D printers.
+- aggregates and monitors temperature readings from both room sensors and individual 3D printers and stores them in a persistent database.
 - provides real-time temperature data for web requests.
-- computes a summary of the temperature readings for the room and each printer, and sends commands to a fan controller to adjust the fan speed based on the temperature readings.
+- computes a summary of the temperature readings for the room and each printer, and sends commands to a fan controller to communicate the need for cooling based on temperature analysis.
 
 ```text
 ┌─────────────────┐     HTTP Requests   ┌─────────────────┐
@@ -43,14 +43,16 @@ The Global Temperature service operates as a microservice that:
 #### Room Temperature
 
 - **Topic**: `device/room/temperature`
-- **Type**: 2.1.1) TemperatureReading
+- **Type**: 2.1.1) TemperatureReadingRoom
 - **Purpose**: Receive room temperature readings for monitoring
+- **QoS**: QoS 0
 
 #### Printer Temperature
 
 - **Topic**: `device/printer/{printerId}/temperature`
-- **Type**: 2.1.2) TemperatureReading
+- **Type**: 2.1.2) TemperatureReadingPrinter
 - **Purpose**: Receive individual printer temperature readings
+- **QoS**: QoS 1
 
 ### MQTT Publications
 
@@ -58,14 +60,15 @@ The Global Temperature service operates as a microservice that:
 
 - **Topic**: `device/fan/controller/status`
 - **Type**: 2.4.1) FanControllerTemp
-- **Purpose**: Control fan speed based on temperature analysis
+- **Purpose**: Periodic heat communication level based on temperature analysis
+- **QoS**: QoS 0
 
 ### HTTP API - Responses - (through API Gateway)
 
 #### Global Temperature Endpoint
 
 - **Endpoint**: `/temperature/global`
-- **Method**: GET
+- **Method**: 1.2.1) GET
 - **Response**: List of all temperature readings (room and printers)
 
 See [communication.md](../communication.md) for full message schemas.
@@ -77,10 +80,11 @@ See [communication.md](../communication.md) for full message schemas.
 - Collects temperature readings from all sources (room and printers)
 - Maintains a history of temperature data for analysis on a persistent database
 
-### Fan Control
+### Fan Communication
 
-- Publishes a command when overheating is detected providing the necessary fan speed
-- Adjusts fan speed based on temperature analysis
+- Publishes a heat level to the fan controller based on temperature analysis
+- It's a overall temperature level that indicates the need for cooling, **not emergency cooling**.
+- The commmunication is periodic, not event-driven.
 
 ### API Integration
 
