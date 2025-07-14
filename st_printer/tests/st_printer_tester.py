@@ -36,7 +36,7 @@ class PrinterAssignmentDTO:
 ########### TESTER
 
 # Interval to publish assignment, periodically
-timeout_publish = 250  # seconds 
+timeout_publish = 20  # seconds 
 
 # Topics
 PRINTER_ID = "printer_001"
@@ -69,10 +69,9 @@ def on_message(client, userdata, msg):
     message_received_event.set()
 
 def subscribe_printer_topics(client):
-    client.subscribe(PROGRESS_TOPIC)
-    client.subscribe(TEMPERATURE_TOPIC)
-    client.subscribe(STATUS_TOPIC)
-    # Remove message_callback_add for specific topics, use general callback
+    client.subscribe(PROGRESS_TOPIC, qos=0)
+    client.subscribe(TEMPERATURE_TOPIC, qos=1)
+    client.subscribe(STATUS_TOPIC, qos=0)
     client.on_message = on_message
 
 def publish_assignment(client):
@@ -91,7 +90,7 @@ def publish_assignment(client):
         )
     )
     print(f"[SEND] Publishing assignment DTO to {ASSIGNMENT_TOPIC}")
-    client.publish(ASSIGNMENT_TOPIC, dto.to_json())
+    client.publish(ASSIGNMENT_TOPIC, dto.to_json(), qos=1)
 
 def main():
     from paho.mqtt.client import CallbackAPIVersion

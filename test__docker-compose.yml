@@ -1,0 +1,36 @@
+
+
+
+###### this is the test docker-compose.yml file 
+# launch only the MQTT broker service
+
+### -> the ufficial docker-compose.yml file is in the `final__docker-compose.yml` file
+
+
+
+name: composed-mqtt-project
+
+## ALL PORTS are decided by flowchart/port_flowchart.mmd
+# The ip address is the service name, e.g., `broker` for the MQTT broker, `web-ui` for the web UI
+
+services:
+
+  ### MQTT Broker Service
+  broker:
+    image: eclipse-mosquitto:2.0.21
+    container_name: my-mosquitto-broker-container
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt-broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt-broker/data:/mosquitto/data 
+      - ./mqtt-broker/log:/mosquitto/log
+    networks:
+      - iot_network
+
+
+
+networks:
+  iot_network:
+    driver: bridge

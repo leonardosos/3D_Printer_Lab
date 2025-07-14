@@ -8,13 +8,11 @@ The target used image and version for this playground is: `eclipse-mosquitto:2.0
 
 ## Docker configuration file
 
-The configuration file is `mosquitto.conf` and it is available in the `mqtt-broker` folder of the project. The configuration file is set to enable persistence, log messages to a file, and allow anonymous connections.
+The configuration file is `mosquitto.conf` and it is available in the `mqtt-broker` folder of the project. The configuration file is set to save log messages to a file, and allow anonymous connections.
+
+Below is the chosen configuration file content:
 
 ```config
-
-    # Enable persistence to store QoS 1 and QoS 2 messages
-    persistence true
-    persistence_location /mosquitto/data/
 
     # Log messages to a file in the mounted log directory
     log_dest file /mosquitto/log/mosquitto.log
@@ -40,7 +38,7 @@ docker pull eclipse-mosquitto:2.0.21
 We are customizing our MQTT Broker using the following customization at runtime:
 
 - local configuration file `mosquitto.conf` using `-v <LOCAL_PATH>/mosquitto.conf:/mosquitto/config/mosquitto.conf`
-- local folder for data in order to keep a local persistence of exchanged information supporting QoS 1 and QoS 2 scenarios using `-v <LOCAL_PATH>/data:/mosquitto/data`
+- if exist some persistence folder for data: use `-v <LOCAL_PATH>/data:/mosquitto/data`
 - local folder to collect logs locally using `-v <LOCAL_PATH>/log:/mosquitto/log` and having access also if the container will be destroyed
 - mapping port with `-p 1883:1883`
 - restart always parameter `--restart always`

@@ -81,6 +81,8 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
 - **Topic**: `device/printer/{printerId}/assignment`
 - **Type**: 2.2.3) PrinterAssignment
 - **Purpose**: Receive print job assignments with model files and specifications
+- **QoS**: 1 (at least once delivery)
+- **Duplicate Handling**: The service checks the job ID to avoid processing the same job multiple times
 
 ### MQTT Publications
 
@@ -89,12 +91,15 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
 - **Topic**: `device/printer/{printerId}/temperature`
 - **Type**: 2.1.2) TemperatureReadingPrinter
 - **Purpose**: Report current nozzle temperature for safety monitoring
+- **QoS**: 1 (at least once delivery)
 
 #### Print Progress Updates
 
 - **Topic**: `device/printer/{printerId}/progress`
 - **Type**: 2.2.2) PrinterProgress
 - **Purpose**: Report current print status and completion percentage
+- **QoS**: 0 (fire and forget)
+- **Frequency**: Every 30 seconds during idle, or on status change during printing
 
 See [communication.md](../communication.md) for
 
@@ -105,19 +110,21 @@ See [communication.md](../communication.md) for
 - **Assignment Processing**: Receives and validates print job assignments
 - possible improvement (**Job Validation**: Checks model file URLs, filament types, and estimated print times)
 - **Next Job Handling**: Manages next job assignment logic to ensure sequential processing
-  - accepts a new job only if the printer is idle or the next job is different from the current one (checking job ID)
-  - store (the current job in progress and ) last job received from the Job Handler
+  - launch a new job only if the printer is idle or the next job is different from the current one (checking job ID)
+  - store (the current job in progress and ) the last job received from the Job Handler
 
 - **Model File Handling**: Processes GCODE files from provided URLs (assumes local files)
 - **Print Simulation**: Simulates realistic printing behavior with time progression
 - **Status Tracking**: Maintains current job state and progress information
   - The printer publishes its status idle every 30 seconds when not printing
+  - Publishes status updates during printing
 
 ### Temperature Simulation
 
 - **Realistic Temperature Curves**: Simulates heating up, printing, and cooling down phases given the nozzle in the PrinterAssignment. (assumes a cold bed temperature)
 - **Thermal Behavior**: Simulates temperature fluctuations during printing
 - **Safety Monitoring**: Often reports temperature anomalies for anomaly detection checks
+- **Temperature Reporting**: Publishes current nozzle temperature only when change.
 
 ### Printer Configuration and Operating Parameters
 
@@ -143,8 +150,8 @@ The ST Printer Service follows a complete print job lifecycle:
 
 - **Job Assignment**: Receive print job assignment from Job Handler
 - **Validation**: Validate job parameters (model URL, filament type, estimated time)
-  - **Callback Assignment**: The printer has a callback function that processes the change in assignment, updating its internal job state (checking if the assignment is not already in progress or completed)
-- **Model Download**: Fetch GCODE file from provided URL
+  - **Callback Assignment**: The printer has a callback function that processes assignment as repoted above
+- **Model Download**: Fetch GCODE file from provided URL (assumes local files)
 - **Preparation**: Initialize print simulation parameters
 - **Status Update**: Report "printing" status with 0% progress
 
@@ -184,6 +191,10 @@ The architecture follows a clear separation where:
   - Job parameters and metadata
   - Validation logic
   - Status tracking
+
+- Printer encapsulates printer-specific data:
+  - Printer configuration and capabilities
+  - Status and temperature management
 
 ### Class Diagram
 

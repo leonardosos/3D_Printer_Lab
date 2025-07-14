@@ -33,6 +33,10 @@ Every microservice or device can validate incoming JSON against the appropriate 
         - [2.4.1 device/fan/controller/status](#241-topic-devicefancontrollerstatus)
         - [2.4.2 device/fan/{fanId}/speed](#242-topic-devicefanfanidspeed)
         - [2.4.3 device/fan/controller/emergency](#243-topic-devicefancontrolleremergency)
+3. [MQTT QoS (Quality of Service) Levels](#3-mqtt-qos-quality-of-service-levels)
+    - [Recap of MQTT QoS Levels](#recap-of-mqtt-qos-levels)
+    - [Summary Table](#summary-table)
+    - [Reasons for QoS Choices](#reasons-for-qos-choices)
 
 ---
 
@@ -303,10 +307,13 @@ All topics follow the pattern `device/<component>/<ID>/<event>`.
 
 #### 2.2.2 Topic: device/printer/{printerId}/progress
 
-Printer progress updates during a print job.
-It also updates the status of the printer periodically for idle or completed states.
+Printer publishes its status on this topic.
 
-When used for idle the `jobId` is an empty string and `progress` is set 100.
+When the printer is actively printing, it sends updates on the job progress. This includes the current job ID, status, and progress percentage.
+
+When the printer is idle, it sends a status update with status "idle" and a `jobId` of an empty string. The `progress` is set to 100% to indicate no active job.
+
+When the printer completes a job, it sends a status update with status "completed" and the just completed job ID.
 
 **Type:** PrinterProgress
 
@@ -441,3 +448,63 @@ When used for idle the `jobId` is an empty string and `progress` is set 100.
 ```json
 { "action": "shutdown", "type": "overheat", "source": "printer", "id": "printer-2", "timestamp": "2025-06-15T08:32:20Z" }
 ```
+
+## 3. MQTT QoS (Quality of Service) Levels
+
+### Recap of MQTT QoS Levels
+
+- **QoS 0 (At most once)**:
+The message is delivered once, with no confirmation. It may be lost if the client or broker disconnects. Fastest, but least reliable.
+
+- **QoS 1 (At least once)**:
+The message is delivered at least once, with confirmation. It may be delivered multiple times (duplicates possible), but delivery is guaranteed.
+
+- **QoS 2 (Exactly once)**:
+The message is delivered exactly once, using a handshake process. Most reliable, prevents duplicates, but has the highest overhead. Used for critical commands.
+
+### Summary Table
+
+| Topic                                   | Schema Type                           | QoS   |
+|------------------------------------------|--------------------------------------|-------|
+| device/room/temperature                  | 2.1.1) TemperatureReadingRoom        | Qos 0 |
+| device/printer/{printerId}/temperature   | 2.1.2) TemperatureReadingPrinter     | Qos 1 |
+| device/printers                          | 2.2.1) PrinterStatusUpdate           | Qos 0 |
+| device/printer/{printerId}/progress      | 2.2.2) PrinterProgress               | Qos 0 |
+| device/printer/{printerId}/assignment    | 2.2.3) PrinterAssignment             | Qos 1 |
+| device/robot/{robotId}/coordinates       | 2.3.1) RobotCommand                  | Qos 0 |
+| device/robot/{robotId}/progress          | 2.3.2) RobotProgress                 | Qos 0 |
+| device/fan/controller/status             | 2.4.1) FanControllerTemp             | Qos 0 |
+| device/fan/{fanId}/speed                 | 2.4.2) FanSpeedStatus                | Qos 1 |
+| device/fan/controller/emergency          | 2.4.3) EmergencyCommand              | Qos 2 |
+
+### Reasons for QoS Choices
+
+- **device/room/temperature** (QoS 0):  
+  Room temperature readings are important for monitoring but not critical. QoS 0 is chosen for speed and low overhead. Occasional loss is acceptable, and consumers do not need to handle duplicates.
+
+- **device/printer/{printerId}/temperature** (QoS 1):  
+  Printer temperature readings are needed for safety and monitoring. QoS 1 guarantees delivery, so temperature data is not lost. Consumers must be able to handle possible duplicate messages -> **using timestamp**.
+
+- **device/printers** (QoS 0):  
+  Printer status updates are sent frequently. Occasional loss is acceptable, so QoS 0 is used for speed and low overhead. No need to handle duplicates.
+
+- **device/printer/{printerId}/progress** (QoS 0):  
+  Progress updates are sent often. If a message is lost, the next update will arrive soon. QoS 0 minimizes network load. No need to handle duplicates.
+
+- **device/printer/{printerId}/assignment** (QoS 1):  
+  Print job assignments are critical and must be delivered reliably. QoS 1 ensures at least one delivery. Consumers must handle possible duplicate assignments to avoid processing the same job twice -> **using Job ID**.
+
+- **device/robot/{robotId}/coordinates** (QoS 0):  
+  Robot movement commands are sent rapidly. If a message is lost, the next command will update the robot. QoS 0 is sufficient. No need to handle duplicates.
+
+- **device/robot/{robotId}/progress** (QoS 0):  
+  Robot progress updates are frequent and not critical. QoS 0 reduces latency and network usage. No need to handle duplicates.
+
+- **device/fan/controller/status** (QoS 0):  
+  Fan status is updated regularly. Loss of a single message is not important, so QoS 0 is chosen. No need to handle duplicates.
+
+- **device/fan/{fanId}/speed** (QoS 1):  
+  Fan speed commands should be delivered reliably, but duplicates can be handled. QoS 1 ensures at least one delivery. Consumers must handle possible duplicate speed commands -> **using timestamp**.
+
+- **device/fan/controller/emergency** (QoS 2):  
+  Emergency commands (shutdown/restart) must be delivered exactly once to **avoid unsafe** repeated actions. QoS 2 prevents duplicates, so consumers do not need to handle them.

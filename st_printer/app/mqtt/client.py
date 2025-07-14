@@ -36,14 +36,14 @@ class MQTTClient:
         # Connect to the MQTT broker
         self.client.connect(self.broker, self.port)
 
-    def publish(self, topic, payload):
+    def publish(self, topic, payload, qos=0):
         # Publish a message to a topic and wait for confirmation
-        infot = self.client.publish(topic, payload)
+        infot = self.client.publish(topic, payload, qos=qos)
         infot.wait_for_publish()
 
-    def subscribe(self, topic, callback):
+    def subscribe(self, topic, callback, qos=0):
         # Subscribe to a topic and set a callback for messages
-        self.client.subscribe(topic)
+        self.client.subscribe(topic, qos=qos)
         self.client.message_callback_add(topic, callback)
 
     def loop_start(self):

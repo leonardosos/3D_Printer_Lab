@@ -26,7 +26,7 @@ class MQTTSubscriber:
                 parameters=params
             )
             callback(client, userdata, assignment_dto)
-        self.mqtt_client.subscribe(topic, dto_callback)
+        self.mqtt_client.subscribe(topic, dto_callback, qos=1)
 
 
 if __name__ == "__main__":
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     #from st_printer directory:
     #
     #    cd /home/leonardo/iot/IoT_Project/st_printer
-    #    python -m app.mqtt.subscriber
+    #    python3 -m app.mqtt.subscriber
     #
     
     from app.mqtt.client import MQTTClient

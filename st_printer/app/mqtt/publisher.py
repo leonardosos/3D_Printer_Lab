@@ -14,7 +14,11 @@ class MQTTPublisher:
             unit="C",
             timestamp=str(time.time())
         )
-        self.mqtt_client.publish(f"device/printer/{printer_id}/temperature", dto.to_json())
+        self.mqtt_client.publish(
+            f"device/printer/{printer_id}/temperature",
+            dto.to_json(),
+            qos=1
+        )
 
     def publish_progress(self, printer_id, job_id, status, progress):
         # Publish the print progress for a job using DTO
@@ -35,7 +39,7 @@ if __name__ == "__main__":
     #from st_printer directory:
     #
     #    cd /home/leonardo/iot/IoT_Project/st_printer
-    #    python -m app.mqtt.publisher
+    #    python3 -m app.mqtt.publisher
     #
     from app.mqtt.client import MQTTClient
     client = MQTTClient("app/printer_mqtt_config.yaml")

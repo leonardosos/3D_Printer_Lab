@@ -51,10 +51,6 @@ Leonardo:
 - [mqtt-broker](mqtt-broker/README.md)            --> FINISHED
 - [mqtt-tester](mqtt-tester/README.md)            --> FINISHED
 
-- [ ] API Gateway with authentication?
-- [ ] Persistence on the broker?
-- [ ] QoS (Quality of Service) levels for MQTT messages
-- [ ] Auto ricerca dei devices
 - [ ] Porte di comunicazione tutte diverse??
 
 Simone:
@@ -244,6 +240,20 @@ You can stop the entire application with all its container using:
 You can stop, remove everything with the following command:
 
     docker-compose rm -fsv
+
+#### Docker Compose Run
+
+Check the presence of mqtt-broker data and logs folders in the mqtt-broker directory.
+
+To run the application with Docker Compose, you can use the following command:
+
+    docker-compose up --build
+
+#### Docker Compose test
+
+To run the docker-compose test, you can use the following command:
+
+    docker-compose -f test__docker-compose.yml up --build
 
 ### MQTT Broker - Eclipse Mosquitto
 
