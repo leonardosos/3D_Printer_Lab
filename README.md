@@ -313,6 +313,14 @@ To run the docker-compose test, you can use the following command:
 
     docker-compose -f test__docker-compose.yml up --build
 
+To stop the test, you can use:
+
+    docker-compose -f test__docker-compose.yml down
+
+To start the test after stop, you can use:
+
+    docker-compose -f test__docker-compose.yml up --build
+
 ### MQTT Broker - Eclipse Mosquitto
 
 This section provides a guide for setting up and customizing an MQTT broker using Eclipse Mosquitto. We use the official eclipse-mosquitto Docker image on Docker Hub: <https://hub.docker.com/_/eclipse-mosquitto>.

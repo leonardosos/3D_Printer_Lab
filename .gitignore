@@ -18,3 +18,5 @@ mqtt-broker/log/*
 mqtt-tester/mqtt-broker/data/*
 mqtt-tester/mqtt-broker/log/*
 
+
+global_temperature/app/persistence/save/*
