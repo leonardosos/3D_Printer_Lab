@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import yaml
 
 class MQTTClient:
-    def __init__(self, config_path, debug=True):
+    def __init__(self, config_path="app/mqtt_config.yaml", debug=True):
         try:
             with open(config_path) as f:
                 config = yaml.safe_load(f)
