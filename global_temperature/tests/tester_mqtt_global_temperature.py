@@ -40,7 +40,7 @@ class TemperatureReadingPrinterDTO:
 
 ##### Tester for MQTT Global Temperature System #####
 
-pub_printer = False  # Flag to control publishing printer temperatures
+pub_printer = True  # Flag to control publishing printer temperatures
 pub_room = True  # Flag to control publishing room temperature
 
 # Topics and config

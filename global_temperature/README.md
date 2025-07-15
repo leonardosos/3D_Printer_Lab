@@ -1,19 +1,29 @@
 # Global Temperature Service
 
-TO DO:
-- [ ] http api
-- [ ] service class 
-- [ ] class 
-- [ ] dockering
-- [ ] finish the README.md
-    - [ ] add the table of contents
-    - [ ] fix the class diagram
-    - [ ] add the folder structure with explanation
-    - [ ] add the docker and docker-compose
-
 ## Table of Contents
 
-
+- [Architecture Position](#architecture-position)
+- [Communication Protocols](#communication-protocols)
+  - [MQTT Subscriptions](#mqtt-subscriptions)
+  - [MQTT Publications](#mqtt-publications)
+  - [HTTP API - Responses](#http-api---responses---through-api-gateway)
+- [Service Features](#service-features)
+  - [Temperature Aggregation](#temperature-aggregation)
+  - [Fan Communication](#fan-communication)
+  - [Temperature Analysis](#temperature-analysis)
+  - [API Integration](#api-integration)
+  - [Configurations file](#configurations-file)
+- [Journey](#journey)
+- [Separation of Concerns](#separation-of-concerns)
+- [Service Class Structure](#service-class-structure)
+- [Folder Structure](#folder-structure)
+- [Local](#local)
+  - [Local run](#local-run)
+  - [Local test](#local-test)
+- [Docker](#docker)
+  - [Docker run](#docker-run)
+  - [Docker Compose](#docker-compose)
+  
 ## Architecture Position
 
 The Global Temperature service operates as a microservice that:
@@ -147,39 +157,183 @@ The Global Temperature Service follows this workflow:
 ```mermaid
 classDiagram
     class GlobalTemperatureService {
-        -mqtt_client: MQTTClient
-        -config: dict
-        -temperature_history: list
-        -temperature_analyzer: TemperatureAnalyzer
-
-        +__init__(config_file: str)
-        +start_service(): void
-        +stop_service(): void
-        +connect_mqtt(): void
-        +disconnect_mqtt(): void
-
-        +callback_room_temperature(topic: str, payload: dict): void
-        +callback_printer_temperature(topic: str, payload: dict): void
-
-        +publish_fan_speed(speed: int): void
-        +load_configuration(config_file: str): dict
-        +get_global_temperature(): dict
-        +get_printer_temperature(printer_id: str): dict
-
-        serve_http_api(): void
+        - mqtt_client
+        - subscriber
+        - publisher
+        - printers
+        - history
+        - analyzer
+        + start()
+        + fan_update()
+        + start_periodic_fan_update()
+        + get_temperature_api_response()
+        + periodic_csv_dump()
     }
 
     class TemperatureAnalyzer {
-        -thresholds: dict
-        -temperature_history: dict
-
-        +__init__(thresholds: dict)
-        +check_threshold(temp: float, threshold: float): bool
-        +analyze_temperature(): dict
+        - thresholds
+        + compute_heat_level(room_readings, printer_readings)
     }
 
-    GlobalTemperatureService --> TemperatureAnalyzer : uses
+    class TemperatureHistory {
+        + add_room_reading(dto)
+        + add_printer_reading(dto)
+        + get_latest_room()
+        + get_latest_printers_list()
+        + csv_dump(file_path)
+    }
+
+    class MQTTClient {
+        + connect()
+        + publish(topic, payload, qos)
+        + subscribe(topic, callback, qos)
+        + loop_start()
+        + loop_stop()
+    }
+
+    class HttpApiEndpoint {
+        + start()
+    }
+
+    class discover_printers {
+        + discover_printers(subscriber, timeout, debug)
+    }
+
+    GlobalTemperatureService "1" --> "1" MQTTClient
+    GlobalTemperatureService "1" --> "1" TemperatureHistory
+    GlobalTemperatureService "1" --> "1" TemperatureAnalyzer
+    GlobalTemperatureService "1" --> "1" discover_printers
+    HttpApiEndpoint "1" --> "1" GlobalTemperatureService
 ```
+
+**Division of concerns:**
+
+- `GlobalTemperatureService` is the main orchestrator, handling MQTT, aggregation, analysis, and API.
+- `TemperatureAnalyzer` computes the heat level for the fan controller.
+- `TemperatureHistory` stores and retrieves temperature readings.
+- `MQTTClient`, `MQTTSubscriber`, and `MQTTPublisher` handle MQTT communication.
+- `HttpApiEndpoint` exposes the HTTP API.
+- `discover_printers` utility discovers available printers via MQTT.
+
+This structure reflects the separation of concerns and main interactions in the service.
 
 ## Folder Structure
 
+```text
+global_temperature/
+├── app/
+│   ├── dto/                # Data Transfer Objects (DTOs) for MQTT/HTTP messages
+│   │   
+│   ├── http/               # HTTP API endpoint logic (Flask)
+│   │   
+│   ├── models/             # Core service classes:
+│   │   ├── global_temperature_service.py   # Main service: aggregation, MQTT, API, fan control
+│   │   └── temperature_analyzer.py        # Analysis logic: thresholds, heat level computation
+│   │   
+│   ├── mqtt/               # MQTT client, publisher, subscriber logic
+│   │   
+│   ├── persistence/        # Temperature history and CSV persistence
+│   │   └── temperature_history.py          # Temperature history management
+│   │   
+│   ├── services/           # Utility services:
+│   │   └── discover_printers.py           # Printer discovery and management
+│   │
+│   ├── main.py             # Main entry point for the service
+│   |
+│   ├── global_temperature_config.yaml  # Heat level thresholds/config
+│   ├── mqtt_config.yaml    # MQTT broker/topic configuration
+│   └── web_config.yaml     # Web API configuration
+│
+├── Dockerfile              # Docker build instructions
+├── README.md               # Service documentation
+├── requirements.txt        # Python dependencies
+│
+├── target_mqtt_config.yaml # Docker-specific MQTT config
+├── target_web_config.yaml  # Docker-specific web config
+├── target_web_conf.yaml    # Alternate web config
+│
+└── tests/
+    ├── tester_http_global_temperature.py   # HTTP endpoint test script
+    └── tester_mqtt_global_temperature.py   # MQTT pub/sub test script
+```
+
+- The `app/` directory contains all service logic, organized by responsibility:
+  - `dto/` holds message/data schemas for MQTT and HTTP communication.
+  - `http/` implements the HTTP API endpoint (Flask).
+  - `models/` contains the main business logic:
+    - `global_temperature_service.py` orchestrates MQTT subscriptions, temperature aggregation, analysis, fan control, and API integration.
+    - `temperature_analyzer.py` handles heat level computation using configurable thresholds.
+  - `mqtt/` provides MQTT client, publisher, and subscriber implementations for messaging.
+  - `persistence/` manages temperature history and CSV export for analysis and backup.
+    - `temperature_history.py` stores and retrieves temperature readings.
+  - `services/` includes utility modules
+    - `discover_printers.py` implements dynamic printer discovery via MQTT.
+  - Configuration files (`*_config.yaml`) allow flexible setup for temperature thresholds, MQTT broker, and web API for local environment.
+  - Configuration files are also provided for Docker deployment (`target_mqtt_config.yaml`, `target_web_config.yaml`).
+  - Containerization files (`Dockerfile`, `requirements.txt`) enable easy deployment in Docker environments.
+  - `main.py` is the entry point for launching the service.
+
+## Local
+
+### Local run
+
+Move to the `global_temperature` directory:
+
+Install the dependencies prensent in the `requirements.txt`.
+
+Run the service with:
+
+```bash
+python3 -m app.main
+```
+
+### Local test
+
+Run the mqtt tests (remember to launche the broker) with:
+
+```bash
+pytest -v tests/tester_mqtt_global_temperature.py
+```
+
+It publishes the room and printer temperature readings (can adjust timing and which room/printer device) on the topics `device/room/temperature` and `device/printer/{printerId}/temperature`, and prints the fan controller status on the topic `device/fan/controller/status`.
+
+Run the http tests with:
+
+```bash
+pytest -v tests/tester_http_global_temperature.py
+```
+
+Perform a http request to the endpoint `/temperature/global` and prints the response with all temperature readings (room and printers).
+
+## Docker
+
+### Docker run
+
+To builfd the Docker image for the Global Temperature Service, navigate to the `global_temperature` directory and run the following command:
+
+```bash
+docker build -t global_temperature-image .
+```
+
+To run the Docker container, use the following command:
+
+```bash
+docker run --name global_temperature-container \
+  -p 8100:8100 \
+  -v ${PWD}/target_mqtt_config.yaml:/app/mqtt_config.yaml \
+  -v ${PWD}/target_web_conf.yaml:/app/web_config.yaml \
+  -v ${PWD}/app/persistence/save:/app/persistence/save \
+  --network composed-mqtt-project_iot_network \
+  --restart always \
+  global_temperature-image
+```
+
+- `-v ${PWD}/target_mqtt_config.yaml:/app/mqtt_config.yaml`: Mounts the MQTT configuration file.
+- `-v ${PWD}/target_web_conf.yaml:/app/web_config.yaml`: Mounts the web configuration file.
+- `-v ${PWD}/app/persistence/save:/app/persistence/save`: Mounts the persistence directory for saving temperature data.
+- `--network composed-mqtt-project_iot_network`: Connects the container to the specified Docker network.
+- `--restart always`: Ensures the container restarts automatically if it stops or if the Docker daemon restarts.
+
+## Docker Compose
+
+For St Printer with Docker Compose, follow the main readme instructions in the root directory of the project. ([main readme](../README.md))

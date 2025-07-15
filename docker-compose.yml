@@ -78,6 +78,24 @@ services:
     #depends_on:
     #  - api-gateway
 
+  ### Global Temperature Service
+  global-temperature:
+    build:
+      context: ./global_temperature
+      dockerfile: Dockerfile
+    container_name: global-temperature-container
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./global_temperature/target_mqtt_config.yaml:/app/mqtt_config.yaml
+      - ./global_temperature/target_web_conf.yaml:/app/web_config.yaml
+      - ./global_temperature/app/persistence/save:/app/persistence/save
+    environment:
+      - timer_hear=90
+    networks:
+      - iot_network
+    restart: always
+
 networks:
   iot_network:
     driver: bridge

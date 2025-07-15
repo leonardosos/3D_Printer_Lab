@@ -98,7 +98,10 @@ class PrintingService:
 
     def _publish_idle_status_periodically(self):
     # Publish idle status periodically 
-        # This thread runs in the background to publish idle status every 30 seconds
+        # This thread runs in the background to publish:
+        # - idle status every 30 seconds
+        # - temperature reading every 30 seconds
+        #
         # It checks if the printer is idle and publishes the status accordingly
         # --> looking if exists a current job or not
 
@@ -108,6 +111,7 @@ class PrintingService:
         while self._idle_thread_running:
             if self.current_job is None:
                 self.publisher.publish_progress(self.printer.printer_id, status="idle", progress=100.0, job_id="")
+                self.publisher.publish_temperature(self.printer.printer_id, 25.0)  # idle (ambient) temperature
             else:
                 # Stop publishing idle status once a print starts
                 break

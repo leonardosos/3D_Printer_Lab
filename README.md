@@ -164,6 +164,7 @@ The working temperature range for the room are:
 The working temperature range for the printers are:
 
 - Minimum: 10°C
+- Starting: 25°C (ambient temperature by default in idle state)
 - Maximum: 300°C
 
 This range is also reported in the configuration file [`config.global_temperature_config.yaml`](global_temperature_config.yaml), used by the **Global Temperature (GT)** service to analyze temperature readings and determine the heat level for the fan controller (see [Readme.md](global_temperature/README.md) for more details).

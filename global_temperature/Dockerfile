@@ -1,7 +1,10 @@
-FROM python:3.9-slim-bullseye
+FROM python:3.11-slim
 
 # Install security updates
-RUN apt-get update && apt-get upgrade -y && apt-get clean
+RUN apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get autoremove -y && apt-get clean
+
+# Install python3-full
+#   RUN apt-get update && apt-get install -y python3-full && apt-get clean
 
 # Copy Application Files & Requirements to /app
 COPY ./app /app
@@ -17,7 +20,6 @@ RUN pip3 install -r requirements.txt
 EXPOSE 8100
 
 # Python Container Application Configurations
-ENV PYTHONPATH=/app/
 ENV PYTHONUNBUFFERED=1
 
 # Since the python cmd is a module, we need to set the working directory to the root
