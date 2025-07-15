@@ -9,6 +9,7 @@ __pycache__/
 .venv
 env/
 venv/
+.vscode/*
 
 # MQTT Broker data and log files
 mqtt-broker/data/*
@@ -16,3 +17,4 @@ mqtt-broker/log/*
 
 mqtt-tester/mqtt-broker/data/*
 mqtt-tester/mqtt-broker/log/*
+
