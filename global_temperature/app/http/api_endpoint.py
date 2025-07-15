@@ -31,14 +31,12 @@ class ApiEndpoint:
             raise RuntimeError(f"Failed to load configuration from {config_path}: {e}")
         
     def setup_routes(self):
-        @self.app.route("/temperature", methods=["GET"])
+        @self.app.route("/temperature/global", methods=["GET"])
         def get_temperature():
-        
             if self.debug:
-                print("[API ENDPOINT DEBUG] Handling GET request for /temperature")
-
-            temp = self.global_temp_service.get_temperature_api_response()
-            return jsonify({"temperature": temp})
+                print("[API ENDPOINT DEBUG] Handling GET request for /temperature/global")
+            # Should return a dict with top-level keys 'temperatures' and 'lastUpdated'
+            return jsonify(self.global_temp_service.get_temperature_api_response())
 
     def start(self, host=None, port=None, reloader=False):
         # Use config values if not provided
@@ -76,5 +74,4 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("Service stopped by user.")
-        
-        
+

@@ -9,8 +9,12 @@ def get_api_base_url():
 
 def get_global_temperature():
     base_url = get_api_base_url()
-    response = requests.get(f'{base_url}/temperature/global')
-    response.raise_for_status()
-    data = response.json()
-    # Create a list of TemperatureReadingDTO from the response data
-    return [TemperatureReadingDTO(**r) for r in data.get('temperatures', [])]
+    try:
+        response = requests.get(f'{base_url}/temperature/global', timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        # Create a list of TemperatureReadingDTO from the response data
+        return [TemperatureReadingDTO(**r) for r in data.get('temperatures', [])]
+    except (requests.RequestException, ValueError, KeyError) as e:
+        # Handle exceptions or errors as needed
+        return []
