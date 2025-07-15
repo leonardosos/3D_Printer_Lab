@@ -8,6 +8,8 @@ import paho.mqtt.client as mqtt
 # DTOs (copied inside for self-contained testing)
 from dataclasses import dataclass, asdict
 
+### dataclasses for DTOs ###
+
 @dataclass
 class TemperatureReadingRoomDTO:
     sensorId: str
@@ -35,6 +37,11 @@ class TemperatureReadingPrinterDTO:
 
     def to_json(self) -> str:
         return json.dumps(asdict(self))
+
+##### Tester for MQTT Global Temperature System #####
+
+pub_printer = False  # Flag to control publishing printer temperatures
+pub_room = True  # Flag to control publishing room temperature
 
 # Topics and config
 ROOM_SENSOR_ID = os.environ.get("ROOM_SENSOR_ID", "room-sensor-1")
@@ -91,16 +98,23 @@ def main():
     client.connect(BROKER, PORT)
     subscribe_topics(client)
     client.loop_start()
-    print(f"Publishing room temperature every {ROOM_TEMP_INTERVAL}s and printer temperatures every {PRINTER_TEMP_INTERVAL}s. (Ctrl+C to exit)")
+
+    if pub_printer and pub_room:
+        print(f"Publishing room temperature every {ROOM_TEMP_INTERVAL}s and printer temperatures every {PRINTER_TEMP_INTERVAL}s. (Ctrl+C to exit)")
+    elif pub_room:
+        print(f"Publishing ONLY room temperature every {ROOM_TEMP_INTERVAL}s. (Ctrl+C to exit)")
+    elif pub_printer:
+        print(f"Publishing ONLY printer temperatures every {PRINTER_TEMP_INTERVAL}s. (Ctrl+C to exit)")
+
     last_room = time.time() - ROOM_TEMP_INTERVAL
     last_printer = time.time() - PRINTER_TEMP_INTERVAL
     try:
         while True:
             now = time.time()
-            if now - last_room >= ROOM_TEMP_INTERVAL:
+            if (now - last_room >= ROOM_TEMP_INTERVAL) and pub_room:
                 publish_room_temperature(client)
                 last_room = now
-            if now - last_printer >= PRINTER_TEMP_INTERVAL:
+            if (now - last_printer >= PRINTER_TEMP_INTERVAL) and pub_printer:
                 publish_printer_temperatures(client)
                 last_printer = now
             time.sleep(0.5)
