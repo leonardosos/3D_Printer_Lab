@@ -44,7 +44,6 @@ class MQTTSubscriber:
             callback(client, userdata, dto)
         self.mqtt_client.subscribe(topic, dto_callback, qos=1)
 
-
 if __name__ == "__main__":
     # Example usage for testing
     #

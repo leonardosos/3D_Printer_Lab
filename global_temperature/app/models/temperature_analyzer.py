@@ -58,6 +58,7 @@ class TemperatureAnalyzer:
         
         If no readings are provided, returns 0.
 
+        # NO VALUE HANDLING:
         If printers or room readings are not present, the result will be based all on the available readings.
         """
 

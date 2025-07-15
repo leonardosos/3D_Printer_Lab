@@ -9,9 +9,9 @@ import threading
 import csv
 
 class TemperatureHistory:
-    def __init__(self, printer_ids: List[str]):
+    def __init__(self, printer_ids: List[str], debug: bool = False):
         # Thread-safe storage for temperature readings
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
         # Store room and printer readings
         # Using lists to maintain order of readings
@@ -54,7 +54,7 @@ class TemperatureHistory:
                 timestamp=str(latest.timestamp)
             )
     
-    def get_latest_printers(self) -> Dict[str, TemperatureReadingDTO]:
+    def get_latest_printers_dict(self) -> Dict[str, TemperatureReadingDTO]:
         """Get the latest reading for each printer ID known as DTOs."""
         with self._lock:
             latest_readings = {}
@@ -77,11 +77,18 @@ class TemperatureHistory:
 
     def csv_dump(self, file_path: str):
         """Dump the temperature history to a CSV file."""
-        with open(file_path, mode="w", newline="") as csvfile:
+
+        # Create directories if they do not exist
+        import os
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        with open(file_path, mode="a", newline="") as csvfile:
             fieldnames = ["timestamp", "temperature", "source", "sourceId"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-            writer.writeheader()
+            # Write the header only if the file is new
+            if os.path.getsize(file_path) == 0:
+                writer.writeheader()
             for reading in self.room_readings:
                 writer.writerow({
                     "timestamp": reading.timestamp,
@@ -96,6 +103,11 @@ class TemperatureHistory:
                     "source": "printer",
                     "sourceId": reading.printerId
                 })
+    
+    def get_latest_printers_list(self) -> List[TemperatureReadingDTO]:
+        """Get the latest readings for all printers as a list of DTOs."""
+        with self._lock:
+            return list(self.get_latest_printers_dict().values())
 
 if __name__ == "__main__":
     # Example usage for testing
@@ -125,17 +137,22 @@ if __name__ == "__main__":
     print("Latest room reading:", history.get_latest_room())
     print("Latest printer1 reading:", history.get_latest_printer("printer1"))
     print("Latest printer2 reading:", history.get_latest_printer("printer2"))
-    print("Latest printers:", history.get_latest_printers())
+    print("Latest printers:", history.get_latest_printers_dict())
 
     ### test temperature analyzer
     from app.models.temperature_analyzer import TemperatureAnalyzer
 
+    room_readings = history.get_latest_room()
+    print(f"Room readings: {room_readings}")
+    printer_readings = history.get_latest_printers_list()
+    print(f"Printer readings: {printer_readings}")
+
     analyzer = TemperatureAnalyzer()
     heat_level = analyzer.compute_heat_level(
-        room_readings=history.get_latest_room(),
-        printer_readings=list(history.get_latest_printers().values())
+        room_readings=room_readings,
+        printer_readings=printer_readings
     )
     print("Computed heat level:", heat_level)
 
     # Dump to CSV
-    history.csv_dump("temperature_history.csv")
+    history.csv_dump("app/persistence/save/temperature_history.csv")
