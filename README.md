@@ -231,12 +231,39 @@ running the following command tests if you have the correct permissions to run D
 
     docker ps
 
-You might encounter an error like this:
+You might encounter an **error** like this:
 
     permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.51/containers/json": dial unix /var/run/docker.sock: connect: permission denied
 
-Follow the instructions in the Docker documentation to resolve this issue:
-<https://docs.docker.com/engine/install/linux-postinstall/>
+Do the following steps to resolve this issue:
+
+    # Check if docker is correctly installed:
+    docker --version
+
+    # It is correctly installed if you get something like:
+    Docker version 28.0.2, build 0442a73
+
+    # If docker is installed, run:
+    sudo usermod -aG docker $USER
+
+    # Log in into a new group:
+    newgrp docker
+
+    # check if "docker" is present in: 
+    groups
+
+    # If so, try again:
+    docker ps
+
+If you still get permission denied error, do the following:
+
+    sudo chown -R $USER:$USER /var/run/docker.sock
+
+Now you should be able to run 
+
+    docker ps
+
+
 
 #### Docker Compose command
 
