@@ -166,26 +166,38 @@ Main logic is encapsulated in `JobHandler`:
 class JobHandler:
 
     def __init__(self, printer_repository, robot_manager_client, mqtt_publisher): 
+      # Initializes the job handler with the printer repository, robot manager client, and MQTT publisher
 
     def assign_job_to_printer(self, job_id: str): 
+      # Assigns a job to an available printer that has a clean and ready plate
 
-    def receive_printer_progress(self, progress_dto): 
+    def receive_printer_progress(self, progress_dto):
+      # Receives and stores the printer's progress as a percentage of the job completion
 
     def handle_printer_idle(self, printer_id: str): 
+      # Determines whether the printer is idle due to finishing a print or because it hasn’t been assigned a job yet, and updates its status accordingly
 
     def receive_robot_progress(self, progress_dto): 
+      # Receives and stores the robot's progress in cleaning the plate
 
-    def notify_robot_manager_of_printer_to_unload(self, printer_id: str): 
+    def notify_robot_manager_of_printer_to_unload(self, printer_id: str):
+      # Publishes the printer ID to the robot manager's priority queue for unloading
 
-    def mark_printer_as_busy_with_job(self, printer_id: str, job_id: str): 
+    def mark_printer_as_busy_with_job(self, printer_id: str, job_id: str):
+      # Marks the printer as busy and associates it with the given job
 
     def mark_printer_as_available(self, printer_id: str): 
+      # Marks the printer as available and adds it back to the available printers list
 
     def get_available_printer(self) -> str: 
+      # Retrieves and removes an available printer from the available printers list
 
     def get_job_associated_with_printer(self, printer_id: str) -> str: 
+      # Returns the job ID currently assigned to the specified printer
 
     def get_status(self) -> dict: 
+      # Returns the current status of all printers: available, working, or waiting for plate cleaning
+
     
 ```
 
