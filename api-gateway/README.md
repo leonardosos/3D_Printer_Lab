@@ -19,7 +19,7 @@ This microservice implements an **API Gateway** that receives HTTP requests from
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Microservice Structure
 
 api-gateway/
 ├── app/
@@ -28,8 +28,6 @@ api-gateway/
 │ ├── services/ # Communication logic with backend services
 │ ├── dto/ # Data models for request/response validation
 ├── Dockerfile # Docker image definition
-├── docker-compose.yml # Orchestrates API Gateway and backend services
-├── .env # Environment variables for local development
 ├── requirements.txt # Python dependencies
 └── README.md # This file
 
