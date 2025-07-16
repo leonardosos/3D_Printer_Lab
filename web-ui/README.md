@@ -153,6 +153,13 @@ The Web UI consists of four main pages, each designed for a specific operational
    - *Image below shows the job queue table, details panel, and action buttons.*
    <img src="./images/queue.png" alt="Priority Queue Management" style="width: 800px; object-fit: cover;">
 
+5. **Add/Edit Job Page (/queue/add_job or /queue/edit_job)**
+   - **Purpose:** Provide a form to add new jobs or edit existing ones.
+   - **How is done:** Displays a form with fields for model ID, printer ID, and priority. Submits data to the backend API to create or update jobs.
+
+6. **Delete Job Confirmation -> future improvement**
+   - **Purpose:** Confirm job deletion before proceeding and confirm dialog of 204 response.
+
 ## Web Server Refresh
 
 The Web UI pages automatically refresh every second to ensure users see the latest data without needing to manually reload. This is implemented using a simple JavaScript `setTimeout` function in the `<head>` section of each HTML template.
