@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, List
 from datetime import datetime
 
+# This Dto module defines the GET jobs (both request and response)
 @dataclass
 class JobDTO:
     """DTO representing a job in the queue"""

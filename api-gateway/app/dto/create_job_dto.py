@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
+from .job_dto import JobDTO
 
+# This Dto module defines the POST jobs (both request and response)
 @dataclass
 class CreateJobRequestDTO:
     """DTO for job creation request"""

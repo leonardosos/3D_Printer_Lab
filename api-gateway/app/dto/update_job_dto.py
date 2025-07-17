@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from .job_dto import JobDTO
 
+# This Dto module defines the UPDATE job priority (both request and response)
 @dataclass
 class UpdateJobRequestDTO:
     """DTO for job update request"""
