@@ -1,5 +1,20 @@
 # Anomaly Detection Service
 
+
+- [ ] trouble printer
+- [ ] trouble room
+- [ ] tester
+
+- [ ] table of contents
+- [ ] architecture class diagram
+- [ ] division of concerns of classes
+- [ ] folder structure explanation and division of concerns
+- [ ] local run
+- [ ] local test
+- [ ] docker run
+
+## Table of Contents
+
 ## Architecture Position
 
 The Anomaly Detection service operates as an MQTT-based microservice that:
@@ -33,15 +48,17 @@ The Anomaly Detection service operates as an MQTT-based microservice that:
 
 ### MQTT Subscriptions
 
-#### Temperature Data Input
+#### Room Temperature Data Input
 
 - **Topic**: `device/room/temperature`
 - **Type**: 2.1.2) TemperatureReading
-- **Purpose**: Monitor room temperature for overheating conditions
+- **Purpose**: Monitor room temperature
+
+#### Printer Temperature Data Input
 
 - **Topic**: `device/printer/{printerId}/temperature`
 - **Type**: 2.1.2) TemperatureReading
-- **Purpose**: Monitor individual printer temperatures for anomalies
+- **Purpose**: Monitor individual printer temperatures
 
 ### MQTT Publications
 
@@ -49,7 +66,8 @@ The Anomaly Detection service operates as an MQTT-based microservice that:
 
 - **Topic**: `device/fan/controller/emergency`
 - **Type**: 2.4.3) EmergencyCommand
-- **Purpose**: Trigger emergency fan control or system shutdown
+- **Purpose**: Trigger emergency fan control
+- **QoS**: 2 (emergency and safety critical)
 
 Types defined in [communication.md](../communication.md):
 
@@ -57,9 +75,19 @@ Types defined in [communication.md](../communication.md):
 
 ### Temperature Thresholds
 
-- **Room Temperature**: Monitors for overheating conditions imposing a maximum threshold (conf_file)
-- **Printer Temperature**: Detects thermal runaway and overheating conditions imposing maximum thresholds (conf_file)
-- **Configurable Limits**: Detects increasing temperature rates that indicate potential thermal runaway (conf_file)
+- **Room Temperature**: Monitors for overheating conditions imposing a maximum value and increase rate threshold
+- **Printer Temperature**: Monitors for overheating conditions imposing a maximum value and increase rate threshold
+- **Configurable Limits**: Thresholds can be adjusted via configuration file (`anomaly_detection_config.yaml`)
+- **Rate of Change**: Monitors rapid temperature increases (exploiting historical data)
+
+### Emergency Handling
+
+- **Emergency Finished**: Indicates that the emergency condition has been resolved
+
+### Emergency history
+
+- **Alert History**: Maintains a history of all emergency alerts triggered
+- **Alert Resolution**: Tracks resolution of emergency conditions
 
 ## Journey
 
@@ -89,20 +117,18 @@ The Anomaly Detection Service follows a continuous monitoring and analysis workf
 ### 4. Alert Generation Phase
 
 - **Critical Condition Detection**: Identify when temperatures exceed safe operating limits
-- **Emergency Classification**: Determine severity level of detected anomalies
-- **Alert Creation**: Generate appropriate emergency commands with recommended actions
+- **Alert Creation**: Generate appropriate emergency commands with related sources
 
 ### 5. Emergency Response Phase
 
 - **Immediate Action**: Publish emergency commands
-- **Alert Logging**: Record all alerts and actions taken for audit trail
+- **Alert Logging**: Record all alerts (for audit trail)
 
 ### 6. Recovery Monitoring
 
 - **Condition Tracking**: Monitor temperature trends post-emergency
-- **System Stabilization**: Ensure temperatures return to safe operating ranges
 - **Alert Resolution**: Log successful resolution of emergency conditions
-- **System De-escalation**: Revoceke emergency commands once conditions stabilize
+- **System De-escalation**: Revoke emergency commands once conditions stabilize
 
 ## Separation of Concerns
 
@@ -118,8 +144,17 @@ The architecture follows a clear separation where:
   - threshold checks
   - rate of change analysis
   - temperature history management
-  - validation of sensor readings
   - emergency re-entrance
+
+- MQTTClient handles MQTT communication:
+  - connection management
+  - message publishing and subscribing
+  - validation of sensor readings
+
+- AlertHistory and TemperatureHistory handle persistence:
+  - storing alert history
+  - storing temperature readings with timestamps
+  - retrieving historical data for analysis
 
 ## Service Class Structure
 
@@ -175,3 +210,53 @@ classDiagram
 
     AnomalyDetectionService --> TemperatureAnalyzer : uses
 ```
+
+## Folder Structure
+
+```text
+anomaly_detection/
+├── app/
+│   ├── classes/                # Data classes 
+│   │   └── emergency_model.py  # Emergency alert data model
+│   │
+│   ├── dto/   # Data Transfer Objects (MQTT schemas)
+│   │   ├── temperature_reading_room_dto.py
+│   │   ├── temperature_reading_printer_dto.py
+│   │   └── emergency_command_dto.py
+│   │
+│   ├── models/                  # Core logic classes
+│   │   ├── anomaly_detection_service.py
+│   │   └── temperature_analyzer.py
+│   |
+│   ├── mqtt/                       # MQTT client, publisher, subscriber
+│   │   ├── mqtt_client.py
+│   │   ├── subscriber.py
+│   │   └── publisher.py
+│   │
+│   ├── persistence/
+│   │   ├── alert_history.py       # Store alert history
+│   │   └── temperature_history.py  # Store and retrieve temperature readings
+│   │
+│   ├── services/
+│   │   └── discover_printers.py    # Service to discover printers on the network
+│   │
+│   ├── main.py                        # Service entrypoint
+│   ├── anomaly_detection_config.yaml  # Anomaly detection configuration
+│   └── mqtt_config.yaml               # MQTT configuration file for local run
+│
+├── target_mqtt_config.yaml            # MQTT configuration file for docker
+│
+├── requirements.txt
+├── Dockerfile
+├── README.md
+```
+
+## Local
+
+### Local Run
+
+### Local Test
+
+## Docker
+
+## Docker Compose

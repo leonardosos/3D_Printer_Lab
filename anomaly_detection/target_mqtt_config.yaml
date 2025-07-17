@@ -1,0 +1,7 @@
+# MQTT Configuration for Printer
+# This file contains the MQTT configuration for the printer application.
+# ON DOCKER
+
+broker_ip: "broker"
+broker_port: 1883
+message_limit: 1000
