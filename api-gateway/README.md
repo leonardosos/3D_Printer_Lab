@@ -97,6 +97,14 @@ api-gateway/
 └── README.md              # This file
 ```
 
+The API Gateway follows a layered architecture pattern:
+
+- Routes Layer: Defines HTTP endpoints and handles request parsing
+- Data Transfer Objects (DTOs) Layer: Validates and transforms data
+- Services Layer: Communicates with backend microservices
+- Utilities Layer: Provides common functionality like error handling
+This layered approach follows the separation of concerns principle, making the code more maintainable and testable.
+
 ## Features
 
 - **Centralized Routing**: Routes requests from the Web UI to appropriate microservices
