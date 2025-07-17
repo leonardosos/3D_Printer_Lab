@@ -78,6 +78,30 @@ services:
     #depends_on:
     #  - api-gateway
 
+  ### API Gateway Service
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-gateway/config:/app/config
+      - ./api-gateway/logs:/app/logs
+    networks:
+      - iot_network
+    depends_on:
+      - global-temperature-service
+      - priority-queue-manager
+      - printer-monitoring
+    restart: unless-stopped
+    # Optional: add healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
 networks:
   iot_network:
     driver: bridge
