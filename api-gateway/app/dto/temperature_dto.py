@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 @dataclass
 class TemperatureReadingDTO:
@@ -27,4 +27,4 @@ class TemperatureReadingDTO:
 class TemperatureResponseDTO:
     """DTO representing the global temperature response"""
     temperatures: List[TemperatureReadingDTO]
-    lastUpdated: str
+    lastUpdated: str = ""  # Added default value here

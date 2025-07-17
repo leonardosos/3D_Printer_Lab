@@ -6,10 +6,10 @@ class PrinterStatusDTO:
     """DTO representing a printer status"""
     printerId: str
     status: str  # 'idle', 'printing', 'error', etc.
+    lastUpdated: str  # Moved this parameter up in the order
     currentJobId: Optional[str] = None
     progress: Optional[int] = None
     temperature: Optional[float] = None
-    lastUpdated: str
     
     def validate(self):
         """Validate the printer status data"""
