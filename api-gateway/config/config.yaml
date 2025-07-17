@@ -1,0 +1,32 @@
+# API Gateway Configuration
+
+server:
+  host: '0.0.0.0'
+  port: 8080
+  debug: false  # Set to true for development
+
+services:
+  global_temperature:
+    base_url: 'http://global-temperature-service:8100'
+    endpoints:
+      get_temperatures: '/temperature'
+  
+  priority_queue:
+    base_url: 'http://priority-queue-manager:8090'
+    endpoints:
+      get_jobs: '/jobs'
+      add_job: '/jobs'
+      update_job: '/jobs/{job_id}'
+      delete_job: '/jobs/{job_id}'
+  
+  printer_monitoring:
+    base_url: 'http://printer-monitoring:8110'
+    endpoints:
+      get_status: '/printers/status'
+
+logging:
+  level: 'INFO'  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: 'logs/api-gateway.log'
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  max_size: 10485760  # 10MB
+  backup_count: 5     # Keep 5 backup files
