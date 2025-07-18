@@ -4,7 +4,7 @@
 
 1. [Project Overview](#iot_project--3d-printers-lab)
 2. [Team Members](#team-members)
-3. [Components Explanation](#components-explanation)
+3. [Components Explanation and ownership](#components-explanation-and-ownership)
 4. [Project Structure](#project-structure)
 5. [Application Scenario](#application-scenario)
     - [Project Description](#project-description)
@@ -21,6 +21,8 @@
         - [Installation](#installation)
         - [Post-installation Permissions Problems](#post-installation-permissions-problems)
         - [Docker Compose Command](#docker-compose-command)
+        - [Docker Compose Run](#docker-compose-run)
+        - [Docker Compose Test (only MQTT Broker)](#docker-compose-test-only-mqtt-broker)
     - [MQTT Broker - Eclipse Mosquitto](#mqtt-broker---eclipse-mosquitto)
 7. [Meeting Notes](#meeting-notes)
 
@@ -186,7 +188,7 @@ Here you can find the documentation related to metods used during the project:
 Components and their interactions are represented in flowcharts, which help visualize the system architecture and communication patterns.
 
 - [Basic Flowchart of the IoT System](flowchart/basic_flowchart.mmd)
-- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd); 
+- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd);
   - This flowchart includes arrows indicating the direction of communication between components, with MQTT topics specified for each interaction. Where up: and down: label means the direction of who is sending the message.
 
 ### Communication Schemas
@@ -253,11 +255,9 @@ If you still get permission denied error, do the following:
 
     sudo chown -R $USER:$USER /var/run/docker.sock
 
-Now you should be able to run 
+Now you should be able to run
 
     docker ps
-
-
 
 #### Docker Compose command
 
@@ -301,7 +301,7 @@ To run the application with Docker Compose, you can use the following command:
 
     docker-compose up --build
 
-#### Docker Compose test
+#### Docker Compose test (only mqtt broker)
 
 To run the docker-compose test, you can use the following command:
 

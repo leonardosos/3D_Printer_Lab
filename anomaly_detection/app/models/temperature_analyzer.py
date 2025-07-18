@@ -3,6 +3,7 @@ from app.dto.temperature_reading_printer_dto import TemperatureReadingPrinterDTO
 import yaml
 import os
 from app.classes.emergency_model import EmergencyAlert
+from datetime import datetime
 
 # input: TemperatureReadingPrinterDTO or TemperatureReadingRoomDTO
 #       - for thresholds: 1 value
@@ -80,30 +81,33 @@ class TemperatureAnalyzer:
         else:
             raise TypeError("Invalid reading type. Expected TemperatureReadingPrinterDTO or TemperatureReadingRoomDTO.")
 
-        if self.debug:
-            print("[TEMP_ANALYZER DEBUG] No THRESHOLD alert generated.")
-
+        if self.debug and isinstance(reading, TemperatureReadingPrinterDTO):
+            print("[TEMP_ANALYZER DEBUG] No printer THRESHOLD alert generated.")
+        elif self.debug and isinstance(reading, TemperatureReadingRoomDTO):
+            print("[TEMP_ANALYZER DEBUG] No room THRESHOLD alert generated.")
         return None
 
     def check_rate(self, reading_prev: TemperatureReadingPrinterDTO | TemperatureReadingRoomDTO, reading_curr: TemperatureReadingPrinterDTO | TemperatureReadingRoomDTO) -> EmergencyAlert | None:
         # Check if the rate of change exceeds a threshold
         if isinstance(reading_prev, TemperatureReadingPrinterDTO) and isinstance(reading_curr, TemperatureReadingPrinterDTO):
-            delta_temp = abs(reading_curr.temperature - reading_prev.temperature)
-            
+            delta_temp = reading_curr.temperature - reading_prev.temperature
+            if delta_temp <= 0:
+                if self.debug:
+                    print("[TEMP_ANALYZER DEBUG] No printer RATE alert generated (temperature did not increase).")
+                return None
             # Convert timestamps to float in case they are strings
-            prev_time = float(reading_prev.timestamp)
-            curr_time = float(reading_curr.timestamp)
+            prev_time = _parse_timestamp(reading_prev.timestamp)
+            curr_time = _parse_timestamp(reading_curr.timestamp)
             delta_time = abs(curr_time - prev_time)
-            
             rate_per_second = delta_temp / delta_time if delta_time > 0 else float('inf')
             rate_per_minute = rate_per_second * 60
 
             if self.debug:
-                print(f"[TEMP_ANALYZER DEBUG] ------ Rate per minute {rate_per_minute} with delta_temp {delta_temp} and delta_time {delta_time}")
-                      
+                print(f"[TEMP_ANALYZER DEBUG] Detected: printer rate per minute {rate_per_minute} with delta_temp {delta_temp} and delta_time {delta_time}")
+
             if rate_per_minute > self.printer_max_rate:
                 if self.debug:
-                    print(f"[TEMP_ANALYZER DEBUG] Rate alert generated: {rate_per_minute} for {reading_curr.printerId} > {self.printer_max_rate}")
+                    print(f"[TEMP_ANALYZER DEBUG] Rate alert generated for printer {reading_curr.printerId}: {rate_per_minute} > {self.printer_max_rate}")
 
                 return EmergencyAlert(
                     alert_id=f"rate_printer_{reading_curr.printerId}_{reading_curr.timestamp}",
@@ -115,22 +119,24 @@ class TemperatureAnalyzer:
                 )
             
         elif isinstance(reading_prev, TemperatureReadingRoomDTO) and isinstance(reading_curr, TemperatureReadingRoomDTO):
-            delta_temp = abs(reading_curr.temperature - reading_prev.temperature)
-            
+            delta_temp = reading_curr.temperature - reading_prev.temperature
+            if delta_temp <= 0:
+                if self.debug:
+                    print("[TEMP_ANALYZER DEBUG] No room RATE alert generated (temperature did not increase).")
+                return None
             # Convert timestamps to float in case they are strings
-            prev_time = float(reading_prev.timestamp)
-            curr_time = float(reading_curr.timestamp)
+            prev_time = _parse_timestamp(reading_prev.timestamp)
+            curr_time = _parse_timestamp(reading_curr.timestamp)
             delta_time = abs(curr_time - prev_time)
-            
             rate_per_second = delta_temp / delta_time if delta_time > 0 else float('inf')
             rate_per_minute = rate_per_second * 60
 
             if self.debug:
-                print(f"[TEMP_ANALYZER DEBUG] ------ Rate per minute {rate_per_minute} with delta_temp {delta_temp} and delta_time {delta_time}")
+                print(f"[TEMP_ANALYZER DEBUG] Detected: room rate per minute {rate_per_minute} with delta_temp {delta_temp} and delta_time {delta_time}")
 
             if rate_per_minute > self.room_max_rate:
                 if self.debug:
-                    print(f"[TEMP_ANALYZER DEBUG] Room rate alert generated: {rate_per_minute} for {reading_curr.sensorId} > {self.room_max_rate}")
+                    print(f"[TEMP_ANALYZER DEBUG] Room rate alert generated for {reading_curr.sensorId}: {rate_per_minute} > {self.room_max_rate}")
 
                 return EmergencyAlert(
                     alert_id=f"rate_room_{reading_curr.sensorId}_{reading_curr.timestamp}",
@@ -145,9 +151,21 @@ class TemperatureAnalyzer:
 
         # No alert if thresholds not exceeded
         if self.debug:
-            print("[TEMP_ANALYZER DEBUG] No RATE alert generated.")
+            if isinstance(reading_prev, TemperatureReadingPrinterDTO):
+                print("[TEMP_ANALYZER DEBUG] No printer RATE alert generated.")
+            elif isinstance(reading_prev, TemperatureReadingRoomDTO):
+                print("[TEMP_ANALYZER DEBUG] No room RATE alert generated.")
 
         return None
+
+def _parse_timestamp(ts):
+    # Handles ISO 8601 and float timestamps
+    if isinstance(ts, (float, int)):
+        return float(ts)
+    try:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+    except Exception:
+        return float(ts)  # fallback for legacy float timestamps
 
 
 if __name__ == "__main__":

@@ -21,12 +21,28 @@ class AlertHistory:
         self.debug = debug
     
 
-    def add_alert(self, alert: EmergencyAlert):
+    def add_alert(self, alert: EmergencyAlert) -> bool:
+        """
+        Add a new alert to the history.
+        Only adds if there is no unresolved alert with the same type, source, and source_id.
+        Returns True if added, False if duplicate.
+        """
         with self._lock:
-            self.alerts.append(alert)
+            for existing in self.alerts:
+                if (
+                    existing.alert_type == alert.alert_type and
+                    existing.source == alert.source and
+                    existing.source_id == alert.source_id and
+                    not existing.resolved
+                ):
+                    if self.debug:
+                        print(f"[ALERT_HISTORY DEBUG] Duplicate active alert not added: {alert.alert_id}")
+                    return False  # Duplicate, not added
 
+            self.alerts.append(alert)
             if self.debug:
                 print(f"[ALERT_HISTORY DEBUG] Added alert: {alert.alert_id}")
+            return True
 
     def resolve_alert(self, alert_id: str):
         with self._lock:
@@ -95,28 +111,40 @@ if __name__ == "__main__":
     #    cd /home/leonardo/iot/IoT_Project/anomaly_detection
     #    python3 -m app.persistence.alert_history
     #
-    history = AlertHistory()
+    history = AlertHistory(debug=True)
     from datetime import timezone
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    history.add_alert(EmergencyAlert(
+    # Add first alert
+    print("Add first room alert (should succeed):")
+    print(history.add_alert(EmergencyAlert(
         alert_id="A1", source="room", source_id="room1", alert_type="overheat", timestamp=now, details={"temperature": 45}
-    ))
-    history.add_alert(EmergencyAlert(
+    )))
+    # Try to add duplicate unresolved alert (should fail)
+    print("Add duplicate unresolved room alert (should fail):")
+    print(history.add_alert(EmergencyAlert(
+        alert_id="A1_DUP", source="room", source_id="room1", alert_type="overheat", timestamp=now, details={"temperature": 46}
+    )))
+    # Add printer alert
+    print("Add first printer alert (should succeed):")
+    print(history.add_alert(EmergencyAlert(
         alert_id="A2", source="printer", source_id="printer1", alert_type="overheat", timestamp=now, details={"temperature": 250}
-    ))
+    )))
+    # Resolve room alert
+    print("Resolve room alert:")
+    history.resolve_alert("A1")
+    # Try to add room alert again after resolving (should succeed)
+    print("Add room alert after resolving (should succeed):")
+    print(history.add_alert(EmergencyAlert(
+        alert_id="A1_NEW", source="room", source_id="room1", alert_type="overheat", timestamp=now, details={"temperature": 47}
+    )))
 
     def print_alerts(alerts):
         for alert in alerts:
             print(f"AlertID: {alert.alert_id} | Source: {alert.source} | SourceID: {alert.source_id} | "
                   f"Type: {alert.alert_type} | Time: {alert.timestamp} | Resolved: {alert.resolved} | Details: {alert.details}")
 
-    print("Latest alert:")
-    latest = history.get_latest_alert(now)
-    print_alerts([latest] if latest else [])
+    print("\nAll alerts:")
+    print_alerts(history.alerts)
 
     print("\nUnresolved alerts:")
-    print_alerts(history.get_unresolved_alerts())
-
-    history.resolve_alert("A1")
-    print("\nUnresolved alerts after resolving A1:")
     print_alerts(history.get_unresolved_alerts())
