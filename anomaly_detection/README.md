@@ -2,6 +2,21 @@
 
 ## Table of Contents
 
+1. [Architecture Position](#architecture-position)
+2. [Communication Protocols](#communication-protocols)
+    - [MQTT Subscriptions](#mqtt-subscriptions)
+    - [MQTT Publications](#mqtt-publications)
+3. [Anomaly Detection Features](#anomaly-detection-features)
+4. [Journey](#journey)
+5. [Service Class Structure](#service-class-structure)
+6. [Class Diagram](#class-diagram)
+7. [Folder Structure](#folder-structure)
+8. [Local](#local)
+    - [Local Run](#local-run)
+    - [Local Test](#local-test)
+9. [Docker](#docker)
+10. [Docker Compose](#docker-compose)
+
 ## Architecture Position
 
 The Anomaly Detection service operates as an MQTT-based microservice that:
