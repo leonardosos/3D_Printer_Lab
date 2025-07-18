@@ -1,4 +1,3 @@
-
 import os
 import time
 import json
@@ -30,11 +29,14 @@ class TemperatureReadingPrinterDTO:
 BROKER = os.environ.get("MQTT_BROKER", "localhost")
 PORT = int(os.environ.get("MQTT_PORT", "1883"))
 
-ROOM_SENSOR_ID = os.environ.get("ROOM_SENSOR_ID", "room-sensor-1")
-PRINTER_ID = os.environ.get("PRINTER_ID", "printer_001")
+ROOM_SENSOR_ID = os.environ.get("ROOM_SENSOR_ID", "room-sensor_odd_1")
+PRINTER_ID = os.environ.get("PRINTER_ID", "printer_odd_1")
 
 ROOM_TEMP_TOPIC = "device/room/temperature"
 PRINTER_TEMP_TOPIC = "device/printer/{}/temperature".format(PRINTER_ID)
+
+printer_publish = True  # Flag to control publishing to printer topic
+room_publish = False# Flag to control publishing to room topic
 
 ### Utility Functions ###
 
@@ -92,38 +94,48 @@ def main():
     # Publish starting value (20°C) for 20 seconds
     start_time = time.time()
     while time.time() - start_time < 15:
-        publish_room_temperature(client, 20, count)
-        publish_printer_temperature(client, 20, count)
+        if room_publish:
+            publish_room_temperature(client, 20, count)
+        if printer_publish:
+            publish_printer_temperature(client, 20, count)
         count += 1
         time.sleep(1)
 
     # Increase temperature from 20 to 500 over 60 seconds
     for temp in range(20, 501):
-        publish_room_temperature(client, temp, count)
-        publish_printer_temperature(client, temp, count)
+        if room_publish:
+            publish_room_temperature(client, temp, count)
+        if printer_publish:
+            publish_printer_temperature(client, temp, count)
         count += 1
         time.sleep(0.12)  # ~60 seconds total
 
     # Hold at 500 degrees for 60 seconds
     hold_start = time.time()
     while time.time() - hold_start < 60:
-        publish_room_temperature(client, 500, count)
-        publish_printer_temperature(client, 500, count)
+        if room_publish:
+            publish_room_temperature(client, 500, count)
+        if printer_publish:
+            publish_printer_temperature(client, 500, count)
         count += 1
         time.sleep(1)
 
     # Decrease temperature back to 20 over 60 seconds
     for temp in range(500, 19, -1):
-        publish_room_temperature(client, temp, count)
-        publish_printer_temperature(client, temp, count)
+        if room_publish:
+            publish_room_temperature(client, temp, count)
+        if printer_publish:
+            publish_printer_temperature(client, temp, count)
         count += 1
         time.sleep(0.12)  # ~60 seconds total
 
     # Publish ending value (20°C) for 60 seconds
     end_time = time.time()
     while time.time() - end_time < 60:
-        publish_room_temperature(client, 20, count)
-        publish_printer_temperature(client, 20, count)
+        if room_publish:
+            publish_room_temperature(client, 20, count)
+        if printer_publish:
+            publish_printer_temperature(client, 20, count)
         count += 1
         time.sleep(1)
 
