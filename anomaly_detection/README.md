@@ -1,12 +1,5 @@
 # Anomaly Detection Service
 
-
-- [ ] table of contents
-
-- [ ] local run
-- [ ] local test
-- [ ] docker run
-
 ## Table of Contents
 
 ## Architecture Position
