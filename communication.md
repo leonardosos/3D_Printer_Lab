@@ -380,6 +380,7 @@ When the printer completes a job, it sends a status update with status "complete
 **Type:** RobotCommand
 
 - `robotId` - string
+- `printerId` – string
 - `x` - number (mm)
 - `y` - number (mm)
 - `z` - number (mm)
@@ -397,6 +398,7 @@ When the printer completes a job, it sends a status update with status "complete
 **Type:** RobotProgress
 
 - `robotId` - string
+- `printerId` – string
 - `jobId?` - string (if tied to a print/job)
 - `action` - "pick"|"place"|"idle"
 - `status` - "in_progress"|"completed"|"error"
