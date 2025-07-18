@@ -336,4 +336,4 @@ docker run --name global_temperature-container \
 
 ## Docker Compose
 
-For St Printer with Docker Compose, follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
+Follow the main readme instructions in the root directory of the project. ([main readme](../README.md))

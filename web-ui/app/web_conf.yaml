@@ -7,10 +7,10 @@ api_gateway:
   # Local development
   
   #gateway:
-  #base_url: "http://localhost:8080"
+  base_url: "http://localhost:8080"
 
-  #global_temperature:
-  base_url: "http://192.168.1.13:8100"
+  #global_temperature, for skip the API Gateway:
+  #base_url: "http://192.168.1.13:8100"
 
 
 web:

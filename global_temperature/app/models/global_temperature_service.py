@@ -1,6 +1,3 @@
-"""
-GlobalTemperatureService: Main service class for temperature aggregation, fan control, and API.
-"""
 from http import client
 from app.persistence.temperature_history import TemperatureHistory
 from app.models.temperature_analyzer import TemperatureAnalyzer
