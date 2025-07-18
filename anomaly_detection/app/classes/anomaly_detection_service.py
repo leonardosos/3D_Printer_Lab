@@ -4,12 +4,12 @@ from app.mqtt.subscriber import MQTTSubscriber
 from app.mqtt.publisher import MQTTPublisher
 
 # persistence
-from app.models.temperature_analyzer import TemperatureAnalyzer
+from app.classes.temperature_analyzer import TemperatureAnalyzer
 from app.persistence.temperature_history import TemperatureHistory
 from app.persistence.alert_history import AlertHistory
 
 # internal data models
-from app.classes.emergency_model import EmergencyAlert
+from app.models.emergency_model import EmergencyAlert
 
 # DTOs
 from app.dto.temperature_reading_printer_dto import TemperatureReadingPrinterDTO
@@ -369,7 +369,7 @@ if __name__ == "__main__":
     #
     # From anomaly_detection directory:
     #    #    cd IoT_Project/anomaly_detection
-    #    #    python3 -m app.models.anomaly_detection_service
+    #    #    python3 -m app.classes.anomaly_detection_service
     #
 
     from app.mqtt.client import MQTTClient

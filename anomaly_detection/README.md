@@ -1,14 +1,8 @@
 # Anomaly Detection Service
 
 
-- [ ] trouble printer
-- [ ] trouble room
-- [ ] tester
-
 - [ ] table of contents
-- [ ] architecture class diagram
-- [ ] division of concerns of classes
-- [ ] folder structure explanation and division of concerns
+
 - [ ] local run
 - [ ] local test
 - [ ] docker run
@@ -130,85 +124,88 @@ The Anomaly Detection Service follows a continuous monitoring and analysis workf
 - **Alert Resolution**: Log successful resolution of emergency conditions
 - **System De-escalation**: Revoke emergency commands once conditions stabilize
 
-## Separation of Concerns
-
-The architecture follows a clear separation where:
-
-- AnomalyDetectionService handles external interactions:
-  - MQTT subscriptions
-  - loading configuration
-  - logging (temperature readings and alerts)
-  - emergency command publications
-
-- TemperatureAnalyzer handles mathematical and logical analysis of temperature data:
-  - threshold checks
-  - rate of change analysis
-  - temperature history management
-  - emergency re-entrance
-
-- MQTTClient handles MQTT communication:
-  - connection management
-  - message publishing and subscribing
-  - validation of sensor readings
-
-- AlertHistory and TemperatureHistory handle persistence:
-  - storing alert history
-  - storing temperature readings with timestamps
-  - retrieving historical data for analysis
-
 ## Service Class Structure
+
+### Separation of Concerns
+
+The anomaly detection service is organized into several key classes:
+
+- **AnomalyDetectionService**  
+  Main service class. Handles:
+  - Initialization of MQTT client, publisher, and subscriber
+  - Discovery of printers on the network
+  - Processing of incoming temperature readings (room and printer)
+  - Detection of threshold and rate anomalies using TemperatureAnalyzer
+  - Publishing emergency alerts and resolutions to MQTT topics
+  - Hysteresis-based emergency resolution logic
+  - Periodic CSV dump of temperature and alert history
+  - Service lifecycle (start, stop, connect, disconnect)
+
+- **TemperatureAnalyzer**  
+  Performs all temperature analysis:
+  - Checks if readings exceed configured thresholds
+  - Detects rapid temperature increases (rate anomalies)
+  - Maintains temperature history for each device
+  - Determines if temperature is stabilizing after an emergency
+
+- **MQTTClient**  
+  Manages MQTT connections:
+  - Connects to broker
+  - Publishes and subscribes to topics
+  - Handles message validation
+
+- **AlertHistory**  
+  - Stores and manages emergency alerts
+  - Tracks active and resolved alerts
+
+- **TemperatureHistory**  
+  Stores historical temperature readings
+
+## Class Diagram
 
 ```mermaid
 classDiagram
     class AnomalyDetectionService {
-        -mqtt_client: MQTTClient
-        -config: dict
-        -temperature_thresholds: dict
-        -alert_history: list
-        -temperature_analyzer: TemperatureAnalyzer
+        - mqtt_client
+        - temperature_analyzer
+        - alert_history
 
-        +__init__(config_file: str)
-        +start_monitoring(): void
-        +stop_monitoring(): void
-        +connect_mqtt(): void
-        +disconnect_mqtt(): void
-
-        +callback_printer_temperature(topic: str, payload: dict): void
-        +callback_room_temperature(topic: str, payload: dict): void
-        +process_room_temperature(room_id: str, data: dict): void
-        +process_printer_temperature(printer_id: str, data: dict): void
-
-        +log_printer_reading(printer_id: str, temperature: float, timestamp: str): void
-        +log_room_temperature(room_id: str, temperature: float, timestamp: str): void
-
-        +publish_emergency_command(command: dict): void
-        +create_fan_speed_alert(source_id: str, recommended_speed: int): dict
-        +log_alert(alert: dict): void
-        
-        +load_configuration(config_file: str): dict
-        +update_thresholds(new_thresholds: dict): void
+        + start_monitoring()
+        + stop_monitoring()
+        + process_temperature()
+        + publish_emergency()
     }
 
     class TemperatureAnalyzer {
-        -thresholds: dict
-        -temperature_history: dict
-        
-        +__init__(thresholds: dict)
+        - thresholds
+        - temperature_history
 
-        +check_threshold(temp: float, threshold: float, device_type: str): bool
-        +detect_rapid_temperature_increase(temp_history: list, rate_threshold: float): bool
-        +validate_sensor_reading(reading: TemperatureReading): bool
-        +update_temperature_history(device_id: str, temperature: float, timestamp: str): void
-        
-        +check_room_temperature_threshold(temp: float): bool
-        +check_printer_temperature_threshold(temp: float): bool
-        +analyze_printer_temperature_rate(printer_id: str): bool
+        + check_threshold()
+        + detect_rapid_increase()
+        + is_stabilizing()
+    }
 
-        +is_temperature_stabilizing(device_id: str): bool
-        +get_temperature_trend(device_id: str, time_window: int): str
+    class MQTTClient {
+        + connect()
+        + publish()
+        + subscribe()
+    }
+
+    class AlertHistory {
+        + add_alert()
+        + resolve_alert()
+        + get_active_alerts()
+    }
+
+    class TemperatureHistory {
+        + add_reading()
+        + get_history()
     }
 
     AnomalyDetectionService --> TemperatureAnalyzer : uses
+    AnomalyDetectionService --> MQTTClient : uses
+    AnomalyDetectionService --> TemperatureHistory : uses
+    TemperatureAnalyzer --> AlertHistory : uses
 ```
 
 ## Folder Structure
@@ -216,7 +213,7 @@ classDiagram
 ```text
 anomaly_detection/
 ├── app/
-│   ├── classes/                # Data classes 
+│   ├── /models                 # Data models 
 │   │   └── emergency_model.py  # Emergency alert data model
 │   │
 │   ├── dto/   # Data Transfer Objects (MQTT schemas)
@@ -224,7 +221,7 @@ anomaly_detection/
 │   │   ├── temperature_reading_printer_dto.py
 │   │   └── emergency_command_dto.py
 │   │
-│   ├── models/                  # Core logic classes
+│   ├── classes/                  # Core logic classes
 │   │   ├── anomaly_detection_service.py
 │   │   └── temperature_analyzer.py
 │   |
@@ -249,14 +246,137 @@ anomaly_detection/
 ├── requirements.txt
 ├── Dockerfile
 ├── README.md
+│
+└── tests/                            # Unit tests
+    |
+    ├── tester_mqtt_anomaly_hear.py
+    ├── tester_mqtt_anomaly.py
+    └── tester_mqtt_single_anomaly.py
 ```
+
+- **app/**  
+  Main application code.
+  - **models/**: Data models, e.g., `emergency_model.py` for emergency alert objects.
+  - **dto/**: Data Transfer Objects for MQTT messages, e.g., temperature readings and emergency commands.
+  - **classes/**: Core logic classes, including `anomaly_detection_service.py` (main service logic) and `temperature_analyzer.py` (analysis algorithms).
+  - **mqtt/**: MQTT client, publisher, and subscriber implementations.
+  - **persistence/**: Handles alert history (`alert_history.py`) and temperature history (`temperature_history.py`).
+  - **services/**: Utility modules, e.g., `discover_printers.py` for printer discovery.
+  - **main.py**: Service entrypoint.
+  - **anomaly_detection_config.yaml**: Configuration for anomaly detection thresholds.
+  - **mqtt_config.yaml**: MQTT broker/topic configuration for local run.
+
+- **target_mqtt_config.yaml**  
+  MQTT configuration for Docker deployment.
+- **tests/**  
+  Unit and integration test scripts, including MQTT anomaly testers.
+  - **tester_mqtt_anomaly_hear.py**: Tests file for subscribe and print the emergency alerts.
+  - **tester_mqtt_anomaly.py**: Tests for anomaly detection service, publishing temperature readings and subscribing (printing) to alerts.
+  - **tester_mqtt_single_anomaly.py**: Tests for single anomaly printer, publishing temperature readings.
 
 ## Local
 
 ### Local Run
 
+Move to the `anomaly_detection` directory:
+
+```bash
+cd IoT_Project/anomaly_detection
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the service locally:
+
+```bash
+python3 -m app.main
+```
+
 ### Local Test
+
+To run unit tests (assuming you have the requirements installed):
+
+```bash
+cd IoT_Project/anomaly_detection/tests
+python3 tester_mqtt_anomaly.py
+```
+
+You can also run:
+
+```bash
+python3 tester_mqtt_anomaly_hear.py
+python3 tester_mqtt_single_anomaly.py
+```
+
+#### tester_mqtt_anomaly.py
+
+- Publishes random temperature readings for both room and 3 printers, and subscribes to emergency alerts.
+- Purpose: **generic integration test** for anomaly detection service.
+
+#### tester_mqtt_anomaly_hear.py
+
+- Subscribes to the emergency alert topic and prints any received alerts.
+- Purpose: **Monitor and debug emergency alert publication**.
+
+#### tester_mqtt_single_anomaly.py
+
+- Publishes temperature readings for a single printer and a single room simulating a thermal runaway and overheating (without subscribing to alerts).
+- Purpose: Isolate and test anomaly detection for individual devices, showing the **emergency creation and handling**.
 
 ## Docker
 
+Build the Docker image:
+
+```bash
+docker build -t anomaly_detection-image .
+```
+
+Run the container:
+
+```bash
+docker run --name anomaly_detection-container \
+    -p 8140:8140 \
+    -v ${PWD}/target_mqtt_config.yaml:/app/mqtt_config.yaml \
+    -v ${PWD}/app/persistence/save/alert_history.csv:/app/persistence/save/alert_history.csv \
+    -v ${PWD}/app/persistence/save/temperature_history.csv:/app/persistence/save/temperature_history.csv \
+    --network composed-mqtt-project_iot_network \
+    --restart always \
+    anomaly_detection-image
+```
+
+- `-d`: Runs the container in detached mode, for debugging purposes is not included.
+- `--name anomaly_detection-container`: Names the container for easy reference.
+- `-p 8140:8140`: Maps the container’s port 8140 to the host, as defined in the flowchart.
+- `-v ...`: Mounts configuration and persistence files for alerts and temperature history.
+- `--network composed-mqtt-project_iot_network`: Connects the container to the project’s Docker network for MQTT communication.
+- `--restart always`: Ensures the container restarts automatically if stopped.
+- `anomaly_detection-image`: The Docker image to use.
+
+The service will be available at [http://localhost:8140](http://localhost:8140) if it exposes an HTTP API.
+
+To stop and remove the container:
+
+```bash
+docker stop anomaly_detection-container
+docker rm anomaly_detection-container
+```
+
+To view logs:
+
+```bash
+docker logs anomaly_detection-container
+```
+
+To enter the container for debugging:
+
+```bash
+docker exec -it anomaly_detection
+```
+
 ## Docker Compose
+
+Follow the main readme instructions in the root directory of the project. ([main readme](../README.md))

@@ -2,7 +2,7 @@ from app.dto.temperature_reading_room_dto import TemperatureReadingRoomDTO
 from app.dto.temperature_reading_printer_dto import TemperatureReadingPrinterDTO
 import yaml
 import os
-from app.classes.emergency_model import EmergencyAlert
+from app.models.emergency_model import EmergencyAlert
 from datetime import datetime
 
 # input: TemperatureReadingPrinterDTO or TemperatureReadingRoomDTO
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     #
     # From anomaly_detection directory:
     #    cd /home/leonardo/iot/IoT_Project/anomaly_detection
-    #    python3 -m app.models.temperature_analyzer
+    #    python3 -m app.classes.temperature_analyzer
 
     # Adjustable interval in seconds
     #       with 60 seconds the rate is the --> difference <-- between two consecutive readings

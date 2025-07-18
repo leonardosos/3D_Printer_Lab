@@ -1,4 +1,4 @@
-from app.models.anomaly_detection_service import AnomalyDetectionService
+from app.classes.anomaly_detection_service import AnomalyDetectionService
 from app.mqtt.client import MQTTClient 
 import time
 
@@ -8,7 +8,7 @@ def main():
     service = AnomalyDetectionService(mqtt_client=client, debug=True, discover_printers_timeout=60)
     service.start()
 
-    service.periodic_csv_dump(file_path="app/persistence/save")
+    service.periodic_csv_dump(file_path="app/persistence/save")  
 
     print("[ANOMALY_DETECTION] Service started. Press Ctrl+C to stop.")
 

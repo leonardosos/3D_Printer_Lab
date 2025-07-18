@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 import threading
 import csv
 from datetime import datetime
-from app.classes.emergency_model import EmergencyAlert
+from app.models.emergency_model import EmergencyAlert
 import os
 
 class AlertHistory:
