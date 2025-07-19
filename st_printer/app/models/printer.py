@@ -10,7 +10,7 @@ class Printer:
     temp_rate: float         # Rate at which the nozzle temperature changes
     print_speed: float       # Printing speed in mm/s
     status: str = "idle"     # Current status of the printer
-    current_temp: float = 25.0 # Current nozzle temperature in Celsius
+    current_temp: float = 25.0 # Current nozzle temperature in Celsius, ambient by default
 
     def update_status(self, status: str):
         # Update the printer's status (e.g., 'idle', 'printing', etc.)

@@ -10,6 +10,7 @@
     - [Print Job Management](#print-job-management)
     - [Temperature Simulation](#temperature-simulation)
     - [Printer Configuration and Operating Parameters](#printer-configuration-and-operating-parameters)
+    - [Temperature reporting](#temperature-reporting)
 4. [Journey](#journey)
     - [Initialization Phase](#1-initialization-phase)
     - [Assignment Reception Phase](#2-assignment-reception-phase)
@@ -92,6 +93,7 @@ The ST Printer service operates as an MQTT-based microservice that simulates ind
 - **Type**: 2.1.2) TemperatureReadingPrinter
 - **Purpose**: Report current nozzle temperature for safety monitoring
 - **QoS**: 1 (at least once delivery)
+- **Frequency**: Every 30 seconds during idle, or on temperature change during printing
 
 #### Print Progress Updates
 
@@ -124,7 +126,8 @@ See [communication.md](../communication.md) for
 - **Realistic Temperature Curves**: Simulates heating up, printing, and cooling down phases given the nozzle in the PrinterAssignment. (assumes a cold bed temperature)
 - **Thermal Behavior**: Simulates temperature fluctuations during printing
 - **Safety Monitoring**: Often reports temperature anomalies for anomaly detection checks
-- **Temperature Reporting**: Publishes current nozzle temperature only when change.
+- **Temperature Reporting**: Publishes nozzle temperature during printing.
+- **Status Tracking**: The printer publishes its temperature every 30 seconds when idle or on temperature change during printing
 
 ### Printer Configuration and Operating Parameters
 
@@ -133,6 +136,10 @@ See [communication.md](../communication.md) for
 - nozzle diameter
 - max nozzle temperature, temp rate
 - print speed (function based on filament type, nozzle diameter, layer height, infill)
+
+### Temperature reporting
+
+The printer temperature **normal (not emergency)** limits and idle are reported in the `printer_config.yaml` file, the source is the dedicated chapter in [Project Readme](../README.md#project-readme).
 
 ## Journey
 

@@ -33,6 +33,8 @@ services:
       - PRINTER_ID=printer_001
     networks:
       - iot_network
+    depends_on:
+      - broker
 
   st-printer-2:
     build:
@@ -47,6 +49,8 @@ services:
       - PRINTER_ID=printer_002
     networks:
       - iot_network
+    depends_on:
+      - broker
 
   st-printer-3:
     build:
@@ -61,6 +65,8 @@ services:
       - PRINTER_ID=printer_003
     networks:
       - iot_network
+    depends_on:
+      - broker
 
   ### Web UI Service
   web-ui:
@@ -75,6 +81,47 @@ services:
     networks:
       - iot_network
     restart: always
+    depends_on:
+      - api-gateway
+
+  ### Global Temperature Service
+  global-temperature:
+    build:
+      context: ./global_temperature
+      dockerfile: Dockerfile
+    container_name: global-temperature-container
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./global_temperature/target_mqtt_config.yaml:/app/mqtt_config.yaml
+      - ./global_temperature/target_web_conf.yaml:/app/web_config.yaml
+      - ./global_temperature/app/persistence/save:/app/persistence/save
+    environment:
+      - timer_hear=90
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+
+  ### Anomaly Detection Service
+  anomaly-detection:
+    build:
+      context: ./anomaly_detection
+      dockerfile: Dockerfile
+    container_name: anomaly_detection-container
+    ports:
+      - "8140:8140"
+    volumes:
+      - ./anomaly_detection/target_mqtt_config.yaml:/app/mqtt_config.yaml
+      - ./anomaly_detection/app/persistence/save/alert_history.csv:/app/persistence/save/alert_history.csv
+      - ./anomaly_detection/app/persistence/save/temperature_history.csv:/app/persistence/save/temperature_history.csv
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
     depends_on:
      - api-gateway
 

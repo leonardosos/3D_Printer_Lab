@@ -4,17 +4,16 @@
 
 1. [Project Overview](#iot_project--3d-printers-lab)
 2. [Team Members](#team-members)
-3. [Meeting Notes](#meeting-notes)
-4. [Components Explanation](#components-explanation)
-5. [Project Structure](#project-structure)
-6. [Application Scenario](#application-scenario)
+3. [Components Explanation and ownership](#components-explanation-and-ownership)
+4. [Project Structure](#project-structure)
+5. [Application Scenario](#application-scenario)
     - [Project Description](#project-description)
     - [Project Implementation](#project-implementation)
     - [Devices Table](#devices-table)
     - [Temperature range](#temperature-range)
         - [Working Temperature Range](#working-temperature-range)
         - [Emergency Temperature Range](#emergency-temperature-range)
-7. [Official Documentation](#official-documentation)
+6. [Official Documentation](#official-documentation)
     - [Flowchart Schemas](#flowchart-schemas)
     - [Communication Schemas](#communication-schemas)
     - [PAHO (MQTT)](#paho-mqtt)
@@ -22,7 +21,10 @@
         - [Installation](#installation)
         - [Post-installation Permissions Problems](#post-installation-permissions-problems)
         - [Docker Compose Command](#docker-compose-command)
+        - [Docker Compose Run](#docker-compose-run)
+        - [Docker Compose Test (only MQTT Broker)](#docker-compose-test-only-mqtt-broker)
     - [MQTT Broker - Eclipse Mosquitto](#mqtt-broker---eclipse-mosquitto)
+7. [Meeting Notes](#meeting-notes)
 
 ---
 ---
@@ -37,48 +39,41 @@ This repository contains the implementation of a distributed IoT system for auto
 - **Simone Giovanardi**
 - **Lorenzo Sartorelli**
 
-## Meeting Notes
-
-- [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
-
-## Components Explanation
-
-Difficult Tier: [Tier List](flowchart/tier_list.mmd)
+## Components Explanation and ownership
 
 Leonardo:
 
 - [Global Temperatures (GT)](global_temperatures/README.md)
 - [Anomaly Detection (AT)](anomaly_detection/README.md)
-- [Printer (ST)](st_printer/README.md)            --> FINISHED
-- [Web Interface (GUI)](web-ui/README.md)         --> FINISHED
-- [mqtt-broker](mqtt-broker/README.md)            --> FINISHED
-- [mqtt-tester](mqtt-tester/README.md)            --> FINISHED
+- [Printer (ST)](st_printer/README.md)
+- [Web Interface (GUI)](web-ui/README.md)
+- [mqtt-broker](mqtt-broker/README.md)
+- [mqtt-tester](mqtt-tester/README.md)
 
 - [ ] Porte di comunicazione tutte diverse??
+- [ ] web server position against api gateway
 
 Simone:
 
 - api gateway
 - robot management
 - robot (periodic status update, dynamic number, need to define the ports)
+- fan unit
+- temperature sensor
 
 Lorenzo:
 
 - job handler
 - printer monitoring
 - fan controller
+- priority queue management
 
-memo:
+memo lorenzo:
 
-- aggiungere delete al queue manager
+- aggiungere delete al queue manager - job handler\
 - cambiare robot communica jobid
 - rob robot -> robot
-
-To be assigned:
-
-- priority queue management
-- fan unit
-- temperature sensor
+- update communication on the local readmes
 
 ## Project Structure
 
@@ -164,6 +159,7 @@ The working temperature range for the room are:
 The working temperature range for the printers are:
 
 - Minimum: 10°C
+- Starting: 25°C (ambient temperature by default in idle state)
 - Maximum: 300°C
 
 This range is also reported in the configuration file [`config.global_temperature_config.yaml`](global_temperature_config.yaml), used by the **Global Temperature (GT)** service to analyze temperature readings and determine the heat level for the fan controller (see [Readme.md](global_temperature/README.md) for more details).
@@ -192,7 +188,7 @@ Here you can find the documentation related to metods used during the project:
 Components and their interactions are represented in flowcharts, which help visualize the system architecture and communication patterns.
 
 - [Basic Flowchart of the IoT System](flowchart/basic_flowchart.mmd)
-- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd); 
+- [Full Flowchart with MQTT Topics](flowchart/full_flowchart.mmd);
   - This flowchart includes arrows indicating the direction of communication between components, with MQTT topics specified for each interaction. Where up: and down: label means the direction of who is sending the message.
 
 ### Communication Schemas
@@ -259,11 +255,9 @@ If you still get permission denied error, do the following:
 
     sudo chown -R $USER:$USER /var/run/docker.sock
 
-Now you should be able to run 
+Now you should be able to run
 
     docker ps
-
-
 
 #### Docker Compose command
 
@@ -307,7 +301,7 @@ To run the application with Docker Compose, you can use the following command:
 
     docker-compose up --build
 
-#### Docker Compose test
+#### Docker Compose test (only mqtt broker)
 
 To run the docker-compose test, you can use the following command:
 
@@ -338,3 +332,7 @@ Follow [the instructions in the README file](mqtt-broker/README.md):
 To test the MQTT broker, you can use the `mqtt-tester` component. This component is designed to interact with the broker and verify its functionality. It includes scripts for local testing and a Docker and docker-compose setup for containerized testing.
 
 See the [mqtt-tester/README.md](mqtt-tester/README.md) for more details on how to use the MQTT tester.
+
+## Meeting Notes
+
+- [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)

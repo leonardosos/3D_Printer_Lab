@@ -9,8 +9,11 @@ def get_api_base_url():
 
 def get_printer_status():
     base_url = get_api_base_url()
-    response = requests.get(f'{base_url}/printers/status')
-    response.raise_for_status()
-    data = response.json()
-    # Create a list of PrinterStatusDTO from the response data
-    return [PrinterStatusDTO(**item) for item in data.get('printers', [])]
+    try:
+        response = requests.get(f'{base_url}/printers/status', timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        # Create a list of PrinterStatusDTO from the response data
+        return [PrinterStatusDTO(**item) for item in data.get('printers', [])]
+    except (requests.RequestException, ValueError, KeyError):
+        return []

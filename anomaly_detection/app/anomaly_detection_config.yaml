@@ -1,0 +1,20 @@
+# Anomaly Detection Configuration
+#
+# This file contains the configuration settings for the anomaly detection service.
+# 
+# It define:
+#   - the emergency threshold
+#   - the emergency rate threshold
+# 
+# The rate thresholds is on unit of time -> ?? seconds
+#
+
+room:
+  low: 10
+  high: 50
+  max_rate_time: 10
+  
+printer:
+  low: 10
+  high: 300
+  max_rate_time: 100

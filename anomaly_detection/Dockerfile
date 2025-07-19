@@ -17,7 +17,7 @@ WORKDIR /app
 RUN pip3 install -r requirements.txt
 
 # Exposed Port of the API Server --> port_flowchart for more details
-EXPOSE 8100
+EXPOSE 8140
 
 # Python Container Application Configurations
 ENV PYTHONUNBUFFERED=1

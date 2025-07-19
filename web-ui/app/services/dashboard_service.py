@@ -11,35 +11,37 @@ def get_api_base_url():
 
 def get_latest_room_temperature():
     base_url = get_api_base_url()
-    resp = requests.get(f"{base_url}/temperature/global")
-    resp.raise_for_status()
-    data = resp.json()
-    # Build a list of temperature readings from the response
-    # for pass through to the DTO constructor
-    temps = [TemperatureReadingDTO(**t) for t in data.get("temperatures", []) if t.get("source") == "room"]
-    # Find the latest temperature reading
-    if temps:
-        latest = max(temps, key=lambda t: t.timestamp)
-        return latest.temperature
-    return None
+    try:
+        resp = requests.get(f"{base_url}/temperature/global", timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        temps = [TemperatureReadingDTO(**t) for t in data.get("temperatures", []) if t.get("source") == "room"]
+        if temps:
+            latest = max(temps, key=lambda t: t.timestamp)
+            return latest.temperature
+        return None
+    except (requests.RequestException, ValueError, KeyError):
+        return None
 
 def get_printers_online_count():
     base_url = get_api_base_url()
-    resp = requests.get(f"{base_url}/printers/status")
-    resp.raise_for_status()
-    data = resp.json()
-    # Do the same as above, but for printers
-    printers = [PrinterStatusDTO(**p) for p in data.get("printers", [])]
-    online = [p for p in printers if p.status in ("online", "idle", "printing")]
-    # Count the number of online printers
-    return len(online)
+    try:
+        resp = requests.get(f"{base_url}/printers/status", timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        printers = [PrinterStatusDTO(**p) for p in data.get("printers", [])]
+        online = [p for p in printers if p.status in ("online", "idle", "printing")]
+        return len(online)
+    except (requests.RequestException, ValueError, KeyError):
+        return 0
 
 def get_jobs_in_queue_count():
     base_url = get_api_base_url()
-    resp = requests.get(f"{base_url}/jobs")
-    resp.raise_for_status()
-    data = resp.json()
-    # Again, build a list of jobs from the response
-    jobs = [JobDTO(**j) for j in data.get("jobs", [])]
-    # Count the number of jobs in the queue
-    return len(jobs)
+    try:
+        resp = requests.get(f"{base_url}/jobs", timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        jobs = [JobDTO(**j) for j in data.get("jobs", [])]
+        return len(jobs)
+    except (requests.RequestException, ValueError, KeyError):
+        return 0

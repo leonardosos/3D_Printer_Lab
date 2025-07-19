@@ -1,49 +1,49 @@
-# Riunione Iniziale del Progetto IoT
+# IoT Project Initial Meeting
 
-## MICROSERVIZI
+## MICROSERVICES
 
-Devono essere semplici, senza introdurre tool esterni complicati.
+They must be simple, without introducing complicated external tools.
 
-È sufficiente definire chiaramente le responsabilità: anche un'architettura "grezza" va bene, purché sia funzionale.
+It is sufficient to clearly define responsibilities: even a “rough” architecture is fine, as long as it is functional.
 
-**Comunicazione doppia tra microservizi:**
+**Dual communication between microservices:**
 
-- Può essere implementata con un sidecar, ma questo dettaglio va solo accennato nella presentazione.
-- All'interno del codice, si può gestire tutto nello stesso servizio/classe.
+- It can be implemented with a sidecar, but this detail only needs to be mentioned in the presentation.
+- Within the code, you can handle everything in the same service/class.
 
-(Usare file di configurazione per tutte le impostazioni, evitando hardcoded.)
+(Use configuration files for all settings, avoiding hardcoded).
 
-## ARCHITETTURA
+## ARCHITECTURE
 
-Deve essere scomposta in componenti chiari e ciascuno deve avere una responsabilità ben definita.
+Must be decomposed into clear components and each must have a well-defined responsibility.
 
-Deve risultare modulare, facilmente scalabile e leggibile.
+It must be modular, easily scalable and readable.
 
-## GUI (Interfaccia Grafica)
+## GUI (Graphical User Interface)
 
-Deve essere stilizzata in modo semplice.
+Must be stylized in a simple manner.
 
-Evitare CSS complessi e meccanismi di comunicazione strani o opachi che complicano l'integrazione. (può chiedere come avviene la comunicazione tra frontend e backend)
+Avoid complex CSS and strange or opaque communication mechanisms that complicate integration. (May ask how communication occurs between frontend and backend).
 
-## TOPIC E ARCHITETTURA MODULARE
+## TOPIC AND MODULAR ARCHITECTURE
 
-L'architettura deve permettere di vedere chiaramente i componenti e supportare la scalabilità automatica delle operazioni in base all'aumento dei device.
+Architecture must allow components to be clearly seen and support automatic scaling of operations as devices increase.
 
-Evitare valori hardcoded, ad esempio trattare i topic tramite ID dinamici.
+Avoid hardcoded values, e.g., treating topics by dynamic IDs.
 
 ## CLASS DIAGRAM
 
-Consigliato creare un diagramma delle classi per ogni microservizio principale:
+Recommended to create a class diagram for each main microservice:
 
-- Deve contenere attributi e metodi principali.
-- Per microservizi piccoli o molto semplici, può essere generico o anche evitato.
-- L'importante è che siano chiare le responsabilità delle classi, la loro composizione/decomposizione, e i rapporti d'uso (chi usa cosa, dove e come).
+- It must contain main attributes and methods.
+- For small or very simple microservices, it can be generic or even avoided.
+- The important thing is to be clear about class responsibilities, class composition/decomposition, and usage relationships (who uses what, where, and how).
 
-## SUGGERIMENTI FINALI
+## FINAL SUGGESTIONS
 
-Prima di fare codice definire per ogni classe e microservizio:
+Before coding define for each class and microservice:
 
-- Strutture dati utilizzate
-- Interfacce di comunicazione
-- Tipi di sanity check
-- Metodi delle classi principali
+- Data structures used
+- Communication interfaces
+- Types of sanity checks
+- Methods of the main classes

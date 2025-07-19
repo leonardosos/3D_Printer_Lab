@@ -448,8 +448,8 @@ It is not an emergency cooling command, but a **periodic** heat level based on t
 
 **Type:** EmergencyCommand
 
-- `action` - "shutdown"|"restart"
-- `type` - "overheat"|"thermal_runaway"
+- `action` - "emergency" | "emergency_finished"
+- `type` - "overheat"|"thermal_runaway"  #Thermal runaway is a too rapid temperature increase (increase rate)
 - `source` - "printer"|"room"
 - `id` - string (e.g. printerId or sensorId)
 - `timestamp` - string (ISO 8601)
@@ -457,7 +457,7 @@ It is not an emergency cooling command, but a **periodic** heat level based on t
 **Example:**
 
 ```json
-{ "action": "shutdown", "type": "overheat", "source": "printer", "id": "printer-2", "timestamp": "2025-06-15T08:32:20Z" }
+{ "action": "emergency", "type": "overheat", "source": "printer", "id": "printer-2", "timestamp": "2025-06-15T08:32:20Z" }
 ```
 
 ## 3. MQTT QoS (Quality of Service) Levels

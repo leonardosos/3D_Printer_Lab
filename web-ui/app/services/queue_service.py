@@ -9,33 +9,40 @@ def get_api_base_url():
 
 def get_job_queue():
     base_url = get_api_base_url()
-    response = requests.get(f'{base_url}/jobs')
-    response.raise_for_status()
-    data = response.json()
-    # Create a list of JobDTO from the response data
-    return [JobDTO(**item) for item in data.get('jobs', [])]
+    try:
+        response = requests.get(f'{base_url}/jobs', timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        return [JobDTO(**item) for item in data.get('jobs', [])]
+    except (requests.RequestException, ValueError, KeyError):
+        return []
 
 def edit_job(job_id, new_priority, new_name=None):
     base_url = get_api_base_url()
     payload = {'priority': new_priority}
     if new_name is not None:
         payload['name'] = new_name
-    response = requests.put(f'{base_url}/jobs/{job_id}', json=payload)
-    # Check if the request was successful
-    response.raise_for_status()
-    # Return True if the job was successfully edited
-    return response.ok
+    try:
+        response = requests.put(f'{base_url}/jobs/{job_id}', json=payload, timeout=5)
+        response.raise_for_status()
+        return response.ok
+    except (requests.RequestException, ValueError, KeyError):
+        return False
 
 def delete_job(job_id):
     base_url = get_api_base_url()
-    response = requests.delete(f'{base_url}/jobs/{job_id}')
-    # Check if the request was successful
-    response.raise_for_status()
-    return response.ok
+    try:
+        response = requests.delete(f'{base_url}/jobs/{job_id}', timeout=5)
+        response.raise_for_status()
+        return response.ok
+    except (requests.RequestException, ValueError, KeyError):
+        return False
 
 def add_job(name, priority):
     base_url = get_api_base_url()
-    response = requests.post(f'{base_url}/jobs', json={'name': name, 'priority': priority})
-    # Check if the request was successful
-    response.raise_for_status()
-    return response.ok
+    try:
+        response = requests.post(f'{base_url}/jobs', json={'name': name, 'priority': priority}, timeout=5)
+        response.raise_for_status()
+        return response.ok
+    except (requests.RequestException, ValueError, KeyError):
+        return False

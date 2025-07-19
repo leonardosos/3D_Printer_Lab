@@ -9,12 +9,22 @@ import threading
 
 class WebServer:
     def __init__(self, config_path='app/web_conf.yaml'):
+        
         print(f"Initializing WebServer with config path: {config_path}")
         self.config = self._load_config(config_path)
         print(f"Loaded config: {self.config}")
+        
         self.app = Flask(__name__)
+        
         self._register_blueprints()
+
+        # Define reload time in milliseconds
+        self.reload_page_timer = 30000 # 30 seconds
+        self._register_context_processors()  
+
+        # Start the server in a separate thread
         self.server_thread = None
+
         print("WebServer initialization complete.")
 
     def _load_config(self, path):
@@ -43,6 +53,12 @@ class WebServer:
         self.app.register_blueprint(printers_bp)
         self.app.register_blueprint(queue_bp)
         print("All blueprints registered.")
+
+    def _register_context_processors(self):
+        reload_time_ms = self.config.get("web", {}).get("reload_time_ms", self.reload_page_timer)
+        @self.app.context_processor
+        def inject_reload_time():
+            return dict(RELOAD_TIME_MS=reload_time_ms)
 
     def _run_server(self):
         web_conf = self.config.get("web", {})
