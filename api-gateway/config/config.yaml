@@ -3,13 +3,13 @@
 server:
   host: '0.0.0.0'
   port: 8080
-  debug: false  # Set to true for development
+  debug: true  # Set to true for development
 
 services:
   global_temperature:
-    base_url: 'http://global-temperature-service:8100'
+    base_url: 'http://global-temperature:8100'
     endpoints:
-      get_temperatures: '/temperature'
+      get_temperatures: '/temperature/global'
   
   priority_queue:
     base_url: 'http://priority-queue-manager:8090'
