@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy requirements first for better caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Ensure config directory exists with default configuration
 COPY config/ /app/config/

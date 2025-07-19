@@ -388,15 +388,23 @@ Configuration settings can be overridden with environment variables:
 
 ### Using Docker
 
+0. Move to the api-gateway folder
+
 1. Build the Docker image:
    ```bash
-   docker build -t api-gateway .
+   docker build -t api-gateway-image .
    ```
 
 2. Run the container:
-   ```bash
-   docker run -p 8080:8080 -v $(pwd)/config:/app/config -v $(pwd)/logs:/app/logs api-gateway
-   ```
+  ```bash
+  docker run \
+    --name api-gateway-container \
+    --restart unless-stopped \
+    -p 8080:8080 \
+    -v $(pwd)/config:/app/config \
+    -v $(pwd)/logs:/app/logs \
+    api-gateway-image
+  ```
 
 ### Using Docker Compose
 
@@ -521,3 +529,5 @@ Potential improvements for future versions:
 - Metrics collection and monitoring integration
 - GraphQL support for more flexible data fetching
 - WebSocket support for real-time updates
+
+## Docker
