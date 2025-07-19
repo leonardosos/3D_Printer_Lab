@@ -4,6 +4,7 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Architecture](#architecture)
+- [Folder Structure](#folder-structure)
 - [Communication Protocol](#communication-protocol)
   - [MQTT Topics](#mqtt-topics)
   - [Message Structure](#message-structure)
@@ -62,13 +63,16 @@ classDiagram
         -Point3D position
         -RobotAction currentAction
         -ActionStatus status
+        -String printerId
         +updatePosition()
         +updateAction()
         +updateStatus()
+        +updatePrinterId()
     }
     
     class CoordinateDTO {
         +String robotId
+        +String printerId
         +double x
         +double y
         +double z
@@ -78,6 +82,7 @@ classDiagram
     
     class ProgressDTO {
         +String robotId
+        +String printerId
         +String action
         +String status
         +String timestamp
@@ -89,6 +94,52 @@ classDiagram
     CoordinateValidator --> CoordinateDTO
     RobotController --> ProgressDTO
 ```
+
+## Folder Structure
+
+```
+robot/
+├── app/                      # Main application code
+│   ├── __init__.py
+│   ├── controller/           # Robot controller logic
+│   │   ├── __init__.py
+│   │   └── robot_controller.py
+│   ├── dto/                  # Data Transfer Objects
+│   │   ├── __init__.py
+│   │   ├── coordinate_dto.py
+│   │   └── progress_dto.py
+│   ├── service/              # Business logic
+│   │   ├── __init__.py
+│   │   ├── path_planner.py
+│   │   └── mqtt_service.py
+│   ├── utils/                # Utility functions
+│   │   ├── __init__.py
+│   │   └── validators.py
+│   └── robot_service.py      # Main entry point
+├── config/                   # Configuration files
+│   └── robot_config.yaml
+├── logs/                     # Log files directory
+├── tests/                    # Unit and integration tests
+│   ├── __init__.py
+│   ├── test_controller.py
+│   ├── test_path_planner.py
+│   └── test_validators.py
+├── Dockerfile                # Docker configuration
+├── requirements.txt          # Python dependencies
+├── README.md                 # Documentation
+└── run.py                    # Script to run the application
+```
+
+### Key Components
+
+- **controller/robot_controller.py**: Core logic for robot operations and state management
+- **dto/coordinate_dto.py**: Data model for coordinate messages received from Robot Management
+- **dto/progress_dto.py**: Data model for progress messages sent to Job Handler and Printer Monitoring
+- **service/path_planner.py**: Path calculation and motion planning algorithms
+- **service/mqtt_service.py**: MQTT communication handling and message processing
+- **utils/validators.py**: Input validation and data sanitization
+- **robot_service.py**: Application entry point and service initialization
+- **config/robot_config.yaml**: Configuration parameters for the robot and MQTT connection
 
 ## Communication Protocol
 
@@ -108,6 +159,8 @@ The robot publishes to:
 device/robot/{robotId}/progress
 ```
 
+**Note**: The robot only publishes a progress message when it has completed its entire operation cycle and returned to the home position, ready for a new assignment.
+
 ### Message Structure
 
 All messages use JSON format for data interchange.
@@ -117,6 +170,7 @@ All messages use JSON format for data interchange.
 ```json
 {
   "robotId": "rob-1",
+  "printerId": "printer-1",
   "x": 120,
   "y": 45,
   "z": 10,
@@ -128,6 +182,7 @@ All messages use JSON format for data interchange.
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
 | `robotId` | String | Unique identifier for the robot | Yes |
+| `printerId` | String | Identifier of the printer to service | Yes |
 | `x` | Number | X-coordinate in millimeters | Yes |
 | `y` | Number | Y-coordinate in millimeters | Yes |
 | `z` | Number | Z-coordinate in millimeters | Yes |
@@ -136,25 +191,29 @@ All messages use JSON format for data interchange.
 
 #### Progress Update (Outgoing)
 
+The robot publishes a single progress message when it has completed the entire operation cycle (pick, transport, place, return) and is ready for a new assignment:
+
 ```json
 {
   "robotId": "rob-1",
-  "action": "pick",
-  "status": "in_progress",
-  "timestamp": "2025-06-15T08:32:10Z"
+  "printerId": "printer-1",
+  "action": "idle",
+  "status": "completed",
+  "timestamp": "2025-06-15T08:35:45Z"
 }
 ```
 
 | Field | Type | Description | Possible Values |
 |-------|------|-------------|----------------|
 | `robotId` | String | Unique identifier for the robot | Any valid robot ID |
-| `action` | String | Current action being performed | `pick`, `place`, `idle` |
-| `status` | String | Status of the current action | `in_progress`, `completed`, `error` |
+| `printerId` | String | Identifier of the printer that was serviced | Any valid printer ID |
+| `action` | String | Current action state | `idle` (ready for new assignment) |
+| `status` | String | Status of the operation cycle | `completed` (successfully finished entire cycle) |
 | `timestamp` | String | ISO 8601 formatted timestamp | Current time |
 
 ## Operation Workflow
 
-The robot follows a defined sequence of operations:
+The robot follows a defined sequence of operations, publishing a status update only upon completion of the entire cycle:
 
 1. **Initialization**:
    - Load configuration parameters
@@ -165,35 +224,30 @@ The robot follows a defined sequence of operations:
 2. **Coordinate Reception**:
    - Receive coordinate message
    - Validate message format and values
-   - Parse target coordinates and optional parameters
+   - Parse target coordinates, printer ID, and optional parameters
+   - Store printer ID for use in the completion message
 
 3. **Navigation**:
    - Calculate path to target coordinates
    - Begin movement
-   - Publish status updates during transit
    - Arrive at 3D printer location
 
 4. **Pick Operation**:
-   - Publish "pick" action with "in_progress" status
    - Execute pick operation sequence
    - Retrieve printed object
-   - Publish "pick" action with "completed" status
 
 5. **Transport**:
    - Calculate path to unloading area
    - Navigate to unloading area
-   - Publish status updates during transit
 
 6. **Place Operation**:
-   - Publish "place" action with "in_progress" status
    - Execute place operation sequence
    - Deposit printed object
-   - Publish "place" action with "completed" status
 
 7. **Return to Home**:
    - Calculate path to home position
    - Navigate to home position
-   - Publish "idle" action with "completed" status
+   - Publish "idle" action with "completed" status and printer ID
    - Ready for next task
 
 ## Configuration
@@ -293,9 +347,14 @@ pytest integration_tests/
 2. **Message Not Received**:
    - Verify topic subscription
    - Check message format (valid JSON)
-   - Ensure correct robotId in messages
+   - Ensure correct robotId and printerId in messages
 
-3. **Unexpected Behavior**:
+3. **No Completion Message**:
+   - Verify the robot has successfully completed its entire operation cycle
+   - Check if the robot encountered any obstacles or errors
+   - Verify network connectivity during operation completion
+
+4. **Unexpected Behavior**:
    - Check logs for validation errors
    - Verify configuration parameters
    - Restart the robot service
