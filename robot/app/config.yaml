@@ -1,0 +1,18 @@
+# Default configuration for the Robot Device Microservice
+
+robot:
+  id: "rob-1"
+  home_position:
+    x: 0
+    y: 0
+    z: 0
+  unloading_area:
+    x: 500
+    y: 500
+    z: 50
+
+mqtt:
+  broker_host: "broker"
+  broker_port: 1883
+  qos: 0
+  client_id: "robot-client"
