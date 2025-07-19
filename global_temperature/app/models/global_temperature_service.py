@@ -35,7 +35,7 @@ class GlobalTemperatureService:
         self.history = TemperatureHistory(self.printers, debug=self.debug)
 
         # Initialize temperature analyzer for heat level computation
-        self.analyzer = TemperatureAnalyzer()
+        self.analyzer = TemperatureAnalyzer(debug=self.debug)
 
 
     def start(self):
@@ -58,6 +58,8 @@ class GlobalTemperatureService:
 
         # Start periodic CSV dump
         self.periodic_csv_dump()
+
+        print(f"[GLOBAL_TEMP] GlobalTemperatureService started successfully. (with {len(self.printers)} printers discovered.)")
 
     # Custom callbacks for MQTT messages, for store temperature readings
     def _on_room_temp(self, client, userdata, dto):

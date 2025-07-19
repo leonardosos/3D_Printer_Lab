@@ -6,18 +6,19 @@ import os
 
 def main():
 
-    # Initialize MQTT client
-    client = MQTTClient()
+    debug_service = os.getenv("DEBUG", "False")
+    timer = int(os.getenv("timer_hear", 60))
 
-    # Get timer from environment or use default
-    timer = int(os.getenv("timer", 60))
+    # Initialize MQTT client
+    client = MQTTClient(debug=True)  # Enable debug mode for MQTT communication
 
     service = GlobalTemperatureService(mqtt_client=client, 
-                                       debug=True, 
+                                       debug=debug_service, 
                                        discover_printers_timeout=timer)
     service.start()
-    
-    api = ApiEndpoint(service)
+
+    api = ApiEndpoint(global_temp_service=service,
+                      debug=True) # let communication for the API endpoint
     api.start()
 
     # Keep the service running

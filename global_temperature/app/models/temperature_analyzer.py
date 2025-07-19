@@ -8,7 +8,7 @@ import yaml
 import os
 
 class TemperatureAnalyzer:
-    def __init__(self, config_path: str = "app/global_temperature_config.yaml", debug: bool = True):
+    def __init__(self, config_path: str = "app/global_temperature_config.yaml", debug: bool = False):
         
         self.debug = debug
 

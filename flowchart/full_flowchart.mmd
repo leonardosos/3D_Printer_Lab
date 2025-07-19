@@ -6,13 +6,13 @@ GUI["🧑‍💻 User Interface (GUI)"]
 %% HTTP Communication Layer
 APIGW["🛰 API Gateway"]
 QueueMgr["📋 Priority Queue Manager"]
-TempGlobal["🌡 Global Temperature"]
 PrinterMon["🖨 Printer Monitoring"]
+TempGlobal["🌡 Global Temperature"]
 
 %% MQTT Communication Layer
 JobHandler["🧠 Job Handler"]
-Planning["🧭 Robot Managment"]
 ST["🧱 ST Printer"]
+Planning["🧭 Robot Managment"]
 Anomaly["⚠️ Anomaly Detection"]
 FanCtrl["🌀 Fan Controller"]
 
@@ -25,28 +25,26 @@ TempSensor["🌡 Room Temp Sensor"]
 GUI o--o|HTTP| APIGW
 APIGW o--o|HTTP: get, post, delete, put| QueueMgr
 APIGW o--o|HTTP: get| TempGlobal
-QueueMgr o--o|HTTP: get| JobHandler
+APIGW o--o|HTTP: get| PrinterMon
+
+QueueMgr o--o|HTTP: get, delete| JobHandler
 
 JobHandler -->|device/printers| Planning
-
-TempSensor -->|device/room/temperature| TempGlobal
-
-ST -->|device/printer/-ID-/temperature| TempGlobal 
-ST -->|device/printer/-ID-/progress| PrinterMon
 JobHandler -->|device/printer/-ID-/assignement| PrinterMon
 JobHandler <-->|down:-> device/printer/-ID-/assignement
 up:-> device/printer/-ID-/progress | ST
 
+ST -->|device/printer/-ID-/temperature| TempGlobal 
+ST -->|device/printer/-ID-/progress| PrinterMon
+ST -->|device/printer/-ID-/temperature| Anomaly
+
 Planning <-->|down:-> device/robot/-ID-/coordinates 
 up:-> device/robot/-ID-/progress| Robot
-Robot -->|device/robot/-ID-/progress| PrinterMon
 Robot -->|device/robot/-ID-/progress| JobHandler 
-
-APIGW o--o|HTTP: get| PrinterMon
 
 TempGlobal -->|device/fan/controller/status| FanCtrl
 FanCtrl -->|device/fan/-ID-/speed| Fan
-
-TempSensor -->|device/room/temperature| Anomaly
-ST -->|device/printer/-ID-/temperature| Anomaly
 Anomaly -->|device/fan/controller/emergency| FanCtrl
+
+TempSensor -->|device/room/temperature| TempGlobal
+TempSensor -->|device/room/temperature| Anomaly

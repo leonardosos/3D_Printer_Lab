@@ -55,7 +55,6 @@ class AnomalyDetectionService:
         self.history = TemperatureHistory(self.printers, debug=self.debug)
         # Initialize alert history for emergency alerts
         self.alert_history = AlertHistory(debug=self.debug)
-
         # Initialize temperature analyzer for heat level computation
         self.analyzer = TemperatureAnalyzer(debug=self.debug)
 
@@ -93,7 +92,7 @@ class AnomalyDetectionService:
         if self.debug:
             print("[GLOBAL_TEMP DEBUG] Subscribed to room and printer temperature topics.")
 
-
+        print(f"[ANOMALY_DETECTION] Service started successfully. ({len(self.printers)} printers discovered.)")
 
     # Custom callbacks for MQTT messages, for store temperature readings
     def _publish_emergency_async(self, action, type_, source, id_):
