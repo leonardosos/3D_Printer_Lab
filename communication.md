@@ -220,6 +220,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
 - `printerId` - string
 - `status` - "idle" | "printing" | "error"
 - `currentJobId?` - string
+- `modelUrl?` - string (URL to GCODE/model file, optional)
 - `progress?` - number (0–100)
 - `temperature?` - number (current nozzle temp in °C)
 - `lastUpdated` - string (ISO 8601)

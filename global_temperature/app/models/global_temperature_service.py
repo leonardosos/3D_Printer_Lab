@@ -29,6 +29,8 @@ class GlobalTemperatureService:
 
         # Search all printers in the network -> blocking call
         # Any payload with printerId will be added to the discovered printers
+        print(f"\033[91m[GLOBAL_TEMP DEBUG] Discovering printers with timeout {self.discover_printers_timeout} seconds...\033[0m")
+
         self.printers = discover_printers(self.subscriber, timeout=self.discover_printers_timeout, debug=self.debug)
 
         # Initialize temperature history and analyzer
@@ -59,7 +61,8 @@ class GlobalTemperatureService:
         # Start periodic CSV dump
         self.periodic_csv_dump()
 
-        print(f"[GLOBAL_TEMP] GlobalTemperatureService started successfully. (with {len(self.printers)} printers discovered.)")
+
+        print(f"\033[92m[GLOBAL_TEMP] Service started successfully. ({len(self.printers)} printers discovered.)\033[0m")
 
     # Custom callbacks for MQTT messages, for store temperature readings
     def _on_room_temp(self, client, userdata, dto):

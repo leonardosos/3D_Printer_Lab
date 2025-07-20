@@ -4,13 +4,16 @@ from app.http.api_endpoint import ApiEndpoint
 import time
 import os
 
-def main():
+def str2bool(val):
+    return str(val).lower() in ("true", "1", "yes")
 
-    debug_service = os.getenv("DEBUG", "False")
+def main():
+    debug_communication = str2bool(os.getenv("DEBUG_COMMUNICATION", "True"))
+    debug_service = str2bool(os.getenv("DEBUG", "False"))
     timer = int(os.getenv("timer_hear", 60))
 
     # Initialize MQTT client
-    client = MQTTClient(debug=True)  # Enable debug mode for MQTT communication
+    client = MQTTClient(debug=debug_communication)  # Enable debug mode for MQTT communication
 
     service = GlobalTemperatureService(mqtt_client=client, 
                                        debug=debug_service, 
@@ -18,7 +21,7 @@ def main():
     service.start()
 
     api = ApiEndpoint(global_temp_service=service,
-                      debug=True) # let communication for the API endpoint
+                      debug=debug_communication)  # let communication for the API endpoint
     api.start()
 
     # Keep the service running

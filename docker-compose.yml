@@ -87,8 +87,8 @@ services:
     networks:
       - iot_network
     restart: always
-    depends_on:
-      - api-gateway
+    #depends_on:
+      #- api-gateway
 
   ### Global Temperature Service
   global-temperature:
@@ -103,14 +103,15 @@ services:
       - ./global_temperature/target_web_conf.yaml:/app/web_config.yaml
       - ./global_temperature/app/persistence/save:/app/persistence/save
     environment:
-      - timer_hear=90
+      - timer_hear=61
       - DEBUG=False
+      - DEBUG_COMMUNICATION=True
     networks:
       - iot_network
     restart: always
     depends_on:
       - broker
-      - api-gateway
+      #- api-gateway
 
   ### Anomaly Detection Service
   anomaly-detection:
@@ -127,8 +128,11 @@ services:
     networks:
       - iot_network
     environment:
-      - timer_hear=60
+      - timer_hear=61
       - DEBUG=False
+      - DEBUG_COMMUNICATION=True
+      - DEBUG_ALERTS=True
+      - DEBUG_ANALYSIS=False
     restart: always
     depends_on:
       - broker

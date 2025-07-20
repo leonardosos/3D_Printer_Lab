@@ -59,10 +59,10 @@ class WebServer:
         return config
 
     def _register_blueprints(self):
-        self.app.register_blueprint(dashboard_bp=dashboard_bp)
-        self.app.register_blueprint(temperature_bp=temperature_bp)
-        self.app.register_blueprint(printers_bp=printers_bp)
-        self.app.register_blueprint(queue_bp=queue_bp)
+        self.app.register_blueprint(dashboard_bp)
+        self.app.register_blueprint(temperature_bp)
+        self.app.register_blueprint(printers_bp)
+        self.app.register_blueprint(queue_bp)
 
         if self.debug:
             print("[WEB UI DEBUG] All blueprints registered.")
