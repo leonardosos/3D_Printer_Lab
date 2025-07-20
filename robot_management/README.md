@@ -1,81 +1,143 @@
-# Robot management
-This microservice is responsible to manage the robot operations, assigning missions and managing the Robot device (other microservice), where now there is only 1 robot device, but hypotetically there can be more than one.
-This microservice is assigned to the port 8120
+# Robot Management Microservice
+
+## Overview
+This microservice is responsible for managing robot device operations within an IoT manufacturing environment. It coordinates robot movements to service 3D printers by assigning missions based on printer status updates. Currently designed for one robot, the architecture supports multiple robots for future scalability.
+
+**Port:** 8120 (configurable)
 
 ## Class Structure
-mermaid diagram
+```mermaid
+classDiagram
+    RobotController --> MQTTClient
+    RobotController --> Queue
+    MQTTClient --> Broker
+    RobotController : +validateMessage()
+    RobotController : +processQueue()
+    RobotController : +publishCoordinates()
+    MQTTClient : +subscribe()
+    MQTTClient : +publish()
+```
 
-## folder structure
+## Folder Structure
+The folder structure is as follows:
 
+```
+robot_management/ 
+├── app/ 
+│   ├── __init__.py 
+│   ├── main.py # Entry point 
+│   ├── mqtt/ # MQTT folder containing logic 
+│   ├── controller.py # RobotController class 
+│   ├── dto/ 
+│   │   └── python dto files for messages
+│   ├── config.py # if necessary 
+│   ├── config.yaml
+├── Dockerfile 
+├── requirements.txt 
+└── README.md
+```
 
 ## Communications
 
-This microservice communicates via MQTT protocol.
+This microservice communicates via the MQTT protocol.
 
 ### Topics
 
-Robot management is subscribed to the topics:
+Robot management subscribes to the following topics:
     
     device/printers
-    device/robot/robot{id}/coordinates
-
-Robot management publishes over the topic:
-
     device/robot/robot{id}/progress
+    
+
+Robot management publishes to the following topic:
+
+    device/robot/robot{id}/coordinates
 
 ### Broker
 
-The mqtt mosquitto broker is available at ther port 1883
+The MQTT Mosquitto broker is available at port 1883.
 
-### Topic messages
+### Topic Messages
 
-Messages over the "device/printers" topic have the following json structure:
+Messages over the `device/printers` topic have the following JSON structure:
 
-    {
-    "printers": [
+```json
+{
+  "printers": [
     { "printerId": "printer-1", "status": "work", "timestamp": "2025-07-09T10:00:00Z" },
     { "printerId": "printer-2", "status": "finish", "timestamp": "2025-07-09T10:00:00Z" },
     { "printerId": "printer-3", "status": "work", "timestamp": "2025-07-09T10:00:00Z" }
-    ]
-    }
+  ]
+}
+```
 
-    where status can be  "work" or "finish"
+- `status` can be `"work"` or `"finish"`.
 
-Messages over the "device/robot/robot{id}/coordinates" topic have the following json structure:
+Messages over the `device/robot/robot{id}/coordinates` topic have the following JSON structure:
 
-    { "robotId": "rob-1", "x": 120, "y": 45, "z": 10, "speed": 200, "timestamp": "2025-06-15T08:32:05Z" }
+```json
+{ 
+  "robotId": "rob-1",
+  "printerId": "printer-1", 
+  "x": 120, 
+  "y": 45, 
+  "z": 10, 
+  "speed": 200, 
+  "timestamp": "2025-06-15T08:32:05Z" 
+}
+```
 
-    where speed is optional and coordinates are expressed in mm
+- `speed` is optional, and coordinates are expressed in millimeters.
 
-Messages over the "device/robot/robot{id}/progress" topic have the following json structure:
+Messages over the `device/robot/robot{id}/progress` topic have the following JSON structure:
 
-    { "robotId": "rob-1", "action": "pick", "status": "in_progress", "timestamp": "2025-06-15T08:32:10Z" }
+```json
+{ 
+  "robotId": "rob-1", 
+  "printerId": "printer-1", 
+  "action": "pick", 
+  "status": "in_progress", 
+  "timestamp": "2025-06-15T08:32:10Z" 
+}
+```
 
-    where action can be "pick"|"place"|"idle"
-    status can be "in_progress"|"completed"|"error"
-    where there can be also jobId as optional parameter and is a string
+- `action` can be `"pick"`, `"place"`, or `"idle"`.
+- `status` can be `"in_progress"`, `"completed"`, or `"error"`.
+- An optional `jobId` parameter (string) may also be included.
 
-## Internal logic
+## Internal Logic
 
-- listens to "device/printers" topic 
+1. Subscribes to the `device/printers` topic.
+2. Validates incoming messages using a DTO, ensuring they follow the expected JSON structure.
+3. Maintains an internal queue (`robot_queue`) where validated messages are appended in chronological order.
+   - The first element in the queue is the oldest message.
+4. Checks the `robot_queue`:
+   - If empty, does nothing.
+   - If not empty, processes the first element:
+     - If `status` is `"finish"`, extracts the `printerId` value.
+     - Retrieves the coordinates of the printer with the given `printerId` from the configuration file.
+     - Publishes the coordinates (without `speed`) to the `device/robot/{robotId}/coordinates` topic, including the `printerId`.
+     - Waits for a message on the `device/robot/robot{id}/progress` topic.
+       - Validates the message using a DTO.
+       - If `status` is `"completed"`, the robot has finished the procedure.
+5. Repeats the process.
 
-- when a message is published there, validate it with a dto, following the expected json structure
+## Error Handling
 
-- Robot management has an internal queue (called robot_queue), in which cronologically the published messages over device/printers are appended (if validated with dto)
-    - then the first element of the robot_queue will be the less recent, if more than one message are stored there
+- Invalid messages are discarded with appropriate logging.
+- Connection issues with the MQTT broker are retried with exponential backoff.
+- Configuration file errors are logged, and the service halts until resolved.
 
-- robot management has also an other list where the it stores the robots devices (actually is only 1)
+## Testing
 
-- check the robot_queue
-    - if list is empty do nothing
-    - if there is at least one element in the queue keep the first element
-        - if status is "finished" in that element keep it
-            - read the message and extract "printerId" value
-                - go to check into a config file which are the coordinates of that printer with "printerId"
-                - publish over device/robot/{robotId}/coordinates that coordinates, without setting speed
-                - wait and listens on device/robot/robot{id}/progress topic. when a message is publicated, validate with dto and if "status" is completed, measn that the robot has finished the procedure
-- repeat everything
+- Unit tests are provided for message validation, queue processing, and MQTT communication.
+- Integration tests simulate end-to-end workflows with mock MQTT brokers.
 
-## docker
+## Deployment
 
-this microservice is dockerized
+This microservice is containerized using Docker. It can be deployed as part of a larger system using Docker Compose.
+
+```bash
+docker build -t robot-management .
+docker run -p 8120:8120 robot-management
+```
