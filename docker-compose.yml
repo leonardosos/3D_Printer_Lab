@@ -122,8 +122,7 @@ services:
     restart: always
     depends_on:
       - broker
-    depends_on:
-     - api-gateway
+      - api-gateway
 
   ### API Gateway Service
   api-gateway:
@@ -140,6 +139,46 @@ services:
       - iot_network
     restart: unless-stopped
 
+  ### Robot Service
+  robot:
+    build:
+      context: ./robot
+      dockerfile: Dockerfile
+    container_name: robot-container
+    volumes:
+      - ./robot/app/config.yaml:/app/app/config.yaml
+      - ./robot/logs:/app/logs
+    environment:
+      - ROBOT_ID=rob-1
+      - MQTT_BROKER_HOST=broker
+      - MQTT_BROKER_PORT=1883
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
+  ### Robot Management Service
+  robot-management:
+    build:
+      context: ./robot_management
+      dockerfile: Dockerfile
+    container_name: robot-management-container
+    ports:
+      - "8120:8120"
+    volumes:
+      - ./robot_management/app/config.yaml:/app/app/config.yaml
+      - ./robot_management/logs:/app/logs
+    environment:
+      - CONFIG_PATH=/app/app/config.yaml
+      - MQTT_BROKER_HOST=broker
+      - MQTT_BROKER_PORT=1883
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - robot
 
 networks:
   iot_network:
