@@ -390,7 +390,7 @@ When the printer completes a job, it sends a status update with status "complete
 **Example:**
 
 ```json
-{ "robotId": "rob-1", "x": 120, "y": 45, "z": 10, "speed": 200, "timestamp": "2025-06-15T08:32:05Z" }
+{ "robotId": "rob-1","printerId": "printer-1", "x": 120, "y": 45, "z": 10, "speed": 200, "timestamp": "2025-06-15T08:32:05Z" }
 ```
 
 #### 2.3.2 Topic: device/robot/{robotId}/progress
@@ -407,7 +407,7 @@ When the printer completes a job, it sends a status update with status "complete
 **Example:**
 
 ```json
-{ "robotId": "rob-1", "action": "pick", "status": "in_progress", "timestamp": "2025-06-15T08:32:10Z" }
+{ "robotId": "rob-1", "printerId": "printer-1", "action": "pick", "status": "in_progress", "timestamp": "2025-06-15T08:32:10Z" }
 ```
 
 ### 2.4 Fan Control & Safety
