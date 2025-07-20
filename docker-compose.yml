@@ -2,6 +2,7 @@ name: composed-mqtt-project
 
 ## ALL PORTS are decided by flowchart/port_flowchart.mmd
 # The ip address is the service name, e.g., `broker` for the MQTT broker, `web-ui` for the web UI
+# The docker has debug variables to print debug messages in the console
 
 services:
 
@@ -31,6 +32,7 @@ services:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
       - PRINTER_ID=printer_001
+      - DEBUG=True
     networks:
       - iot_network
     depends_on:
@@ -47,6 +49,7 @@ services:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
       - PRINTER_ID=printer_002
+      - DEBUG=True
     networks:
       - iot_network
     depends_on:
@@ -63,6 +66,7 @@ services:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
       - PRINTER_ID=printer_003
+      - DEBUG=True
     networks:
       - iot_network
     depends_on:
@@ -78,11 +82,13 @@ services:
       - "8000:8000"
     volumes:
       - ./web-ui/target_web_conf.yaml:/app/web_conf.yaml
+    environment:
+      - DEBUG=True
     networks:
       - iot_network
     restart: always
-    depends_on:
-      - api-gateway
+    #depends_on:
+      #- api-gateway
 
   ### Global Temperature Service
   global-temperature:
@@ -97,13 +103,15 @@ services:
       - ./global_temperature/target_web_conf.yaml:/app/web_config.yaml
       - ./global_temperature/app/persistence/save:/app/persistence/save
     environment:
-      - timer_hear=90
+      - timer_hear=61
+      - DEBUG=False
+      - DEBUG_COMMUNICATION=True
     networks:
       - iot_network
     restart: always
     depends_on:
       - broker
-      - api-gateway
+      #- api-gateway
 
   ### Anomaly Detection Service
   anomaly-detection:
@@ -119,6 +127,12 @@ services:
       - ./anomaly_detection/app/persistence/save/temperature_history.csv:/app/persistence/save/temperature_history.csv
     networks:
       - iot_network
+    environment:
+      - timer_hear=61
+      - DEBUG=False
+      - DEBUG_COMMUNICATION=True
+      - DEBUG_ALERTS=True
+      - DEBUG_ANALYSIS=False
     restart: always
     depends_on:
       - broker

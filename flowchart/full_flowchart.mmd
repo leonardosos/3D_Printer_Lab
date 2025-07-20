@@ -1,52 +1,41 @@
 flowchart TB
 
-%% User Interaction Layer
-GUI["🧑‍💻 User Interface (GUI)"]
+ST -->|device/printer/-ID-/progress| PrinterMon
 
-%% HTTP Communication Layer
+APIGW o--o|HTTP: get| TempGlobal
+
+TempSensor -->|device/room/temperature| TempGlobal
+TempSensor -->|device/room/temperature| Anomaly
+
+GUI["🧑‍💻 User Interface (GUI)"]
+Robot["🤖 ROB Robot"]
+Fan["💨 Fan Unit"]
+PrinterMon["🖨 Printer Monitoring"]
+ST["🧱 ST Printer"]
 APIGW["🛰 API Gateway"]
 QueueMgr["📋 Priority Queue Manager"]
 TempGlobal["🌡 Global Temperature"]
-PrinterMon["🖨 Printer Monitoring"]
-
-%% MQTT Communication Layer
 JobHandler["🧠 Job Handler"]
-Planning["🧭 Robot Managment"]
-ST["🧱 ST Printer"]
+Planning["🧭 Robot Management"]
 Anomaly["⚠️ Anomaly Detection"]
 FanCtrl["🌀 Fan Controller"]
-
-%% Device Layer (emoji-enhanced)
-Robot["🤖 ROB Robot"]
-Fan["💨 Fan Unit"]
 TempSensor["🌡 Room Temp Sensor"]
 
-%% Data Flow 
-GUI o--o|HTTP| APIGW
-APIGW o--o|HTTP: get, post, delete, put| QueueMgr
-APIGW o--o|HTTP: get| TempGlobal
-QueueMgr o--o|HTTP: get| JobHandler
-
-JobHandler -->|device/printers| Planning
-
-TempSensor -->|device/room/temperature| TempGlobal
-
-ST -->|device/printer/-ID-/temperature| TempGlobal 
-ST -->|device/printer/-ID-/progress| PrinterMon
-JobHandler -->|device/printer/-ID-/assignement| PrinterMon
-JobHandler <-->|down:-> device/printer/-ID-/assignement
-up:-> device/printer/-ID-/progress | ST
-
-Planning <-->|down:-> device/robot/-ID-/coordinates 
-up:-> device/robot/-ID-/progress| Robot
-Robot -->|device/robot/-ID-/progress| PrinterMon
-Robot -->|device/robot/-ID-/progress| JobHandler 
-
-APIGW o--o|HTTP: get| PrinterMon
+ST -->|device/printer/-ID-/temperature| TempGlobal
+ST -->|device/printer/-ID-/temperature| Anomaly
 
 TempGlobal -->|device/fan/controller/status| FanCtrl
+Anomaly -->|device/fan/controller/emergency| FanCtrl
 FanCtrl -->|device/fan/-ID-/speed| Fan
 
-TempSensor -->|device/room/temperature| Anomaly
-ST -->|device/printer/-ID-/temperature| Anomaly
-Anomaly -->|device/fan/controller/emergency| FanCtrl
+GUI o--o|HTTP| APIGW
+APIGW o--o|HTTP: get, post, delete, put| QueueMgr
+APIGW o--o|HTTP: get| PrinterMon
+QueueMgr o--o|HTTP: get, delete| JobHandler
+
+JobHandler -->|device/printers| Planning
+Planning <-->|down:-> device/robot/-ID-/coordinates
+up:-> device/robot/-ID-/progress| Robot
+Robot -->|device/robot/-ID-/progress| JobHandler
+
+JobHandler -->|device/printer/-ID-/assignement| ST

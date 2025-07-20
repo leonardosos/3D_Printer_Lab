@@ -17,30 +17,30 @@ import time
 
 
 class PrintingService:
-    def __init__(self, config_path, mqtt_config_path, debug=True):
-        
-        # Initialize the printer service 
-        
-        # load id form environment variable or use default
-        printer_id = os.getenv("PRINTER_ID", "printer_001")
+    def __init__(self, config_path, debug=True, mqtt_client=None, printer_id="printer_001"):
 
-        if debug:
-            print(f"[SERVICE DEBUG] Initializing PrintingService for printer ID: {printer_id}")
+        # Initialize the printer service
+        self.config_path = config_path
+        self.debug = debug
+        self.mqtt_client = mqtt_client
+        self.printer_id = printer_id
+
+        if self.debug:
+            print(f"[SERVICE DEBUG] Initializing PrintingService for printer ID: {self.printer_id}")
 
         # Load printer configuration from YAML file
         try:
-            with open(config_path) as f:
+            with open(self.config_path) as f:
                 config = yaml.safe_load(f)
-            if debug:
-                print(f"[SERVICE DEBUG] Loaded printer configuration: {config_path}")
+            if self.debug:
+                print(f"[SERVICE DEBUG] Loaded printer configuration: {self.config_path}")
         except FileNotFoundError:
-            raise FileNotFoundError(f"Configuration file not found: {config_path}")
+            raise FileNotFoundError(f"Configuration file not found: {self.config_path}")
 
         # Create Printer instance with loaded configuration
-        self.printer = Printer(printer_id=printer_id, **config)
+        self.printer = Printer(printer_id=self.printer_id, **config)
 
         # Initialize MQTT client and publisher/subscriber
-        self.mqtt_client = MQTTClient(mqtt_config_path, debug=debug)
         self.publisher = MQTTPublisher(self.mqtt_client)
         self.subscriber = MQTTSubscriber(self.mqtt_client)
 
@@ -51,9 +51,6 @@ class PrintingService:
         self.current_job = None     # Currently active print job
         self.next_job = None        # Next job to be processed 
         self.last_job_id = None     # Last job ID processed
-
-        # Debug flag to enable/disable debug prints
-        self.debug = debug  # Enable debug prints if True
 
         # Start idle status thread to publish idle status periodically
         self._idle_thread_running = False  # Change to False initially

@@ -18,3 +18,4 @@ mqtt-tester/mqtt-broker/data/*
 mqtt-tester/mqtt-broker/log/*
 
 global_temperature/app/persistence/save/*
+anomaly_detection/app/persistence/save/*
