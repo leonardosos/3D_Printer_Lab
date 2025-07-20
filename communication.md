@@ -234,6 +234,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
       "printerId": "printer-1",
       "status": "printing",
       "currentJobId": "job-123",
+      "modelUrl": "model-456",
       "progress": 42,
       "temperature": 205.3,
       "lastUpdated": "2025-06-15T08:31:15Z"
