@@ -1,0 +1,48 @@
+2025-07-21 09:38:33,665 - __main__ - INFO - Starting Robot Management microservice
+2025-07-21 09:38:33,671 - app.controller - INFO - Using MQTT broker at broker:1883
+2025-07-21 09:38:33,671 - app.controller - INFO - Starting Robot Controller
+2025-07-21 09:38:33,671 - app.mqtt.client - INFO - Connecting to MQTT broker at broker:1883
+2025-07-21 09:38:33,679 - app.mqtt.client - INFO - Connected to MQTT broker
+2025-07-21 09:38:33,779 - app.mqtt.client - INFO - Subscribing to topic: device/printers
+2025-07-21 09:38:33,780 - app.mqtt.client - INFO - Subscribing to topic: device/robot/rob-1/progress
+2025-07-21 09:38:33,781 - app.controller - INFO - Starting queue processing
+2025-07-21 09:44:05,968 - app.controller - INFO - Received printer status: { printers: [{ printerId: printer-3, status: finish, timestamp: 2025-07-09T10:00:00Z } ] }
+2025-07-21 09:44:05,968 - app.controller - ERROR - Invalid printer status message: { printers: [{ printerId: printer-3, status: finish, timestamp: 2025-07-09T10:00:00Z } ] }
+2025-07-21 09:45:37,983 - app.controller - INFO - Received printer status: { printerId: printer-1, status: finish, timestamp: 2025-07-09T10:00:00Z }
+2025-07-21 09:45:37,983 - app.controller - ERROR - Invalid printer status message: { printerId: printer-1, status: finish, timestamp: 2025-07-09T10:00:00Z }
+2025-07-21 09:46:37,014 - app.controller - INFO - Received printer status:  printerId: printer-1, status: finish, timestamp: 2025-07-09T10:00:00Z 
+2025-07-21 09:46:37,014 - app.controller - ERROR - Invalid printer status message:  printerId: printer-1, status: finish, timestamp: 2025-07-09T10:00:00Z 
+2025-07-21 09:48:01,720 - app.controller - INFO - Received printer status:  printerId: printer-1, status: work, timestamp: 2025-07-09T10:00:00Z 
+2025-07-21 09:48:01,721 - app.controller - ERROR - Invalid printer status message:  printerId: printer-1, status: work, timestamp: 2025-07-09T10:00:00Z 
+2025-07-21 09:52:34,155 - app.controller - INFO - Received printer status: {printers: [{printerId: printer-1, status: work, timestamp: 2025-07-09T10:00:00Z}]}
+2025-07-21 09:52:34,156 - app.controller - ERROR - Invalid printer status message: {printers: [{printerId: printer-1, status: work, timestamp: 2025-07-09T10:00:00Z}]}
+2025-07-21 09:58:03,518 - app.controller - INFO - Received printer status: {"printers": [{"printerId": "printer-1", "status": "work", "timestamp": "2025-07-09T10:00:00Z"}]}
+2025-07-21 09:58:03,519 - app.controller - INFO - No printers with 'finish' status
+2025-07-21 09:58:20,976 - app.controller - INFO - Received printer status: {"printers": [{"printerId": "printer-1", "status": "finish", "timestamp": "2025-07-09T10:00:00Z"}]}
+2025-07-21 09:58:20,976 - app.controller - INFO - Adding printer printer-1 to queue
+2025-07-21 09:58:21,061 - app.controller - INFO - Processing task for printer printer-1
+2025-07-21 09:58:21,062 - app.mqtt.client - INFO - Publishing to topic device/robot/rob-1/coordinates: {"robotId": "rob-1", "printerId": "printer-1", "x": 120, "y": 45, "z": 10, "timestamp": "2025-07-21T09:58:21Z"}
+2025-07-21 09:58:21,063 - app.controller - INFO - Sent robot command for printer printer-1: {"robotId": "rob-1", "printerId": "printer-1", "x": 120, "y": 45, "z": 10, "timestamp": "2025-07-21T09:58:21Z"}
+2025-07-21 09:58:33,372 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-1", "action": "place", "status": "in_progress", "timestamp": "2025-07-21T09:58:29Z"}
+2025-07-21 09:58:33,411 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-1", "action": "place", "status": "completed", "timestamp": "2025-07-21T09:58:30Z"}
+2025-07-21 09:58:33,412 - app.controller - INFO - Task for printer printer-1 completed
+2025-07-21 09:58:33,412 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-1", "action": "idle", "status": "completed", "timestamp": "2025-07-21T09:58:33Z"}
+2025-07-21 09:58:33,412 - app.controller - INFO - Received progress update but not waiting for completion
+2025-07-21 10:00:59,486 - app.controller - INFO - Received printer status: {"printers": [{"printerId": "printer-2", "status": "finish", "timestamp": "2025-07-09T10:00:00Z"}]}
+2025-07-21 10:00:59,487 - app.controller - INFO - Adding printer printer-2 to queue
+2025-07-21 10:01:00,245 - app.controller - INFO - Processing task for printer printer-2
+2025-07-21 10:01:00,246 - app.mqtt.client - INFO - Publishing to topic device/robot/rob-1/coordinates: {"robotId": "rob-1", "printerId": "printer-2", "x": 240, "y": 45, "z": 10, "timestamp": "2025-07-21T10:01:00Z"}
+2025-07-21 10:01:00,246 - app.controller - INFO - Sent robot command for printer printer-2: {"robotId": "rob-1", "printerId": "printer-2", "x": 240, "y": 45, "z": 10, "timestamp": "2025-07-21T10:01:00Z"}
+2025-07-21 10:01:13,713 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-2", "action": "place", "status": "in_progress", "timestamp": "2025-07-21T10:01:09Z"}
+2025-07-21 10:01:13,754 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-2", "action": "place", "status": "completed", "timestamp": "2025-07-21T10:01:10Z"}
+2025-07-21 10:01:13,754 - app.controller - INFO - Task for printer printer-2 completed
+2025-07-21 10:01:13,754 - app.controller - INFO - Received robot progress: {"robotId": "rob-1", "printerId": "printer-2", "action": "idle", "status": "completed", "timestamp": "2025-07-21T10:01:13Z"}
+2025-07-21 10:01:13,754 - app.controller - INFO - Received progress update but not waiting for completion
+2025-07-21 10:01:39,509 - app.controller - INFO - Received printer status: {"printers": [{"printerId": "printer-7", "status": "finish", "timestamp": "2025-07-09T10:00:00Z"}]}
+2025-07-21 10:01:39,510 - app.controller - INFO - Adding printer printer-7 to queue
+2025-07-21 10:01:40,291 - app.controller - INFO - Processing task for printer printer-7
+2025-07-21 10:01:40,292 - app.controller - ERROR - No coordinates found for printer printer-7
+2025-07-21 10:02:02,269 - __main__ - INFO - Received signal 15, shutting down...
+2025-07-21 10:02:02,269 - app.controller - INFO - Stopping Robot Controller
+2025-07-21 10:02:02,535 - app.mqtt.client - WARNING - Disconnected from MQTT broker with code 0
+2025-07-21 10:02:02,535 - app.mqtt.client - INFO - Disconnected from MQTT broker
