@@ -123,8 +123,7 @@ services:
       - "8140:8140"
     volumes:
       - ./anomaly_detection/target_mqtt_config.yaml:/app/mqtt_config.yaml
-      - ./anomaly_detection/app/persistence/save/alert_history.csv:/app/persistence/save/alert_history.csv
-      - ./anomaly_detection/app/persistence/save/temperature_history.csv:/app/persistence/save/temperature_history.csv
+      - ./anomaly_detection/app/persistence/save:/app/persistence/save
     networks:
       - iot_network
     environment:
