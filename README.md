@@ -55,9 +55,9 @@ Leonardo:
 
 Simone:
 
-- api gateway
-- robot management
-- robot (periodic status update, dynamic number, need to define the ports)
+- [Api Gateway](api-gateway/README.md)
+- [Robot Management (RM)](robot_management/README.md)
+- [Robot](robot/README.md)
 - fan unit
 - temperature sensor
 
