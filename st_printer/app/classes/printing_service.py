@@ -114,11 +114,34 @@ class PrintingService:
                 break
             time.sleep(self._idle_timer)  # publish every 30 seconds
 
+    def _publish_idle_status_periodically_beginning(self):
+    # Publish idle status periodically 
+        # This thread runs in the background to publish:
+        # - idle status every 30 seconds
+        # - temperature reading every 30 seconds
+        #
+        # It checks if the printer is idle and publishes the status accordingly
+        # --> looking if exists a current job or not
+
+        if self.debug:
+            print(f"[SERVICE DEBUG] Idle status thread started for printer {self.printer.printer_id} every {self._idle_timer} seconds")
+
+        while self._idle_thread_running:
+            if self.current_job is None:
+                self.publisher.publish_progress(self.printer.printer_id, status="idle", progress=0.0, job_id="")
+                self.publisher.publish_temperature(self.printer.printer_id, 25.0)  # idle (ambient) temperature
+            else:
+                # Stop publishing idle status once a print starts
+                break
+            time.sleep(self._idle_timer)  # publish every 30 seconds
+
     def try_start_next_job(self):
         # Start next job if printer is idle
         if self.current_job is None and self.next_job is not None:
             # Stop the idle status thread when a print starts
             self._idle_thread_running = False
+            if self.idle_status_thread and self.idle_status_thread.is_alive():
+                self.idle_status_thread.join(timeout=1)  # Wait for thread to finish
             
             # Variable turn cycle from next_job to current_job
             self.current_job = self.next_job
@@ -162,7 +185,7 @@ class PrintingService:
         
         # Start idle status thread after MQTT connection
         self._idle_thread_running = True
-        self.idle_status_thread = threading.Thread(target=self._publish_idle_status_periodically, daemon=True)
+        self.idle_status_thread = threading.Thread(target=self._publish_idle_status_periodically_beginning, daemon=True)
         self.idle_status_thread.start()
 
 
