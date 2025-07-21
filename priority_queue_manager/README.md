@@ -111,6 +111,29 @@ Retrieves all jobs sorted from highest to lowest priority.
     }
   ]
 }
+
+```
+
+### GET `/prioritary_job`
+
+Retrieves the job with the highest priority.
+
+**Response:**
+```json
+{
+  "jobs": [
+    {
+      "id": "job-123",
+      "modelId": "model-456",
+      "assignedPrinterId": null,
+      "priority": 10,
+      "status": "pending",
+      "submittedAt": "2025-06-15T08:30:00Z",
+      "updatedAt": "2025-06-15T08:30:00Z"
+    }
+  ]
+}
+
 ```
 
 ---
@@ -238,6 +261,3 @@ Jobs may have one of the following statuses:
 
 ---
 
-## Ownership
-
-This microservice is maintained by the **Backend Team**. For integration or support, please reach out through internal channels. It is intended for internal use only by the Job Handler and Web UI.

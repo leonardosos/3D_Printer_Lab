@@ -1,29 +1,47 @@
 # Fan Controller Microservice
 
-The `fan_controller` microservice is responsible for managing the speed of a fan unit based on ambient temperature and emergency conditions. It receives temperature updates and emergency alerts, computes the appropriate fan speed, and publishes speed commands to the fan unit.
+The `fan_controller` microservice manages the speed of a fan unit based on ambient temperature and emergency alerts. It subscribes to MQTT topics to receive updates, determines the correct fan speed, and publishes speed commands accordingly.
 
 ---
 
 ## Overview
 
-This service listens to two main MQTT topics:
+### MQTT Topics
 
-- **Global temperature updates** (`device/fan/controller/status`)
-- **Emergency alerts** (`device/fan/controller/emergency`)
+**Subscribed:**
 
-Based on these inputs, the service calculates the optimal fan speed and publishes it to:
+- `device/fan/controller/status` – Global temperature updates
+- `device/fan/controller/emergency` – Emergency alerts
 
-- **Fan command topic**: `device/fan/-id-/speed`
+**Published:**
 
-If an emergency condition is detected (e.g., fire, overheating), it bypasses normal temperature-based logic and prioritizes the emergency action (e.g., fan shutdown or full-speed override).
+- `device/fan/<id>/speed` – Fan speed commands
+
+---
+
+## Behavior
+
+The microservice reacts to both **status** and **emergency** messages to compute the appropriate fan speed. Logic flow:
+
+1. **Emergency Active**:
+   - If `type` is `"overheat"` or `"thermal_runaway"`, fan speed is set to 100%.
+   - If `action` is `"shutdown"`, fan speed is set to 0%.
+   - If `type` is `"thermal_runaway"`, speed is 100% for 30 seconds, then reset.
+   - If `type` is `"solved"`, emergency state is cleared and normal operation resumes.
+
+2. **Status Only**:
+   - Speed is calculated from severity: `value * 10`, clamped between 0–100.
+
+3. **No Input**:
+   - No speed update is published.
 
 ---
 
 ## Message Formats
 
-### Temperature Status Input
+### Status Input
 
-**Topic:** `device/fan/controller/status`\
+**Topic:** `device/fan/controller/status`  
 **Payload:**
 
 ```json
@@ -33,60 +51,103 @@ If an emergency condition is detected (e.g., fire, overheating), it bypasses nor
 }
 ```
 
-- `value`: Integer indicating temperature severity.
-- `timestamp`: ISO 8601 timestamp of the reading.
+- `value`: Integer from 1–10, indicating temperature severity.
+- `timestamp`: ISO 8601 string.
 
 ---
 
 ### Emergency Input
 
-**Topic:** `device/fan/controller/emergency`\
+**Topic:** `device/fan/controller/emergency`  
 **Payload:**
 
 ```json
 {
   "action": "shutdown",
-  "type": "overheat",
+  "type": "thermal_runaway",
   "source": "printer",
   "id": "printer-2",
   "timestamp": "2025-06-15T08:32:20Z"
 }
 ```
 
-- `action`: `"shutdown"` or `"max_speed"`, the emergency directive.
-- `type`: Type of emergency (`overheat`, `fire`, etc.).
-- `source`: Device that triggered the alert.
-- `id`: Unique identifier for the source device.
-- `timestamp`: ISO timestamp of the alert.
+- `action`: `"shutdown"` or `"max_speed"`.
+- `type`: `"overheat"`, `"thermal_runaway"`, `"solved"`, etc.
+- `source`: Device name triggering the alert.
+- `id`: Unique source identifier.
+- `timestamp`: ISO timestamp.
 
 ---
 
 ### Fan Speed Output
 
-**Topic:** `device/fan/-id-/speed`\
+**Topic:** `device/fan/<id>/speed`  
 **Payload:**
 
 ```json
 {
   "fanId": "fan-1",
   "speed": 75,
-  "actual": 72,
+  "actual": 75,
   "timestamp": "2025-06-15T08:32:15Z"
 }
 ```
 
 - `fanId`: Target fan identifier.
 - `speed`: Intended fan speed (0–100).
-- `actual`: Measured speed (for logging/simulation).
-- `timestamp`: When the command was issued.
+- `actual`: Measured/assumed speed.
+- `timestamp`: When the message is published.
+
+---
+
+## Class Overview
+
+### `FanController`
+
+Handles logic and publishes fan speed.
+
+```python
+class FanController:
+    def __init__(self, fan_id, repository, publisher)
+    def on_status_received(payload)
+    def on_emergency_received(payload)
+    def update_speed()
+    def calculate_speed(status, emergency=None) -> int
+    def publish_speed(speed: int)
+```
+
+- **Emergency takes precedence** over temperature updates.
+- **Thermal runaway** triggers a **30-second timer** after which speed resets.
+- `"solved"` emergency clears the active alert and re-enables status-based logic.
 
 ---
 
 ## Architecture
 
-### DTOs
+### Directory Structure
 
-Located in `app/dto`, the following Data Transfer Object classes are used:
+```
+fan_controller/
+├── README.md
+├── dockerfile
+├── config/
+│   └── fan_controller_config.yaml
+├── app/
+│   ├── main.py
+│   ├── model/
+│   │   └── status.py
+│   ├── dto/
+│   │   ├── status_dto.py
+│   │   ├── emergency_dto.py
+│   │   └── fan_speed_dto.py
+│   ├── mqtt/
+│   │   ├── publisher.py
+│   │   └── subscriber.py
+│   └── persistence/
+│       └── repository.py
+```
+
+### DTOs (`app/dto/`)
 
 ```python
 @dataclass
@@ -101,86 +162,39 @@ class EmergencyDTO:
     source: str
     id: str
     timestamp: float
+
+@dataclass
+class FanSpeedDTO:
+    fanId: str
+    speed: int
+    actual: int
+    timestamp: str
 ```
 
 ---
 
-### FanController Logic
+## Deployment
 
-Main service logic is encapsulated in the `FanController` class:
-
-```python
-class FanController:
-
-    def __init__(self):
-        self.latest_status = None
-        self.latest_emergency = None
-
-    def on_status_received(self, json_input):
-        # Deserialize and store new status
-
-    def on_emergency_received(self, json_input):
-        # Deserialize and store emergency info
-
-    def update_speed(self):
-        # Decide if fan speed update is needed
-
-    def calculate_speed(self, status, emergency=None):
-        # Compute speed based on status or emergency
-
-    def publish_speed(self, speed):
-        # Publish command to MQTT topic
-```
-
-Logic priority:
-
-1. If an **emergency** is active, it overrides normal operations.
-2. If only **temperature status** is updated, it recalculates speed accordingly.
-3. If no new data is received, no update is sent.
-
----
-
-## Directory Structure
-
-```
-fan_controller/
-├── app/
-│   ├── dto/
-│   │   ├── __init__.py
-│   │   ├── status_dto.py
-│   │   ├── emergency_dto.py
-│   │   ├── fan_speed_dto.py
-│   ├── model/
-│   │   ├── __init__.py
-│   │   └── status.py
-│   ├── persistence/
-│   │   ├── __init__.py
-│   │   └── repository.py
-│   ├── mqtt/
-│   │   ├── __init__.py
-│   │   ├── subscriber.py
-│   │   └── publisher.py
-│   ├── main.py
-├── requirements.txt
-├── Dockerfile
-```
-
----
-
-## Docker Usage
-
-A `Dockerfile` is provided to containerize the service. Typical usage:
+### Docker
 
 ```bash
 docker build -t fan_controller .
 docker run -d --name fan_controller fan_controller
 ```
 
+### Configuration
+
+Custom behavior (e.g., thresholds, MQTT broker) may be defined in:
+
+```
+config/fan_controller_config.yaml
+```
+
 ---
 
 ## Requirements
 
-Install dependencies using:
+Install dependencies with:
 
 ```bash
 pip install -r requirements.txt
@@ -188,12 +202,11 @@ pip install -r requirements.txt
 
 ---
 
-## Final Notes & Adjustments
+## Notes
 
-- `value` is now correctly parsed as an integer, aligning with `StatusDTO.value: int`.
-- The `id` field in `EmergencyDTO` has been corrected to `str`.
-- Duplicate `publisher.py` files were identified; only the one under `services/` was kept.
-- Typo fixed: all mentions now use the correct class name `FanController`.
+- Thermal runaway mode includes a built-in **30s safety timer**.
+- `"solved"` messages gracefully clear emergency state.
+- Repository pattern is used to maintain internal state (`status`, `emergency`).
+- Fan speed messages are printed to stdout for inspection and logged via `logging`.
 
-Feel free to expand this README with API testing instructions or deployment configurations as needed.
-
+---

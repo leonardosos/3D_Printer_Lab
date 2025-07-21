@@ -1,0 +1,16 @@
+web:
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+
+persistence:
+  file_path: "data/queue_data.json"
+  backup_interval: 300  # seconds
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+integration:
+  job_handler_url: "http://localhost:8081"
+  web_ui_url: "http://localhost:8000"

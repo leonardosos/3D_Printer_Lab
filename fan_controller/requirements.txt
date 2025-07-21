@@ -1,0 +1,7 @@
+# mqtt
+paho-mqtt == 2.1.0
+PyYAML == 6.0.2
+
+# http
+requests == 2.32.4
+PyYAML == 6.0.2
