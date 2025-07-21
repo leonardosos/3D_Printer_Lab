@@ -1,5 +1,5 @@
 from typing import Dict, Optional, Set
-from job_handler.app.dto.job_dto import Job
+from app.dto.job_dto import Job
 
 class JobHandlerRepository:
     def __init__(self):

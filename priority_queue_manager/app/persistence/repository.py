@@ -3,8 +3,8 @@ import os
 import logging
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from ..model.job_model import Job
-from ..model.exceptions import PersistenceError, JobNotFoundError
+from app.model.job_model import Job
+from app.model.exceptions import PersistenceError, JobNotFoundError
 
 class QueuePersistence:
     def __init__(self, file_path: str = "data/queue_data.json"):

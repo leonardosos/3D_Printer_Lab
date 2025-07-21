@@ -1,8 +1,10 @@
-# mqtt
+# MQTT
 paho-mqtt == 2.1.0
-PyYAML == 6.0.2
 
-# http
+# HTTP/API
+fastapi == 0.104.0
+uvicorn == 0.24.0
 requests == 2.32.4
+
+# Configuration
 PyYAML == 6.0.2
-Fastapi == 0.104.0

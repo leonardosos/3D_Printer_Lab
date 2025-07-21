@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from job_handler.app.dto.job_dto import Job
+from app.dto.job_dto import Job
 from typing import Optional
 from datetime import datetime
 import logging

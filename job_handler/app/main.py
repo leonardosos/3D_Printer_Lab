@@ -2,7 +2,7 @@ import logging
 import yaml
 import sys
 import argparse
-from job_handler.app.model.job_handler import JobHandler
+from app.model.job_handler import JobHandler
 
 def load_config(path: str):
     with open(path, "r") as f:

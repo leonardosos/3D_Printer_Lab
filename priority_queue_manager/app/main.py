@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from flask import Flask
-from priority_queue_manager.app.api.routes import app
+from app.api.routes import app
 
 # Add the current directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

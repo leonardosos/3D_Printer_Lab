@@ -2,8 +2,8 @@ import paho.mqtt.client as mqtt
 import json
 import logging
 from typing import Callable
-from job_handler.app.dto.printer_progress_dto import PrinterProgress
-from job_handler.app.dto.robot_progress_dto import RobotProgress
+from app.dto.printer_progress_dto import PrinterProgress
+from app.dto.robot_progress_dto import RobotProgress
 
 class MQTTSubscriber:
     def __init__(self, broker_host: str, broker_port: int, on_printer_progress: Callable[[PrinterProgress], None], on_robot_progress: Callable[[RobotProgress], None]):

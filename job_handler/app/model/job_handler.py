@@ -4,14 +4,14 @@ import logging
 import requests
 import numpy as np
 from typing import Optional
-from job_handler.app.persistence.repository import JobHandlerRepository
-from job_handler.app.dto.job_dto import Job
-from job_handler.app.dto.assignment_dto import Assignment
-from job_handler.app.dto.printer_progress_dto import PrinterProgress
-from job_handler.app.dto.robot_progress_dto import RobotProgress
-from job_handler.app.dto.printer_list_dto import PrintersList, PrinterStatus
-from job_handler.app.mqtt.publisher import MQTTPublisher
-from job_handler.app.mqtt.subscriber import MQTTSubscriber
+from app.persistence.repository import JobHandlerRepository
+from app.dto.job_dto import Job
+from app.dto.assignment_dto import Assignment
+from app.dto.printer_progress_dto import PrinterProgress
+from app.dto.robot_progress_dto import RobotProgress
+from app.dto.printer_list_dto import PrintersList, PrinterStatus
+from app.mqtt.publisher import MQTTPublisher
+from app.mqtt.subscriber import MQTTSubscriber
 
 class JobHandler:
     def __init__(self, broker_host: str, broker_port: int, queue_manager_url: str):

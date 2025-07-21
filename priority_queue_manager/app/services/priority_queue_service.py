@@ -1,8 +1,8 @@
 import logging
 from typing import List, Optional
-from ..model.job_model import Job
-from ..persistence.repository import QueuePersistence
-from ..model.exceptions import JobNotFoundError, InvalidJobDataError, QueueOperationError
+from app.persistence.repository import QueuePersistence
+from app.model.job_model import Job
+from app.model.exceptions import JobNotFoundError, InvalidJobDataError, QueueOperationError
 
 class PriorityQueueService:
     def __init__(self, persistence_file_path: str = "data/queue_data.json"):

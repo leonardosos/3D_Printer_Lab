@@ -1,17 +1,26 @@
 import logging
+import os
 from fastapi import FastAPI
 from app.api.routes import router
 from app.persistence.repository import PrinterMonitoringRepository
 from app.model.monitoring import PrinterMonitoringService
 from app.mqtt.subscriber import MQTTSubscriber
 
+def load_config():
+    import yaml
+    config_path = os.path.join(os.path.dirname(__file__), "config", "mqtt_config.yaml")
+    with open(config_path, "r") as f:
+        return yaml.safe_load(f)
+
 logging.basicConfig(level=logging.INFO)
 
 # Global singletons
+config = load_config()
 repository = PrinterMonitoringRepository()
 service = PrinterMonitoringService(repository)
-mqtt_subscriber = MQTTSubscriber("localhost", 1883, service)
 
+mqtt_subscriber = MQTTSubscriber(config["host"], config["port"], service)
+    
 app = FastAPI()
 
 # Dependency for injection

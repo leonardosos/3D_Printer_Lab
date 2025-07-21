@@ -2,15 +2,15 @@ from flask import Flask, request, jsonify
 import logging
 
 # Import DTOs
-from priority_queue_manager.app.dto.job_request_dto import JobRequestDTO
-from priority_queue_manager.app.dto.job_response_dto import JobResponseDTO
-from priority_queue_manager.app.dto.priority_update_dto import PriorityUpdateDTO
+from app.dto.job_request_dto import JobRequestDTO
+from app.dto.job_response_dto import JobResponseDTO
+from app.dto.priority_update_dto import PriorityUpdateDTO
 
 # Import Service
-from ..services.priority_queue_service import PriorityQueueService
+from app.services.priority_queue_service import PriorityQueueService
 
 # Import Exceptions
-from priority_queue_manager.app.model.exceptions import (
+from app.model.exceptions import (
     JobNotFoundError, 
     InvalidJobDataError, 
     QueueOperationError, 

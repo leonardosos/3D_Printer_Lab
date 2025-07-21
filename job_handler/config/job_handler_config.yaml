@@ -1,6 +1,6 @@
 mqtt:
-  host: "localhost"
+  host: "host.docker.internal"
   port: 1883
 
 queue_manager:
-  url: "http://localhost:8000"
+  url: "http://host.docker.internal:8000"

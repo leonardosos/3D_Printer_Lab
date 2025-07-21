@@ -2,8 +2,8 @@ import paho.mqtt.client as mqtt
 import json
 import logging
 from dataclasses import asdict
-from job_handler.app.dto.assignment_dto import Assignment
-from job_handler.app.dto.printer_list_dto import PrintersList
+from app.dto.assignment_dto import Assignment
+from app.dto.printer_list_dto import PrintersList
 
 class MQTTPublisher:
     def __init__(self, broker_host: str, broker_port: int, qos: int = 0):
