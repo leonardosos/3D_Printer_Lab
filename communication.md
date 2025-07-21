@@ -443,7 +443,7 @@ It is not an emergency cooling command, but a **periodic** heat level based on t
 **Example:**
 
 ```json
-{ "fanId": "fan-1", "speed": 75, "actual": 72, "timestamp": "2025-06-15T08:32:15Z" }
+{ "fanId": "fan1", "speed": 75, "actual": 72, "timestamp": "2025-06-15T08:32:15Z" }
 ```
 
 #### 2.4.3 Topic: device/fan/controller/emergency
