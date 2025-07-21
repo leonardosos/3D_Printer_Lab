@@ -17,4 +17,4 @@ room:
 printer:
   low: 10
   high: 300
-  max_rate_time: 100
+  max_rate_time: 300
