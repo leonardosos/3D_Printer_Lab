@@ -194,6 +194,23 @@ services:
       - broker
       - robot
 
+  ### Fan Unit Service
+  fan-unit:
+    build:
+      context: ./fan_unit
+      dockerfile: Dockerfile
+    container_name: fan-unit-container
+    volumes:
+      - ./fan_unit/app/config.yaml:/app/app/config.yaml
+    environment:
+      - FAN_ID=fan1
+      - DEBUG=True
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
 networks:
   iot_network:
     driver: bridge
