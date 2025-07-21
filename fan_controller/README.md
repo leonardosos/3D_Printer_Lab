@@ -30,7 +30,7 @@ The microservice reacts to both **status** and **emergency** messages to compute
    - If `type` is `"solved"`, emergency state is cleared and normal operation resumes.
 
 2. **Status Only**:
-   - Speed is calculated from severity: `value * 10`, clamped between 0–100.
+   - Speed is calculated from severity: `heatLevel * 10`, clamped between 0–100.
 
 3. **No Input**:
    - No speed update is published.
@@ -46,12 +46,12 @@ The microservice reacts to both **status** and **emergency** messages to compute
 
 ```json
 {
-  "value": 4,
+  "heatLevel": 4,
   "timestamp": "2025-06-15T08:32:20Z"
 }
 ```
 
-- `value`: Integer from 1–10, indicating temperature severity.
+- `heatLevel`: Integer from 1–10, indicating temperature severity.
 - `timestamp`: ISO 8601 string.
 
 ---
@@ -152,7 +152,7 @@ fan_controller/
 ```python
 @dataclass
 class StatusDTO:
-    value: int
+    heatLevel: int
     timestamp: float
 
 @dataclass
@@ -161,7 +161,7 @@ class EmergencyDTO:
     type: str
     source: str
     id: str
-    timestamp: float
+    timestamp: str
 
 @dataclass
 class FanSpeedDTO:

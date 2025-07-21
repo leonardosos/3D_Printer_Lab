@@ -2,6 +2,7 @@ import time
 import threading
 import logging
 import requests
+from dataclasses import asdict
 import numpy as np
 from typing import Optional
 from app.persistence.repository import JobHandlerRepository

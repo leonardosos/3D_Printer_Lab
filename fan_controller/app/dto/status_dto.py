@@ -2,5 +2,5 @@ from dataclasses import dataclass
 
 @dataclass
 class StatusDTO:
-    value: int
+    heatLevel: int
     timestamp: str

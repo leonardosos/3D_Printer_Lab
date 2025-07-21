@@ -72,8 +72,8 @@ class FanController:
             if emergency.action == "shutdown":
                 return 0
         if status:
-            # Map status.value (1-10) to speed (0-100)
-            return min(max(status.value * 10, 0), 100)
+            # Map status.heatLevel (1-10) to speed (0-100)
+            return min(max(status.heatLevel * 10, 0), 100)
         return 0
 
     def publish_speed(self, speed: int):

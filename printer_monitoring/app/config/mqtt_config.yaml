@@ -1,3 +1,3 @@
 # MQTT Configuration for Printer Monitoring
-host: "host.docker.internal"
+host: "broker"
 port: 1883

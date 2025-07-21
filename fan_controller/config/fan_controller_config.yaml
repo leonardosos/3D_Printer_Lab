@@ -1,8 +1,8 @@
 fans:
   - id: "fan1"
-  - id: "fan2"
+#  - id: "fan2"
 mqtt:
-  host: "host.docker.internal"
+  host: "broker"
   port: 1883
 topics:
   status: "device/fan/controller/status"

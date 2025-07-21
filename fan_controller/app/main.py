@@ -49,7 +49,7 @@ def main():
         logging.info("Running in test mode.")
         # Simulate a status and emergency message for each fan
         for fan_id, controller in fan_controllers.items():
-            status_payload = {"value": 5, "timestamp": "2025-07-19T12:00:00Z"}
+            status_payload = {"heatLevel": 5, "timestamp": "2025-07-19T12:00:00Z"}
             emergency_payload = {"action": "none", "type": "overheat", "source": "test", "id": "em1", "timestamp": "2025-07-19T12:01:00Z"}
             logging.info(f"Simulating status for {fan_id}")
             controller.on_status_received(status_payload)

@@ -194,6 +194,94 @@ services:
       - broker
       - robot
 
+### Printer Monitoring Service
+
+  printer-monitoring:
+    build:
+      context: ./printer_monitoring
+      dockerfile: Dockerfile
+    container_name: printer-monitoring-container
+    ports:
+      - "8110:8110"
+    volumes:
+      - ./printer_monitoring/config.yaml:/app/mqtt_config.yaml
+    environment:
+      - CONFIG_PATH=/app/mqtt_config.yaml
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+      - job-handler
+
+### Fan Controller Service
+
+  fan-controller:
+    build:
+      context: ./fan_controller
+      dockerfile: Dockerfile
+    container_name: fan-controller-container
+    ports:
+      - "8150:8150"
+    volumes:
+      - ./fan_controller/config.yaml:/app/fan_controller_config.yaml
+    environment:
+      - CONFIG_PATH=/app/fan_controller_config.yaml
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
+### Priority Queue Manager Service
+
+  priority-queue-manager:
+    build:
+      context: ./priority_queue_manager
+      dockerfile: Dockerfile
+    container_name: priority-queue-manager-container
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./priority_queue_manager/config.yaml:/app/priority_queue_config.yaml
+      - ./priority_queue_manager/data:/app/data
+    environment:
+      - CONFIG_PATH=/app/priority_queue_config.yaml
+      - DEBUG=True
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+
+
+### Job Handler Service
+
+  job-handler:
+    build:
+      context: ./job_handler
+      dockerfile: Dockerfile
+    container_name: job-handler-container
+    ports:
+      - "8115:8115"
+    volumes:
+      - ./job_handler/config.yaml:/app/job_handler_config.yaml
+    environment:
+      - CONFIG_PATH=/app/job_handler_config.yaml
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+      - priority-queue-manager
+
+
 networks:
   iot_network:
     driver: bridge
+
+
+
