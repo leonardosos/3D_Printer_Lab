@@ -662,3 +662,48 @@ werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on 
 2025-07-19 11:56:19,757 - api-gateway - INFO - Forwarding request to Global Temperature service: GET http://global-temperature:8100/temperature/global
 2025-07-19 11:56:19,761 - api-gateway - INFO - Received response from http://global-temperature:8100/temperature/global: 200
 2025-07-19 11:56:19,762 - werkzeug - INFO - 172.18.0.7 - - [19/Jul/2025 11:56:19] "GET /temperature/global HTTP/1.1" 200 -
+2025-07-19 15:24:05,703 - api-gateway - INFO - API Gateway starting up with configuration loaded
+2025-07-19 15:24:05,727 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.18.0.2:8080
+2025-07-19 15:24:05,727 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-19 15:24:05,728 - werkzeug - INFO -  * Restarting with stat
+2025-07-19 15:24:06,079 - api-gateway - INFO - API Gateway starting up with configuration loaded
+2025-07-19 15:24:06,095 - werkzeug - WARNING -  * Debugger is active!
+2025-07-19 15:24:06,096 - werkzeug - INFO -  * Debugger PIN: 237-031-934
+2025-07-19 15:30:43,749 - api-gateway - INFO - Forwarding request to Global Temperature service: GET http://global-temperature:8100/temperature/global
+2025-07-19 15:30:43,760 - api-gateway - INFO - Received response from http://global-temperature:8100/temperature/global: 200
+2025-07-19 15:30:43,762 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:43] "GET /temperature/global HTTP/1.1" 200 -
+2025-07-19 15:30:43,779 - api-gateway - INFO - Forwarding request to Printer Monitoring service: GET http://printer-monitoring:8110/printers/status
+2025-07-19 15:30:43,790 - api-gateway - ERROR - Request to http://printer-monitoring:8110/printers/status failed: HTTPConnectionPool(host='printer-monitoring', port=8110): Max retries exceeded with url: /printers/status (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7971cccbab50>: Failed to resolve 'printer-monitoring' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-19 15:30:43,791 - api-gateway - ERROR - Service error: Service is unavailable
+2025-07-19 15:30:43,791 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:43] "[35m[1mGET /printers/status HTTP/1.1[0m" 503 -
+2025-07-19 15:30:43,804 - api-gateway - INFO - Forwarding request to Priority Queue Manager service: GET http://priority-queue-manager:8090/jobs
+2025-07-19 15:30:43,812 - api-gateway - ERROR - Request to http://priority-queue-manager:8090/jobs failed: HTTPConnectionPool(host='priority-queue-manager', port=8090): Max retries exceeded with url: /jobs (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7971ccce17f0>: Failed to resolve 'priority-queue-manager' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-19 15:30:43,812 - api-gateway - ERROR - Service error: Service is unavailable
+2025-07-19 15:30:43,813 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:43] "[35m[1mGET /jobs HTTP/1.1[0m" 503 -
+2025-07-19 15:30:46,968 - api-gateway - INFO - Forwarding request to Global Temperature service: GET http://global-temperature:8100/temperature/global
+2025-07-19 15:30:46,973 - api-gateway - INFO - Received response from http://global-temperature:8100/temperature/global: 200
+2025-07-19 15:30:46,975 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:46] "GET /temperature/global HTTP/1.1" 200 -
+2025-07-19 15:30:50,794 - api-gateway - INFO - Forwarding request to Global Temperature service: GET http://global-temperature:8100/temperature/global
+2025-07-19 15:30:50,798 - api-gateway - INFO - Received response from http://global-temperature:8100/temperature/global: 200
+2025-07-19 15:30:50,799 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:50] "GET /temperature/global HTTP/1.1" 200 -
+2025-07-19 15:30:52,352 - api-gateway - INFO - Forwarding request to Printer Monitoring service: GET http://printer-monitoring:8110/printers/status
+2025-07-19 15:30:52,360 - api-gateway - ERROR - Request to http://printer-monitoring:8110/printers/status failed: HTTPConnectionPool(host='printer-monitoring', port=8110): Max retries exceeded with url: /printers/status (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7971ccce64c0>: Failed to resolve 'printer-monitoring' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-19 15:30:52,361 - api-gateway - ERROR - Service error: Service is unavailable
+2025-07-19 15:30:52,361 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:52] "[35m[1mGET /printers/status HTTP/1.1[0m" 503 -
+2025-07-19 15:30:54,296 - api-gateway - INFO - Forwarding request to Priority Queue Manager service: GET http://priority-queue-manager:8090/jobs
+2025-07-19 15:30:54,303 - api-gateway - ERROR - Request to http://priority-queue-manager:8090/jobs failed: HTTPConnectionPool(host='priority-queue-manager', port=8090): Max retries exceeded with url: /jobs (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7971cccba9a0>: Failed to resolve 'priority-queue-manager' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-19 15:30:54,303 - api-gateway - ERROR - Service error: Service is unavailable
+2025-07-19 15:30:54,304 - werkzeug - INFO - 172.18.0.4 - - [19/Jul/2025 15:30:54] "[35m[1mGET /jobs HTTP/1.1[0m" 503 -
+2025-07-21 09:39:05,808 - api-gateway - INFO - API Gateway starting up with configuration loaded
+2025-07-21 09:39:06,306 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.18.0.3:8080
+2025-07-21 09:39:06,306 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-21 09:39:06,308 - werkzeug - INFO -  * Restarting with stat
+2025-07-21 09:39:06,644 - api-gateway - INFO - API Gateway starting up with configuration loaded
+2025-07-21 09:39:06,660 - werkzeug - WARNING -  * Debugger is active!
+2025-07-21 09:39:06,700 - werkzeug - INFO -  * Debugger PIN: 107-416-934
