@@ -87,8 +87,8 @@ services:
     networks:
       - iot_network
     restart: always
-    #depends_on:
-      #- api-gateway
+    depends_on:
+      - api-gateway
 
   ### Global Temperature Service
   global-temperature:
@@ -111,7 +111,7 @@ services:
     restart: always
     depends_on:
       - broker
-      #- api-gateway
+      - api-gateway
 
   ### Anomaly Detection Service
   anomaly-detection:
