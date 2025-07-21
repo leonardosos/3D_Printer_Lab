@@ -1,0 +1,42 @@
+# Configuration for Robot Management microservice
+
+# MQTT broker settings
+mqtt:
+  broker: "localhost"
+  port: 1883
+  client_id: "robot-management-service"
+  keep_alive: 60
+  reconnect_delay: 5
+
+# Robots configuration
+robots:
+  - id: "rob-1"
+    default_speed: 200
+    topics:
+      coordinates: "device/robot/rob-1/coordinates"
+      progress: "device/robot/rob-1/progress"
+
+# Printers configuration
+printers:
+  - id: "printer-1"
+    coordinates:
+      x: 120
+      y: 45
+      z: 10
+  - id: "printer-2"
+    coordinates:
+      x: 240
+      y: 45
+      z: 10
+  - id: "printer-3"
+    coordinates:
+      x: 360
+      y: 45
+      z: 10
+
+# Service configuration
+service:
+  port: 8120
+  queue_size: 100
+  processing_interval: 1.0  # seconds
+  printer_topic: "device/printers"
