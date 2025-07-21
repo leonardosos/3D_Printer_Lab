@@ -28,10 +28,12 @@ from typing import List
 
 
 class AnomalyDetectionService:
-    def __init__(self, mqtt_client, debug=True, discover_printers_timeout=60):
-        
+    def __init__(self, mqtt_client, debug_service=True, discover_printers_timeout=60, debug_alerts=True, debug_analysis=True):
+
         # Initialize self attributes
-        self.debug = debug
+        self.debug = debug_service
+        self.debug_alerts = debug_alerts
+        self.debug_analysis = debug_analysis
         self.discover_printers_timeout = discover_printers_timeout
 
         # Initialize MQTT client
@@ -48,16 +50,16 @@ class AnomalyDetectionService:
 
         # Search all printers in the network -> blocking call
         # Any payload with printerId will be added to the discovered printers
+        print(f"\033[91m[ANOMALY_DETECTION DEBUG] Discovering printers with timeout {self.discover_printers_timeout} seconds...\033[0m")
         self.printers = discover_printers(self.subscriber, timeout=self.discover_printers_timeout, debug=self.debug)
 
         # Classes
         # Initialize temperature history and analyzer
         self.history = TemperatureHistory(self.printers, debug=self.debug)
         # Initialize alert history for emergency alerts
-        self.alert_history = AlertHistory(debug=self.debug)
-
+        self.alert_history = AlertHistory(debug=self.debug_alerts)
         # Initialize temperature analyzer for heat level computation
-        self.analyzer = TemperatureAnalyzer(debug=self.debug)
+        self.analyzer = TemperatureAnalyzer(debug=self.debug_analysis)
 
 
         # VARIABLES FOR KEEPING TRACK OF TEMPERATURES
@@ -93,7 +95,7 @@ class AnomalyDetectionService:
         if self.debug:
             print("[GLOBAL_TEMP DEBUG] Subscribed to room and printer temperature topics.")
 
-
+        print(f"\033[92m[ANOMALY_DETECTION] Service started successfully. ({len(self.printers)} printers discovered.)\033[0m")
 
     # Custom callbacks for MQTT messages, for store temperature readings
     def _publish_emergency_async(self, action, type_, source, id_):
@@ -176,6 +178,16 @@ class AnomalyDetectionService:
 
     def _on_printer_temp(self, client, userdata, dto_received):
         printer_id = dto_received.printerId
+
+        # Dynamically add new printer IDs if not present
+        if printer_id not in self.current_printer_temperatures:
+            self.current_printer_temperatures[printer_id] = None
+            self.prev_printer_temperatures[printer_id] = None
+            self.printer_threshold_safe_count[printer_id] = 0
+            self.printer_rate_safe_count[printer_id] = 0
+            if self.debug:
+                print(f"[ANOMALY_DETECTION DEBUG] Discovered new printer: {printer_id} (no temperature history will be available for this printer)")
+
         # Update previous and current printer temperature DTOs
         self.prev_printer_temperatures[printer_id] = self.current_printer_temperatures.get(printer_id)
         self.current_printer_temperatures[printer_id] = dto_received
@@ -268,7 +280,7 @@ class AnomalyDetectionService:
                             source="room",
                             id_=alert.source_id
                         )
-                        if self.debug:
+                        if self.debug_alerts:
                             print(f"[REENTRANT] Room threshold emergency resolved: {alert.alert_id}")
                 self.room_threshold_safe_count = 0
         else:
@@ -291,7 +303,7 @@ class AnomalyDetectionService:
                             source="room",
                             id_=alert.source_id
                         )
-                        if self.debug:
+                        if self.debug_alerts:
                             print(f"[REENTRANT] Room rate emergency resolved: {alert.alert_id}")
                 self.room_rate_safe_count = 0
         else:
@@ -314,7 +326,7 @@ class AnomalyDetectionService:
                             source="printer",
                             id_=printer_id
                         )
-                        if self.debug:
+                        if self.debug_alerts:
                             print(f"[REENTRANT] Printer {printer_id} threshold emergency resolved: {alert.alert_id}")
                 self.printer_threshold_safe_count[printer_id] = 0
         else:
@@ -337,7 +349,7 @@ class AnomalyDetectionService:
                             source="printer",
                             id_=printer_id
                         )
-                        if self.debug:
+                        if self.debug_alerts:
                             print(f"[REENTRANT] Printer {printer_id} rate emergency resolved: {alert.alert_id}")
                 self.printer_rate_safe_count[printer_id] = 0
         else:

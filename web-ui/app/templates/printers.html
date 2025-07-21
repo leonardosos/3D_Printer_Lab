@@ -70,7 +70,13 @@
         <div class="grid">
             {% for printer in printers %}
             <div class="printer-card">
-                <div class="printer-title">{{ printer.name }}</div>
+                <div class="printer-title">
+                  {% if printer.modelUrl %}
+                    {{ printer.modelUrl }}
+                  {% else %}
+                    Printer {{ printer.printerId }}
+                  {% endif %}
+                </div>
                 <div class="printer-status">Status: <strong>{{ printer.status }}</strong></div>
                 <div class="printer-job">Current Job: {{ printer.current_job or "None" }}</div>
                 <div class="printer-progress">

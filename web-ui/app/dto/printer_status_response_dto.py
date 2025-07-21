@@ -5,11 +5,12 @@ import json
 @dataclass
 class PrinterStatusDTO:
     printerId: str
-    status: str
+    status: str  # "idle" | "printing" | "error"
     currentJobId: Optional[str] = None
-    progress: Optional[float] = None
+    modelUrl: Optional[str] = None
+    progress: Optional[int] = None  # 0–100
     temperature: Optional[float] = None
-    lastUpdated: str = ""
+    lastUpdated: str = ""  # ISO 8601
 
 @dataclass
 class PrinterStatusResponseDTO:

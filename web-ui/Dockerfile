@@ -25,4 +25,4 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR / 
 
 # Run the target application
-CMD ["python3", "-m", "app.web_server_proces_docker"]
+CMD ["python3", "-m", "app.web_server_process"]

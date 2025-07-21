@@ -13,6 +13,7 @@ from datetime import datetime
 
 class TemperatureAnalyzer:
     def __init__(self, config_path: str = 'app/anomaly_detection_config.yaml', debug: bool = False):
+        
         self.debug = debug
 
         self.room_max_threshold = 50

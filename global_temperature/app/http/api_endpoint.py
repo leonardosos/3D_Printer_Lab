@@ -25,8 +25,8 @@ class ApiEndpoint:
             self.app.config.update(self.config)
             
             if self.debug:
-                print(f"[API ENDPOINT DEBUG] Loaded config: {self.config}")
-        
+                print(f"[API GLOBAL TEMPERATURE ENDPOINT DEBUG] Loaded config: {self.config}")
+
         except Exception as e:
             raise RuntimeError(f"Failed to load configuration from {config_path}: {e}")
         
@@ -34,7 +34,7 @@ class ApiEndpoint:
         @self.app.route("/temperature/global", methods=["GET"])
         def get_temperature():
             if self.debug:
-                print("[API ENDPOINT DEBUG] Handling GET request for /temperature/global")
+                print("[API GLOBAL TEMPERATURE ENDPOINT DEBUG] Handling GET request for /temperature/global")
             # Should return a dict with top-level keys 'temperatures' and 'lastUpdated'
             return jsonify(self.global_temp_service.get_temperature_api_response())
 

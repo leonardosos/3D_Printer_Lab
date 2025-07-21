@@ -8,12 +8,18 @@ import os
 import threading
 
 class WebServer:
-    def __init__(self, config_path='app/web_conf.yaml'):
+    def __init__(self, config_path='app/web_conf.yaml', debug=True):
         
-        print(f"Initializing WebServer with config path: {config_path}")
+        self.debug = debug
+        
+        if self.debug:
+            print(f"[WEB UI DEBUG] Initializing WebServer with config path: {config_path}")
+
         self.config = self._load_config(config_path)
-        print(f"Loaded config: {self.config}")
         
+        if self.debug:
+            print(f"[WEB UI DEBUG] Loaded config: {self.config}")
+
         self.app = Flask(__name__)
         
         self._register_blueprints()
@@ -25,10 +31,13 @@ class WebServer:
         # Start the server in a separate thread
         self.server_thread = None
 
-        print("WebServer initialization complete.")
+        if self.debug:
+            print("[WEB UI DEBUG] WebServer initialization complete.")
 
     def _load_config(self, path):
-        print(f"Attempting to load config from: {path}")
+        if self.debug:
+            print(f"[WEB UI DEBUG] Attempting to load config from: {path}")
+
         config = {
             "web": {"host": "0.0.0.0", "port": 8000, "debug": False},
             "api_gateway": {"base_url": "http://localhost:8080"}
@@ -40,7 +49,9 @@ class WebServer:
                     print(f"YAML loaded: {loaded}")
                     if isinstance(loaded, dict):
                         config.update(loaded)
-                        print("Config updated with YAML file.")
+
+                        if self.debug:
+                            print("[WEB UI DEBUG] Config updated with YAML file.")
             except Exception as e:
                 print(f"Error loading config: {e}")
         else:
@@ -52,7 +63,9 @@ class WebServer:
         self.app.register_blueprint(temperature_bp)
         self.app.register_blueprint(printers_bp)
         self.app.register_blueprint(queue_bp)
-        print("All blueprints registered.")
+
+        if self.debug:
+            print("[WEB UI DEBUG] All blueprints registered.")
 
     def _register_context_processors(self):
         reload_time_ms = self.config.get("web", {}).get("reload_time_ms", self.reload_page_timer)
@@ -69,7 +82,8 @@ class WebServer:
         self.app.run(host=host, port=port, debug=debug, use_reloader=False)
 
     def start(self):
-        print("Starting server in background thread.")
+        print("Starting web-ui server...")
+
         self.server_thread = threading.Thread(target=self._run_server, daemon=True)
         self.server_thread.start()
 
