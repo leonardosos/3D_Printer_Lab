@@ -88,6 +88,7 @@ services:
     environment:
       - DEBUG=True
       - TZ=Europe/Berlin
+      - RELOAD_TIME_MS=10000 # 10 seconds
     networks:
       - iot_network
     restart: always

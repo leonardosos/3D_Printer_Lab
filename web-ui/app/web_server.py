@@ -25,8 +25,9 @@ class WebServer:
         self._register_blueprints()
 
         # Define reload time in milliseconds
-        self.reload_page_timer = 30000 # 30 seconds
-        self._register_context_processors()  
+        reload_timer_string = os.getenv("RELOAD_TIME_MS", default="30000") #default: 30 seconds
+        self.reload_page_timer = int(reload_timer_string) # Convert to integer
+        self._register_context_processors()
 
         # Start the server in a separate thread
         self.server_thread = None
