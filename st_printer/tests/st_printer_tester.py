@@ -36,7 +36,7 @@ class PrinterAssignmentDTO:
 ########### TESTER
 
 # Interval to publish assignment, periodically
-timeout_publish = 20  # seconds 
+timeout_publish = 120  # seconds 
 
 # Topics
 PRINTER_ID = "printer_001"
