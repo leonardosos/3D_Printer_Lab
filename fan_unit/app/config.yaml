@@ -1,0 +1,10 @@
+mqtt:
+  broker_host: broker
+  broker_port: 1883
+  topic_subscribe: "device/fan/fan1/speed"
+  qos: 1
+
+fan:
+  id: "fan1"
+  min_speed: 0
+  max_speed: 100

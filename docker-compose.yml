@@ -193,6 +193,39 @@ services:
       - broker
       - robot
 
+  ### Fan Unit Service
+  fan-unit:
+    build:
+      context: ./fan_unit
+      dockerfile: Dockerfile
+    container_name: fan-unit-container
+    volumes:
+      - ./fan_unit/app/config.yaml:/app/app/config.yaml
+    environment:
+      - FAN_ID=fan1
+      - DEBUG=True
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
+  ### Room Temperature Sensor Service
+  room-temperature-sensor:
+    build:
+      context: ./room_temperature_sensor
+      dockerfile: Dockerfile
+    container_name: room-temperature-sensor-container
+    volumes:
+      - ./room_temperature_sensor/config:/app/config
+    environment:
+      - DEBUG=True
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
 networks:
   iot_network:
     driver: bridge
