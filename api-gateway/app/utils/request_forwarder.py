@@ -58,18 +58,19 @@ def forward_request(method, url, headers=None, params=None, json=None, timeout=1
             # Try to parse error response as JSON
             try:
                 error_data = response.json()
-                # Propagate the error from the microservice
-                raise ServiceException(
-                    message=error_data.get('error', {}).get('message', str(e)),
-                    status_code=response.status_code,
-                    details=error_data.get('error', {}).get('details')
-                )
             except ValueError:
-                # If the error response is not JSON, raise a generic error
-                raise ServiceException(
-                    message=f"Service error: {str(e)}",
-                    status_code=response.status_code
-                )
+                error_data = response.text
+
+            if isinstance(error_data, dict):
+                message = error_data.get('error', {}).get('message', str(e))
+                details = error_data.get('error', {}).get('details')
+            else:
+                message = str(error_data) if error_data else str(e)
+                details = None
+
+            # Log the error but do not raise or do anything else
+            logger.error(f"ServiceException: {message} (status {response.status_code})")
+            return {}  # Return empty dict gracefully
         
         # Parse the response as JSON
         try:
