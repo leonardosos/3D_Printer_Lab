@@ -5,7 +5,7 @@ sensor:
   update_interval_seconds: 5
   
 mqtt:
-  broker_host: "localhost"
+  broker_host: "broker"
   broker_port: 1883
   topic: "device/room/temperature"
   
