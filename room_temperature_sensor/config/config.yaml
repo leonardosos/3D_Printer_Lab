@@ -1,0 +1,13 @@
+sensor:
+  id: "room-sensor-1"
+  min_temperature: 11.0
+  max_temperature: 49.0
+  update_interval_seconds: 5
+  
+mqtt:
+  broker_host: "localhost"
+  broker_port: 1883
+  topic: "device/room/temperature"
+  
+logging:
+  level: "INFO"
