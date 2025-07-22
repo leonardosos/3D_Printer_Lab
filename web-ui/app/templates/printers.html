@@ -78,7 +78,7 @@
                   {% endif %}
                 </div>
                 <div class="printer-status">Status: <strong>{{ printer.status }}</strong></div>
-                <div class="printer-job">Current Job: {{ printer.current_job or "None" }}</div>
+                <div class="printer-job">Current Job: {{ printer.currentJobId or "None" }}</div>
                 <div class="printer-progress">
                     <div class="printer-progress-bar" style="width: {{ printer.progress }}%;"></div>
                 </div>

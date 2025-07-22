@@ -85,9 +85,9 @@
             <thead>
                 <tr>
                     <th>Job ID</th>
-                    <th>Name</th>
                     <th>Priority</th>
                     <th>Status</th>
+                    <th>Model ID</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -95,9 +95,9 @@
                 {% for job in jobs %}
                 <tr>
                     <td>{{ job.id }}</td>
-                    <td>{{ job.name }}</td>
                     <td>{{ job.priority }}</td>
                     <td>{{ job.status }}</td>
+                    <td>{{ job.modelId if job.modelId else "Unknown" }}</td>
                     <td class="actions">
                         <button class="edit" onclick="location.href='{{ url_for('queue.edit_job', job_id=job.id) }}'">Edit</button>
                         <form action="{{ url_for('queue.delete_job_route', job_id=job.id) }}" method="post" style="display:inline;">
