@@ -349,8 +349,7 @@ Run the container:
 docker run --name anomaly_detection-container \
     -p 8140:8140 \
     -v ${PWD}/target_mqtt_config.yaml:/app/mqtt_config.yaml \
-    -v ${PWD}/app/persistence/save/alert_history.csv:/app/persistence/save/alert_history.csv \
-    -v ${PWD}/app/persistence/save/temperature_history.csv:/app/persistence/save/temperature_history.csv \
+    -v ${PWD}/app/persistence/save:/app/persistence/save \
     --network composed-mqtt-project_iot_network \
     --restart always \
     anomaly_detection-image

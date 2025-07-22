@@ -1,11 +1,15 @@
 flowchart TB
 
-ST -->|device/printer/-ID-/progress| PrinterMon
+ST -->|MQTT:
+device/printer/-ID-/progress| PrinterMon
 
-APIGW o--o|HTTP: get| TempGlobal
+APIGW o--o|HTTP:
+ get| TempGlobal
 
-TempSensor -->|device/room/temperature| TempGlobal
-TempSensor -->|device/room/temperature| Anomaly
+TempSensor -->|MQTT:
+device/room/temperature| TempGlobal
+TempSensor -->|MQTT:
+device/room/temperature| Anomaly
 
 GUI["🧑‍💻 User Interface (GUI)"]
 Robot["🤖 ROB Robot"]
@@ -21,21 +25,33 @@ Anomaly["⚠️ Anomaly Detection"]
 FanCtrl["🌀 Fan Controller"]
 TempSensor["🌡 Room Temp Sensor"]
 
-ST -->|device/printer/-ID-/temperature| TempGlobal
-ST -->|device/printer/-ID-/temperature| Anomaly
+ST -->|MQTT:
+device/printer/-ID-/temperature| TempGlobal
+ST -->|MQTT:
+device/printer/-ID-/temperature| Anomaly
 
-TempGlobal -->|device/fan/controller/status| FanCtrl
-Anomaly -->|device/fan/controller/emergency| FanCtrl
-FanCtrl -->|device/fan/-ID-/speed| Fan
+TempGlobal -->|MQTT:
+device/fan/controller/status| FanCtrl
+Anomaly -->|MQTT:
+device/fan/controller/emergency| FanCtrl
+FanCtrl -->|MQTT:
+device/fan/-ID-/speed| Fan
 
 GUI o--o|HTTP| APIGW
-APIGW o--o|HTTP: get, post, delete, put| QueueMgr
-APIGW o--o|HTTP: get| PrinterMon
-QueueMgr o--o|HTTP: get, delete| JobHandler
+APIGW o--o|HTTP:
+get, post, delete, put| QueueMgr
+APIGW o--o|HTTP:
+get| PrinterMon
+QueueMgr o--o|HTTP:
+get, delete| JobHandler
 
-JobHandler -->|device/printers| Planning
-Planning <-->|down:-> device/robot/-ID-/coordinates
-up:-> device/robot/-ID-/progress| Robot
-Robot -->|device/robot/-ID-/progress| JobHandler
+JobHandler -->|MQTT:
+device/printers| Planning
+Planning <-->|MQTT:
+device/robot/-ID-/coordinates
+device/robot/-ID-/progress| Robot
+Robot -->|MQTT:
+device/robot/-ID-/progress| JobHandler
 
-JobHandler -->|device/printer/-ID-/assignement| ST
+JobHandler -->|MQTT:
+device/printer/-ID-/assignement| ST
