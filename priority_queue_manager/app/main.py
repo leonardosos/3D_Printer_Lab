@@ -17,14 +17,10 @@ def load_config():
     try:
         with open(config_path, 'r') as file:
             config = yaml.safe_load(file)
+            print(f"[DEBUG QUEUE] Loaded configuration from {config_path}: {config}")
         return config
     except Exception as e:
-        print(f"Error loading config: {e}")
-        # Return default config
-        return {
-            'server': {'host': '0.0.0.0', 'port': 8090, 'debug': True},
-            'logging': {'level': 'INFO', 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'}
-        }
+        raise FileNotFoundError(f"Error loading config: {e}")
 
 def setup_logging(config):
     """Setup logging configuration"""

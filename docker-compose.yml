@@ -260,7 +260,7 @@ services:
     volumes:
       - ./priority_queue_manager/data:/app/data
     environment:
-      - CONFIG_PATH=/app/priority_queue_config.yaml
+      - CONFIG_PATH=/app/config/priority_queue_config.yaml
       - DEBUG=True
       - TZ=Europe/Berlin
     networks:

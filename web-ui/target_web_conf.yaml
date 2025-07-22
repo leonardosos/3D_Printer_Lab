@@ -6,8 +6,11 @@
 ### Look port_flowchart for port flowchart
 
 api_gateway:
-  #Docker with name "api-gateway" and port 8080
+  #LEGIT: Docker with name "api-gateway" and port 8080
   base_url: "http://api-gateway:8080"
+
+  #TRICK: Docker bypassing the api gateway and directly connecting to the priority queue manager
+  #base_url: "http://priority-queue-manager:8090"
 web:
   host: "0.0.0.0"
   port: 8000
