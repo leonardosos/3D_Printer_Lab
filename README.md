@@ -322,6 +322,7 @@ In debug phase, if you need to "subscribe to single topics", run:
     docker exec -it my-mosquitto-broker-container mosquitto_sub -h localhost -p 1883 -t "#"
 
 where you can use the wildcard # to "subscribe to all topics" or "select that one" in which you are interested in 
+
 ---
 
 ### MQTT Broker - Eclipse Mosquitto
