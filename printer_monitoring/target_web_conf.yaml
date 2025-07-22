@@ -1,0 +1,13 @@
+# port is the port number for the web server, where listens for incoming requests
+# api_base_url is the base URL for the API Gateway, where the web server will send requests
+#   -> the port should match the one used in the API Gateway service
+#   -> the URL should point to the API Gateway service in your Docker network
+
+### Look port_flowchart for port flowchart
+
+api_gateway:
+  #Docker with name "api-gateway" and port 8080
+  base_url: "http://api-gateway:8080"
+printer_monitoring:
+  host: "0.0.0.0"
+  port: 8110 

@@ -199,20 +199,23 @@ services:
     build:
       context: ./printer_monitoring
       dockerfile: Dockerfile
-    container_name: printer-monitoring-container
+    container_name: printer_monitoring-container
     ports:
       - "8110:8110"
     volumes:
-      - ./printer_monitoring/app/config/mqtt_config.yaml:/app/mqtt_config.yaml
-    environment:
-      - CONFIG_PATH=/app/mqtt_config.yaml
+      - ./printer_monitoring/target_mqtt_config.yaml:/app/mqtt_config.yaml
+      - ./printer_monitoring/target_web_conf.yaml:/app/web_config.yaml
+      - ./printer_monitoring/app/persistence/save:/app/persistence/save
     networks:
       - iot_network
+    environment:
+      - timer_hear=61
+      - DEBUG=False
+      - DEBUG_COMMUNICATION=True
     restart: always
     depends_on:
       - broker
       - api-gateway
-      - job-handler
 
 ### Fan Controller Service
 
