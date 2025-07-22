@@ -16,7 +16,7 @@ class MQTTPublisher:
         self.client.loop_start()
 
     def publish_assignment(self, printer_id: str, assignment: Assignment):
-        topic = f"device/printer/{printer_id}/assignement"
+        topic = f"device/printer/{printer_id}/assignment"
         payload = json.dumps(asdict(assignment))
         try:
             self.client.publish(topic, payload, qos=self.qos)

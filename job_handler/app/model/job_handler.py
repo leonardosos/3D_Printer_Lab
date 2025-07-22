@@ -24,7 +24,7 @@ class JobHandler:
             self.on_robot_progress
         )
         self.queue_manager_url = queue_manager_url
-        self.discovery_time = 30  # seconds
+        self.discovery_time = 60  # seconds
 
     def start(self):
         logging.info("Starting JobHandler...")
