@@ -11,7 +11,7 @@ WORKDIR /job_handler
 COPY . .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Expose port (if you're running an API or server)
 EXPOSE 8115

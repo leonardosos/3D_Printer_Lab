@@ -243,7 +243,6 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      - ./priority_queue_manager/config/priority_queue_config.yaml:/app/priority_queue_config.yaml
       - ./priority_queue_manager/data:/app/data
     environment:
       - CONFIG_PATH=/app/priority_queue_config.yaml

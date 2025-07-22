@@ -1,128 +1,117 @@
-import logging
 import os
-import sys
+import logging
 import yaml
 from flask import Flask
-from app.api.routes import app
+from logging.handlers import RotatingFileHandler
 
-# Add the current directory to Python path for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from app.api.routes import api_bp
+from app.model.priority_queue_service import PriorityQueueManager
 
-"""
-try:
-    from priority_queue_manager.app.api.routes import app
-except ImportError:
-    # Fallback for different import paths
-    try:
-        from priority_queue_manager.app.api.routes import app
-    except ImportError:
-        print("Error: Could not import routes. Make sure you're in the correct directory.")
-        sys.exit(1)
-"""
+# Create Flask application
+app = Flask(__name__)
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-logger = logging.getLogger(__name__)
-
-def create_app():
-    """Application factory pattern"""
-    # Ensure data directory exists (relative to main.py)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(current_dir, "..", "data")
-    data_dir = os.path.abspath(data_dir)  # Normalize path
-    
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-        logger.info(f"Created data directory: {data_dir}")
-    
-    logger.info("Priority Queue Manager service initialized")
-    logger.info(f"Data directory: {data_dir}")
-    return app
-
-def test_endpoints():
-    """Simple test function to verify endpoints work"""
-    logger.info("=== Testing Priority Queue Manager ===")
-    
-    with app.test_client() as client:
-        # Test health check (if exists)
-        try:
-            response = client.get('/health')
-            logger.info(f"Health check: {response.status_code}")
-        except:
-            logger.info("No health endpoint found")
-        
-        # Test get all jobs (should be empty initially)
-        response = client.get('/jobs')
-        logger.info(f"GET /jobs: {response.status_code} - {len(response.get_json().get('jobs', []))} jobs")
-        
-        # Test create job
-        test_job = {
-            "modelId": "test-model-123",
-            "priority": 5
-        }
-        response = client.post('/jobs', json=test_job)
-        logger.info(f"POST /jobs: {response.status_code}")
-        
-        if response.status_code == 201:
-            job_data = response.get_json()
-            logger.info(f"Created job: {job_data.get('job', {}).get('id')}")
-        
-        # Test get priority job
-        response = client.get('/prioritary_job')
-        logger.info(f"GET /prioritary_job: {response.status_code}")
-        
-        if response.status_code == 200:
-            logger.info("✅ All basic tests passed!")
-        else:
-            logger.warning("⚠️ Some tests failed")
-
-if __name__ == '__main__':
-    # Check if running in test mode
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        logger.info("Running in TEST mode")
-        flask_app = create_app()
-        test_endpoints()
-        sys.exit(0)
-    
-    # Normal startup
-    # Load configuration from YAML file
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(current_dir, "..", "config", "priority_queue_config.yaml")
+def load_config():
+    """Load configuration from YAML file"""
+    config_path = os.path.join(os.path.dirname(__file__), 'config', 'config.yaml')
     
     try:
         with open(config_path, 'r') as file:
             config = yaml.safe_load(file)
-        
-        # Get web configuration with environment variable overrides
-        web_config = config.get('web', {})
-        host = os.getenv('HOST', web_config.get('host', '0.0.0.0'))
-        port = int(os.getenv('PORT', web_config.get('port', 8090)))
-        debug = os.getenv('DEBUG', str(web_config.get('debug', True))).lower() == 'true'
-        
-        logger.info(f"Configuration loaded from: {config_path}")
-        
+        return config
     except Exception as e:
-        logger.warning(f"Failed to load config file: {e}. Using defaults.")
-        # Fallback to defaults
-        host = os.getenv('HOST', '0.0.0.0')
-        port = int(os.getenv('PORT', 8090))
-        debug = os.getenv('DEBUG', 'True').lower() == 'true'
+        print(f"Error loading config: {e}")
+        # Return default config
+        return {
+            'server': {'host': '0.0.0.0', 'port': 8090, 'debug': True},
+            'logging': {'level': 'INFO', 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'}
+        }
+
+def setup_logging(config):
+    """Setup logging configuration"""
+    log_config = config.get('logging', {})
     
-    logger.info(f"Starting Priority Queue Manager on {host}:{port}")
-    logger.info(f"Debug mode: {debug}")
-    logger.info(f"Working directory: {os.getcwd()}")
+    # Create logs directory if it doesn't exist
+    log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     
-    # Create and run the app
-    flask_app = create_app()
-    
+    # Setup file handler if log file is specified
+    if 'file' in log_config:
+        log_file = log_config['file']
+        log_path = os.path.join(os.path.dirname(__file__), '..', log_file)
+        
+        handler = RotatingFileHandler(
+            log_path,
+            maxBytes=log_config.get('max_size', 10485760),
+            backupCount=log_config.get('backup_count', 5)
+        )
+        
+        # Configure logging
+        logging.basicConfig(
+            level=getattr(logging, log_config.get('level', 'INFO')),
+            format=log_config.get('format', '%(asctime)s - %(name)s - %(levelname)s - %(message)s'),
+            handlers=[handler, logging.StreamHandler()]  # Both file and console
+        )
+    else:
+        # Console only
+        logging.basicConfig(
+            level=getattr(logging, log_config.get('level', 'INFO')),
+            format=log_config.get('format', '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        )
+
+# Load configuration
+config = load_config()
+
+# Setup logging
+setup_logging(config)
+
+# Create logger
+logger = logging.getLogger(__name__)
+
+# Configure Flask app
+app.config['HOST'] = config['server']['host']
+app.config['PORT'] = config['server']['port']
+app.config['DEBUG'] = config['server']['debug']
+
+# Initialize service (singleton)
+priority_queue_manager = PriorityQueueManager()
+
+# Register blueprints
+app.register_blueprint(api_bp)
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    service_info = config.get('service', {})
     try:
-        flask_app.run(host=host, port=port, debug=debug)
-    except KeyboardInterrupt:
-        logger.info("Shutting down gracefully...")
+        job_count = priority_queue_manager.get_job_count()
+        
+        return {
+            "status": "healthy",
+            "service": service_info.get('name', 'priority-queue-manager'),
+            "version": service_info.get('version', '1.0.0'),
+            "jobs_count": job_count
+        }, 200
     except Exception as e:
-        logger.error(f"Failed to start server: {e}")
-        sys.exit(1)
+        logger.error(f"Health check failed: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "service": service_info.get('name', 'priority-queue-manager'),
+            "error": str(e)
+        }, 500
+
+# Global error handler
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Global exception handler"""
+    logger.error(f"Unhandled exception: {str(e)}", exc_info=True)
+    return {"error": "Internal server error"}, 500
+
+if __name__ == '__main__':
+    logger.info(f"Starting Priority Queue Manager on {app.config['HOST']}:{app.config['PORT']}")
+    app.run(
+        host=app.config['HOST'],
+        port=app.config['PORT'],
+        debug=app.config['DEBUG']
+    )

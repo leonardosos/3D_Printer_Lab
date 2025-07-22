@@ -1,27 +1,26 @@
-FROM python:3.9-slim-bullseye
+FROM python:3.11-slim
 
-# Install security updates
-RUN apt-get update && apt-get upgrade -y && apt-get clean
-
-# Copy Application Files & Requirements to /app
-COPY ./app /app
-COPY requirements.txt /app/requirements.txt
-
-# Set the target container working directory to /app
 WORKDIR /app
 
-# Install Python Application Requirements
-RUN pip3 install -r requirements.txt
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Exposed Port of the API Server
-EXPOSE 8080
+# Ensure config directory exists with default configuration
+COPY app/config/ /app/config/
 
-# Python Container Application Configurations
-ENV PYTHONPATH=/app/
+# Copy application code
+COPY app/ /app/app/
+
+# Create data directory for persistence and ensure it's writable
+RUN mkdir -p data && chmod -R 755 data
+
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
-# Since the python cmd is a module, we need to set the working directory to the root
-WORKDIR / 
+# Expose the port used by the priority queue manager (as defined in docker-compose.yml)
+EXPOSE 8090
 
-# Run the target application
-CMD ["python3", "-m", "app.main"]
+# Command to run the application
+CMD ["python", "app/main.py"]

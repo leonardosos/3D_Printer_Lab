@@ -1,155 +1,136 @@
-import json
-import os
+from typing import List, Optional
+from app.dto.job_request_dto import JobRequestDTO
+from app.dto.job_response_dto import JobResponseDTO
+from datetime import datetime, timezone
+import uuid
 import logging
-from datetime import datetime
-from typing import List, Dict, Any, Optional
-from app.model.job_model import Job
-from app.model.exceptions import PersistenceError, JobNotFoundError
 
-class QueuePersistence:
-    def __init__(self, file_path: str = "data/queue_data.json"):
-        self.file_path = file_path
-        self.logger = logging.getLogger(__name__)
-        self.jobs: List[Job] = []  # In-memory storage
-        self._ensure_directory()
-        self._load_jobs_from_file()
-    
-    def _ensure_directory(self):
-        """Ensure the data directory exists"""
-        directory = os.path.dirname(self.file_path)
-        if directory and not os.path.exists(directory):
-            os.makedirs(directory)
-    
-    def _load_jobs_from_file(self):
-        """Load jobs from file into memory on initialization"""
-        try:
-            if not os.path.exists(self.file_path):
-                self.logger.info(f"No persistence file found at {self.file_path}, starting with empty queue")
-                self.jobs = []
-                return
-            
-            with open(self.file_path, 'r') as f:
-                jobs_data = json.load(f)
-            
-            # Convert dictionaries to Job objects
-            self.jobs = []
-            for job_dict in jobs_data:
-                # Convert string timestamps back to datetime objects
-                if 'submittedAt' in job_dict and isinstance(job_dict['submittedAt'], str):
-                    job_dict['submittedAt'] = datetime.fromisoformat(job_dict['submittedAt'])
-                if 'updatedAt' in job_dict and isinstance(job_dict['updatedAt'], str):
-                    job_dict['updatedAt'] = datetime.fromisoformat(job_dict['updatedAt'])
-                
-                job = Job(
-                    id=job_dict['id'],
-                    modelId=job_dict['modelId'],
-                    assignedPrinterId=job_dict.get('assignedPrinterId'),
-                    priority=job_dict.get('priority', 0),
-                    status=job_dict.get('status', 'pending'),
-                    submittedAt=job_dict.get('submittedAt'),
-                    updatedAt=job_dict.get('updatedAt')
-                )
-                self.jobs.append(job)
-            
-            self.logger.info(f"Successfully loaded {len(self.jobs)} jobs from {self.file_path}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to load jobs: {e}")
-            self.jobs = []
-            raise PersistenceError(f"Failed to load jobs: {e}")
-    
-    def _save_jobs_to_file(self):
-        """Save current jobs to file"""
-        try:
-            # Convert Job objects to dictionaries
-            serializable_jobs = []
-            for job in self.jobs:
-                job_dict = {
-                    'id': job.id,
-                    'modelId': job.modelId,
-                    'assignedPrinterId': job.assignedPrinterId,
-                    'priority': job.priority,
-                    'status': job.status,
-                    'submittedAt': job.submittedAt.isoformat() if job.submittedAt else None,
-                    'updatedAt': job.updatedAt.isoformat() if job.updatedAt else None
-                }
-                serializable_jobs.append(job_dict)
-            
-            with open(self.file_path, 'w') as f:
-                json.dump(serializable_jobs, f, indent=2)
-            
-            self.logger.info(f"Successfully saved {len(self.jobs)} jobs to {self.file_path}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to save jobs: {e}")
-            raise PersistenceError(f"Failed to save jobs: {e}")
-    
-    def add_job(self, job: Job) -> Job:
-        """Add a job to the repository"""
-        self.jobs.append(job)
-        self._save_jobs_to_file()
-        return job
-    
-    def get_job_by_id(self, job_id: str) -> Job:
-        """Get a job by its ID"""
-        job = next((job for job in self.jobs if job.id == job_id), None)
-        if not job:
-            raise JobNotFoundError(job_id)
-        return job
-    
-    def update_job(self, job: Job) -> Job:
-        """Update an existing job"""
-        # Find and replace the job
-        for i, existing_job in enumerate(self.jobs):
-            if existing_job.id == job.id:
-                self.jobs[i] = job
-                self._save_jobs_to_file()
+class PriorityQueueRepository:
+    def __init__(self):
+        # In-memory storage for jobs
+        self._jobs: List[JobResponseDTO] = []
+        self._logger = logging.getLogger(__name__)
+        self._logger.info("PriorityQueueRepository initialized")
+
+    def add_job(self, job_request: JobRequestDTO) -> JobResponseDTO:
+        """
+        Add a new job to the repository
+        """
+        job_id = f"job-{uuid.uuid4()}"
+        now = datetime.now(timezone.utc)
+        
+        new_job = JobResponseDTO(
+            id=job_id,
+            modelId=job_request.modelId,
+            assignedPrinterId=job_request.printerId,
+            priority=job_request.priority,
+            status="pending",
+            submittedAt=now,
+            updatedAt=now
+        )
+        
+        self._jobs.append(new_job)
+        self._logger.info(f"Added job {job_id} with priority {job_request.priority}")
+        return new_job
+
+    def get_all_jobs(self) -> List[JobResponseDTO]:
+        """
+        Get all jobs
+        """
+        return self._jobs.copy()
+
+    def set_jobs(self, jobs: List[JobResponseDTO]):
+        """
+        Set the jobs list (used by service for reordering)
+        """
+        self._jobs = jobs
+
+    def get_job_by_id(self, job_id: str) -> Optional[JobResponseDTO]:
+        """
+        Get a specific job by its ID
+        """
+        for job in self._jobs:
+            if job.id == job_id:
                 return job
-        raise JobNotFoundError(job.id)
-    
+        return None
+
+    def update_job_priority(self, job_id: str, new_priority: int) -> Optional[JobResponseDTO]:
+        """
+        Update the priority of an existing job
+        """
+        job = self.get_job_by_id(job_id)
+        if job:
+            job.priority = new_priority
+            job.updatedAt = datetime.now(timezone.utc)
+            self._logger.info(f"Updated job {job_id} priority to {new_priority}")
+            return job
+        return None
+
     def delete_job(self, job_id: str) -> bool:
-        """Delete a job by ID"""
-        job = self.get_job_by_id(job_id)  # This will raise JobNotFoundError if not found
-        self.jobs.remove(job)
-        self._save_jobs_to_file()
-        return True
-    
-    def get_all_jobs(self) -> List[Job]:
-        """Get all jobs"""
-        return self.jobs.copy()
-    
+        """
+        Delete a single job by ID
+        Returns True if job was found and deleted, False otherwise
+        """
+        for i, job in enumerate(self._jobs):
+            if job.id == job_id:
+                deleted_job = self._jobs.pop(i)
+                self._logger.info(f"Deleted job {job_id}")
+                return True
+        return False
+
     def delete_multiple_jobs(self, job_ids: List[str]) -> int:
-        """Delete multiple jobs by IDs"""
+        """
+        Delete multiple jobs by their IDs
+        Returns the number of jobs actually deleted
+        """
         deleted_count = 0
-        jobs_to_remove = []
+        job_ids_set = set(job_ids)
         
-        for job_id in job_ids:
-            job = next((job for job in self.jobs if job.id == job_id), None)
-            if job:
-                jobs_to_remove.append(job)
-                deleted_count += 1
-        
-        # Remove found jobs
-        for job in jobs_to_remove:
-            self.jobs.remove(job)
+        # Filter out jobs that should be deleted
+        original_count = len(self._jobs)
+        self._jobs = [job for job in self._jobs if job.id not in job_ids_set]
+        deleted_count = original_count - len(self._jobs)
         
         if deleted_count > 0:
-            self._save_jobs_to_file()
+            self._logger.info(f"Deleted {deleted_count} jobs")
         
         return deleted_count
-    
-    def clear_all_jobs(self):
-        """Clear all jobs (for testing purposes)"""
-        self.jobs = []
-        self._save_jobs_to_file()
 
-    # Legacy methods for backward compatibility (deprecated)
-    def save_jobs(self, jobs: List[Dict[str, Any]]) -> bool:
-        """Legacy method - deprecated, use repository methods instead"""
-        self.logger.warning("save_jobs method is deprecated, use repository methods instead")
-        return True
-    
-    def load_jobs(self) -> List[Dict[str, Any]]:
-        """Legacy method - deprecated, use repository methods instead"""
-        self.logger.warning("load_jobs method is deprecated, use repository methods instead")
-        return []
+    def get_highest_priority_job(self) -> Optional[JobResponseDTO]:
+        """
+        Get the job with highest priority (consumer approach - removes the job)
+        Returns None if no jobs are available
+        """
+        if not self._jobs:
+            return None
+        
+        # Get the first job (highest priority) and remove it
+        highest_priority_job = self._jobs.pop(0)
+        self._logger.info(f"Retrieved and removed highest priority job {highest_priority_job.id}")
+        return highest_priority_job
+
+    def get_job_count(self) -> int:
+        """
+        Get the total number of jobs in the queue
+        """
+        return len(self._jobs)
+
+    def update_job_status(self, job_id: str, status: str) -> Optional[JobResponseDTO]:
+        """
+        Update the status of an existing job
+        """
+        job = self.get_job_by_id(job_id)
+        if job:
+            job.status = status
+            job.updatedAt = datetime.now(timezone.utc)
+            self._logger.info(f"Updated job {job_id} status to {status}")
+            return job
+        return None
+
+    def clear_all_jobs(self):
+        """
+        Remove all jobs from the queue (useful for testing)
+        """
+        count = len(self._jobs)
+        self._jobs.clear()
+        self._logger.info(f"Cleared all {count} jobs from queue")

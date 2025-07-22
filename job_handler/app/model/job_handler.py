@@ -60,7 +60,10 @@ class JobHandler:
             resp = requests.get(f"{self.queue_manager_url}/prioritary_job")
             if resp.status_code == 200:
                 job_data = resp.json()
-                job = Job(**job_data)
+                if 'jobs' in job_data and job_data['jobs']:
+                    job = Job(**job_data['jobs'][0])  # Prendi il primo job
+                else:
+                    job = Job(**job_data)  # Parsing diretto se
                 logging.info(f"Received job from queue manager: {job}")
                 return job
             else:
@@ -78,7 +81,7 @@ class JobHandler:
             filamentType="PLA",  # Example, adjust as needed
             estimatedTime=np.random.randint(3300, 3900),
             priority=job.priority,
-            assignedAt=job.submittedAt.isoformat(),
+            assignedAt=job.submittedAt if isinstance(job.submittedAt, str) else job.submittedAt.isoformat(),
             parameters={"layerHeight": 0.2, "infill": 20, "nozzleTemp": 210, "bedTemp": 60}
         )
         self.publisher.publish_assignment(printer_id, assignment)
