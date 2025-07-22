@@ -1,7 +1,7 @@
 web:
   host: "host.docker.internal"
-  port: 1883
-  debug: false
+  port: 8090
+  debug: true
 
 persistence:
   file_path: "data/queue_data.json"

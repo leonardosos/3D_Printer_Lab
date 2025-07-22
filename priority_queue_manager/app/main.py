@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import yaml
 from flask import Flask
 from app.api.routes import app
 
@@ -88,10 +89,28 @@ if __name__ == '__main__':
         sys.exit(0)
     
     # Normal startup
-    # Get configuration from environment variables (with defaults)
-    host = os.getenv('HOST', '0.0.0.0')
-    port = int(os.getenv('PORT', 8080))
-    debug = os.getenv('DEBUG', 'True').lower() == 'true'
+    # Load configuration from YAML file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(current_dir, "..", "config", "priority_queue_config.yaml")
+    
+    try:
+        with open(config_path, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        # Get web configuration with environment variable overrides
+        web_config = config.get('web', {})
+        host = os.getenv('HOST', web_config.get('host', '0.0.0.0'))
+        port = int(os.getenv('PORT', web_config.get('port', 8090)))
+        debug = os.getenv('DEBUG', str(web_config.get('debug', True))).lower() == 'true'
+        
+        logger.info(f"Configuration loaded from: {config_path}")
+        
+    except Exception as e:
+        logger.warning(f"Failed to load config file: {e}. Using defaults.")
+        # Fallback to defaults
+        host = os.getenv('HOST', '0.0.0.0')
+        port = int(os.getenv('PORT', 8090))
+        debug = os.getenv('DEBUG', 'True').lower() == 'true'
     
     logger.info(f"Starting Priority Queue Manager on {host}:{port}")
     logger.info(f"Debug mode: {debug}")

@@ -203,7 +203,7 @@ services:
     ports:
       - "8110:8110"
     volumes:
-      - ./printer_monitoring/config.yaml:/app/mqtt_config.yaml
+      - ./printer_monitoring/app/config/mqtt_config.yaml:/app/mqtt_config.yaml
     environment:
       - CONFIG_PATH=/app/mqtt_config.yaml
     networks:
@@ -243,7 +243,7 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      - ./priority_queue_manager/config.yaml:/app/priority_queue_config.yaml
+      - ./priority_queue_manager/config/priority_queue_config.yaml:/app/priority_queue_config.yaml
       - ./priority_queue_manager/data:/app/data
     environment:
       - CONFIG_PATH=/app/priority_queue_config.yaml
@@ -285,7 +285,7 @@ services:
       dockerfile: Dockerfile
     container_name: fan-unit-container
     volumes:
-      - ./fan_unit/app/config.yaml:/app/app/config.yaml
+      - ./fan_controller/config/fan_controller_config.yaml:/app/fan_controller_config.yaml
     environment:
       - FAN_ID=fan1
       - DEBUG=True
