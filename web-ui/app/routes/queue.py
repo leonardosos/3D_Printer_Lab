@@ -29,8 +29,8 @@ def delete_job_route(job_id):
 @queue_bp.route('/queue/add', methods=['GET', 'POST'])
 def add_job_route():
     if request.method == 'POST':
-        name = request.form.get('name')
+        model_id = request.form.get('name')  # or change the form field to 'modelId'
         priority = request.form.get('priority')
-        add_job(name, priority)
+        add_job(model_id, priority)
         return redirect(url_for('queue.queue_page'))
     return render_template('add_job.html')

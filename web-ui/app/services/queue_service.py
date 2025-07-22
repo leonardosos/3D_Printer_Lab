@@ -41,7 +41,7 @@ def delete_job(job_id):
 def add_job(name, priority):
     base_url = get_api_base_url()
     try:
-        response = requests.post(f'{base_url}/jobs', json={'name': name, 'priority': priority}, timeout=5)
+        response = requests.post(f'{base_url}/jobs', json={'modelId': name, 'priority': priority}, timeout=5)
         response.raise_for_status()
         return response.ok
     except (requests.RequestException, ValueError, KeyError):
