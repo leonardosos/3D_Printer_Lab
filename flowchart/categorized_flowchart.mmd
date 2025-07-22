@@ -1,0 +1,80 @@
+flowchart TB
+
+%% Define blocks
+GUI["🧑‍💻 User Interface (GUI)"]
+Robot["🤖 Robot"]
+Fan["💨 Fan Unit"]
+PrinterMon["🖨 Printer Monitoring"]
+ST["🧱 ST Printer"]
+APIGW["🛰 API Gateway"]
+QueueMgr["📋 Priority Queue Manager"]
+TempGlobal["🌡 Global Temperature"]
+JobHandler["🧠 Job Handler"]
+RobManagement["🧭 Robot Management"]
+Anomaly["⚠️ Anomaly Detection"]
+FanCtrl["🌀 Fan Controller"]
+TempSensor["🌡 Room Temp Sensor"]
+
+%% Group related systems
+subgraph " "
+  ST
+  PrinterMon
+end
+
+subgraph " "
+  TempSensor
+  TempGlobal
+  Anomaly
+end
+
+subgraph " "
+  FanCtrl
+  Fan
+end
+
+subgraph " "
+  QueueMgr
+  JobHandler
+end
+
+subgraph " "
+  RobManagement
+  Robot
+end
+
+subgraph " "
+  GUI
+  APIGW
+end
+
+
+%% MQTT links from ST Printer
+ST -->|MQTT: device/printer/-ID-/progress| PrinterMon
+ST -->|MQTT: device/printer/-ID-/temperature| TempGlobal
+ST -->|MQTT: device/printer/-ID-/temperature| Anomaly
+
+%% MQTT from TempSensor
+TempSensor -->|MQTT: device/room/temperature| TempGlobal
+TempSensor -->|MQTT: device/room/temperature| Anomaly
+
+%% Fan controller and response
+TempGlobal -->|MQTT: device/fan/controller/status| FanCtrl
+Anomaly -->|MQTT: device/fan/controller/emergency| FanCtrl
+FanCtrl -->|MQTT: device/fan/-ID-/speed| Fan
+
+%% Job assignment
+JobHandler -->|MQTT: device/printer/-ID-/assignement| ST
+
+%% HTTP connections
+GUI o--o|HTTP| APIGW
+APIGW o--o|HTTP: get| PrinterMon
+APIGW o--o|HTTP: get, post, delete, put| QueueMgr
+QueueMgr o--o|HTTP: get, delete| JobHandler
+
+%% Robot management
+JobHandler -->|MQTT: device/printers| RobManagement
+RobManagement <-->|MQTT: device/robot/-ID-/coordinates\ndevice/robot/-ID-/progress| Robot
+Robot -->|MQTT: device/robot/-ID-/progress| JobHandler
+
+APIGW o--o|HTTP:
+ get| TempGlobal
