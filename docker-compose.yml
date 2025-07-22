@@ -33,6 +33,7 @@ services:
     environment:
       - PRINTER_ID=printer-1
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -50,6 +51,7 @@ services:
     environment:
       - PRINTER_ID=printer-2
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -67,6 +69,7 @@ services:
     environment:
       - PRINTER_ID=printer-3
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -84,6 +87,7 @@ services:
       - ./web-ui/target_web_conf.yaml:/app/web_conf.yaml
     environment:
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -106,6 +110,7 @@ services:
       - timer_hear=61
       - DEBUG=False
       - DEBUG_COMMUNICATION=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -132,6 +137,7 @@ services:
       - DEBUG_COMMUNICATION=True
       - DEBUG_ALERTS=True
       - DEBUG_ANALYSIS=False
+      - TZ=Europe/Berlin
     restart: always
     depends_on:
       - broker
@@ -148,6 +154,8 @@ services:
     volumes:
       - ./api-gateway/config:/app/config
       - ./api-gateway/logs:/app/logs
+    environment:
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: unless-stopped
@@ -165,6 +173,7 @@ services:
       - ROBOT_ID=rob-1
       - MQTT_BROKER_HOST=broker
       - MQTT_BROKER_PORT=1883
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -186,6 +195,7 @@ services:
       - CONFIG_PATH=/app/app/config.yaml
       - MQTT_BROKER_HOST=broker
       - MQTT_BROKER_PORT=1883
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -212,6 +222,7 @@ services:
       - timer_hear=61
       - DEBUG=False
       - DEBUG_COMMUNICATION=True
+      - TZ=Europe/Berlin
     restart: always
     depends_on:
       - broker
@@ -230,6 +241,7 @@ services:
       - ./fan_controller/config.yaml:/app/fan_controller_config.yaml
     environment:
       - CONFIG_PATH=/app/fan_controller_config.yaml
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -251,6 +263,7 @@ services:
     environment:
       - CONFIG_PATH=/app/priority_queue_config.yaml
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -272,6 +285,7 @@ services:
       - ./job_handler/config.yaml:/app/job_handler_config.yaml
     environment:
       - CONFIG_PATH=/app/job_handler_config.yaml
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -292,6 +306,7 @@ services:
     environment:
       - FAN_ID=fan1
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -308,6 +323,7 @@ services:
       - ./room_temperature_sensor/config:/app/config
     environment:
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always

@@ -3,6 +3,7 @@ from app.dto.printer_progress_dto import PrinterProgressDTO
 from app.dto.monitoring_dto import PrinterStatusDTO, APIResponseDTO
 import threading
 import csv
+import datetime
 
 class StatusHistory:
     def __init__(self, printer_ids: List[str], debug: bool = False):
@@ -34,9 +35,13 @@ class StatusHistory:
                     printerId=r.printerId,
                     status=r.status,
                     currentJobId=r.jobId,
-                    modelUrl=getattr(r, "modelUrl", ""),  # Use empty string if not present
+                    modelUrl=getattr(r, "modelUrl", ""),
                     progress=r.progress,
-                    lastUpdated=str(r.timestamp)
+                    lastUpdated=(
+                        datetime.datetime.fromtimestamp(float(r.timestamp)).isoformat()
+                        if r.timestamp.replace('.', '', 1).isdigit()
+                        else r.timestamp
+                    )
                 )
                 for r in latest_status
             ]
