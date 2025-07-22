@@ -58,8 +58,8 @@ Simone:
 - [Api Gateway](api-gateway/README.md)
 - [Robot Management (RM)](robot_management/README.md)
 - [Robot](robot/README.md)
-- fan unit
-- temperature sensor
+- [Fan unit](fan_unit/README.md)
+- [Room Temperature Sensor](room_temperature_sensor/README.md)
 
 Lorenzo:
 
