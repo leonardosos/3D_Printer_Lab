@@ -31,7 +31,7 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_001
+      - PRINTER_ID=printer-1
       - DEBUG=True
     networks:
       - iot_network
@@ -48,7 +48,7 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_002
+      - PRINTER_ID=printer-2
       - DEBUG=True
     networks:
       - iot_network
@@ -65,7 +65,7 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_003
+      - PRINTER_ID=printer-3
       - DEBUG=True
     networks:
       - iot_network
