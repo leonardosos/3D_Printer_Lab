@@ -315,6 +315,16 @@ To start the test after stop, you can use:
 
     docker-compose -f test__docker-compose.yml up --build
 
+---
+
+In debug phase, if you need to "subscribe to single topics", run:
+
+    docker exec -it my-mosquitto-broker-container mosquitto_sub -h localhost -p 1883 -t "#"
+
+where you can use the wildcard # to "subscribe to all topics" or "select that one" in which you are interested in 
+
+---
+
 ### MQTT Broker - Eclipse Mosquitto
 
 This section provides a guide for setting up and customizing an MQTT broker using Eclipse Mosquitto. We use the official eclipse-mosquitto Docker image on Docker Hub: <https://hub.docker.com/_/eclipse-mosquitto>.
