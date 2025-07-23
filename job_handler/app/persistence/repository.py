@@ -3,13 +3,13 @@ from app.dto.job_dto import Job
 
 class JobHandlerRepository:
     def __init__(self):
-        # Set of printer IDs that are available for assignment
+        # Set of printerIds that are available for assignment
         self.available_printers: Set[str] = set()
-        # Set of printer IDs that are currently busy (printing or awaiting cleaning)
+        # Set of printerIds that are currently busy (printing or awaiting cleaning)
         self.busy_printers: Set[str] = set()
-        # Map of printer ID to the current job assigned
+        # Map of printerId to the current job assigned
         self.printer_jobs: Dict[str, Job] = {}
-        # Set of printer IDs that are awaiting cleaning
+        # Set of printerIds that are awaiting cleaning
         self.awaiting_cleaning: Set[str] = set()
 
     def add_available_printer(self, printer_id: str):

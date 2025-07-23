@@ -6,7 +6,7 @@ import logging
 
 router = APIRouter()
 
-# Dummy in-memory job queue for demonstration
+# Dummy in-memory job queue for demonstration - not used in the real implementation
 job_queue = [
     Job(
         id="job-123",
@@ -17,7 +17,6 @@ job_queue = [
         submittedAt=datetime(2025, 6, 15, 8, 30, 0),
         updatedAt=datetime(2025, 6, 15, 8, 30, 0)
     )
-    # Add more jobs as needed
 ]
 
 @router.get("/prioritary_job", response_model=Job)
@@ -28,3 +27,4 @@ def get_prioritary_job():
     job = job_queue.pop(0)
     logging.info(f"Returning job: {job}")
     return job
+
