@@ -25,3 +25,4 @@ api-gateway/logs/*
 robot_management/logs/*
 
 printer_monitoring/app/persistence/save/*
+priority_queue_manager/logs/*
