@@ -1,243 +1,440 @@
-# Priority Queue Management Microservice
+# Priority Queue Manager Service
 
-The **Priority Queue Management** microservice handles dynamic job prioritization in a print workflow system. It ensures that job execution follows a strict priority order while supporting real-time job creation, updates, and deletions via a RESTful HTTP API. This service acts as the source of truth for job scheduling decisions, and it integrates tightly with the Web UI and Job Handler microservices.
+## Table of Contents
 
----
+1. [Architecture Position](#architecture-position)
+2. [Communication Protocols](#communication-protocols)
+    - [HTTP API Endpoints](#http-api-endpoints)
+3. [Queue Management Features](#queue-management-features)
+4. [Journey](#journey)
+5. [Service Class Structure](#service-class-structure)
+6. [Class Diagram](#class-diagram)
+7. [Folder Structure](#folder-structure)
+8. [Local](#local)
+    - [Local Run](#local-run)
+    - [Local Test](#local-test)
+9. [Docker](#docker)
+10. [Docker Compose](#docker-compose)
 
-## Features
+## Architecture Position
 
-- Create new jobs with optional priority and printer assignment.
-- Update the priority of jobs dynamically.
-- Delete individual or multiple jobs in bulk.
-- Retrieve the complete list of jobs sorted by highest priority.
-- Lightweight, stateless API for Web UI and backend orchestration.
+The Priority Queue Manager service operates as an HTTP-based microservice that:
 
----
+- Manages print job queues with dynamic priority assignment
+- Provides CRUD operations for job management via REST API
+- Serves as the central job scheduling authority for the 3D printer farm
+- Integrates with Web UI for user job management and Job Handler for automated job processing
 
-## API Endpoints
-
-### POST `/jobs`
-
-Creates a new job and inserts it into the priority queue.
-
-**Request:**
-```json
-{
-  "modelId": "string",
-  "printerId": "string",   // optional
-  "priority": 5            // optional, default = 0
-}
+```text
+                                        ┌─────────────────┐
+                                        │   Priority      │
+┌─────────────────┐    HTTP API         │   Queue         │
+│  API Gateway    │ ◄─────────────────► │   Manager       │
+│                 │ /jobs routing       │                 │
+└─────────────────┘                     │                 │
+                                        │                 │
+                                        │                 │
+                                        │                 │
+                                        └─────────────────┘
+                                                │ HTTP API
+                                                │ GET /prioritary_job
+                                                │ GET /jobs
+                                                ▼
+                                        ┌─────────────────┐
+                                        │  Job Handler    │
+                                        │                 │
+                                        └─────────────────┘
 ```
 
-**Response:**
-```json
-{
-  "job": {
-    "id": "job-123",
-    "modelId": "model-789",
-    "assignedPrinterId": null,
-    "priority": 5,
-    "status": "pending",
-    "submittedAt": "2025-07-14T09:00:00Z",
-    "updatedAt": "2025-07-14T09:00:00Z"
-  }
-}
-```
+## Communication Protocols
 
----
+### HTTP API Endpoints
 
-### PUT `/jobs/{jobId}`
+#### Job Creation
 
-Modifies the priority of an existing job.
+- **Endpoint**: `POST /jobs`
+- **Type**: 1.1.2) JobRequest → JobResponse
+- **Purpose**: Create new print jobs with optional priority and printer assignment
+- **Request Body**: JobRequestDTO
+- **Response**: Created job details wrapped in JobResponseDTO
 
-**Request:**
-```json
-{
-  "priority": 15
-}
-```
+#### Job Retrieval
 
-**Response:**
-```json
-{
-  "job": {
-    "id": "job-123",
-    "modelId": "model-456",
-    "assignedPrinterId": null,
-    "priority": 15,
-    "status": "pending",
-    "submittedAt": "2025-06-15T08:30:00Z",
-    "updatedAt": "2025-06-15T08:35:00Z"
-  }
-}
-```
+- **Endpoint**: `GET /jobs`
+- **Type**: 1.1.1) JobResponse[]
+- **Purpose**: Retrieve all jobs sorted by priority (highest first)
+- **Response**: Array of job objects sorted by priority
 
----
+#### Priority Job Consumption
 
-### DELETE `/jobs/{jobId}`
+- **Endpoint**: `GET /prioritary_job`
+- **Type**: JobResponse (Consumer pattern)
+- **Purpose**: Retrieve and remove the highest priority job from queue
+- **Response**: Single highest priority job (job is removed from queue)
 
-Deletes a single job by ID.
+#### Job Priority Update
 
-**Response:**
-- HTTP 204 No Content
+- **Endpoint**: `PUT /jobs/{jobId}`
+- **Type**: 1.1.3) PriorityUpdate → JobResponse
+- **Purpose**: Update job priority and automatically reorder queue
+- **Request Body**: New priority value
+- **Response**: Updated job details
 
----
+#### Job Deletion
 
-### DELETE `/jobs?ids=job-1,job-2,...`
+- **Endpoint**: `DELETE /jobs/{jobId}`
+- **Type**: 1.1.4) Deletion confirmation
+- **Purpose**: Remove single job from queue
+- **Response**: HTTP 204 No Content
 
-Deletes multiple jobs by ID in a single request.
+#### Bulk Job Deletion
 
-**Response:**
-- HTTP 204 No Content
+- **Endpoint**: `DELETE /jobs?ids=job-1,job-2,...`
+- **Type**: Bulk deletion confirmation
+- **Purpose**: Remove multiple jobs in single request
+- **Response**: HTTP 204 No Content
 
----
+Types defined in [communication.md](../communication.md).
 
-### GET `/jobs`
+## Queue Management Features
 
-Retrieves all jobs sorted from highest to lowest priority.
+### Dynamic Priority Management
 
-**Response:**
-```json
-{
-  "jobs": [
-    {
-      "id": "job-123",
-      "modelId": "model-456",
-      "assignedPrinterId": null,
-      "priority": 10,
-      "status": "pending",
-      "submittedAt": "2025-06-15T08:30:00Z",
-      "updatedAt": "2025-06-15T08:30:00Z"
+- **Priority-based Sorting**: Jobs automatically sorted by priority (highest first)
+- **Real-time Reordering**: Queue automatically reorders when priorities change
+- **Configurable Priorities**: Support for integer priority values (higher = more urgent)
+- **Default Priority**: New jobs default to priority 0 if not specified
+
+### Consumer Pattern Implementation
+
+- **Job Consumption**: `GET /prioritary_job` removes job from queue (consumer pattern)
+- **Queue Management**: Automatic promotion of next highest priority job
+- **Job Handler Integration**: Seamless integration with automated job processing
+
+### Job Lifecycle Management
+
+- **Status Tracking**: Track job status through pending, queued, in_progress, completed, failed states
+- **Timestamp Management**: Automatic tracking of submission and update timestamps
+- **Printer Assignment**: Optional printer assignment during job creation or later update
+
+### Data Persistence
+
+- **In-memory Storage**: Fast access to current job queue
+- **Repository Pattern**: Clean separation between service logic and data access
+- **Data Consistency**: Automatic queue reordering after modifications
+
+## Journey
+
+The Priority Queue Manager Service follows a job-centric workflow management pattern:
+
+### 1. Initialization Phase
+
+- Load configuration files (queue config and service config)
+- Initialize Flask application with API routes
+- Set up logging system with configurable levels
+- Initialize PriorityQueueManager service and repository
+- Register API blueprint with all CRUD endpoints
+- Configure error handlers and health check endpoints
+
+### 2. Job Creation Phase
+
+- **Job Submission**: Receive job creation requests from Web UI via API Gateway
+- **Data Validation**: Validate incoming job request data (modelId, optional printer, priority)
+- **Job Assignment**: Generate unique job ID and set default values
+- **Queue Insertion**: Add job to priority queue with automatic ordering
+- **Response Generation**: Return created job details to requestor
+
+### 3. Job Management Phase
+
+- **Priority Updates**: Process priority change requests and reorder queue
+- **Job Retrieval**: Serve complete job list requests sorted by priority
+- **Job Deletion**: Handle single and bulk job deletion operations
+- **Queue Maintenance**: Automatic queue reordering after any modifications
+
+### 4. Job Distribution Phase
+
+- **High Priority Retrieval**: Serve `GET /prioritary_job` requests from Job Handler
+- **Consumer Pattern**: Remove highest priority job from queue upon retrieval
+- **Queue Advancement**: Automatically promote next highest priority job
+- **Job Handler Integration**: Enable automated job processing workflow
+
+### 5. Status Monitoring Phase
+
+- **Health Checks**: Provide service health status via `/health` endpoint
+- **Error Handling**: Comprehensive error handling with appropriate HTTP status codes
+- **Logging**: Detailed logging of all operations for debugging and monitoring
+- **Performance Tracking**: Monitor queue operations and API response times
+
+## Service Class Structure
+
+### Separation of Concerns
+
+The priority queue manager service is organized into several key classes:
+
+- **PriorityQueueManager**  
+  Main service class. Handles:
+  - Job creation with automatic ID generation and queue insertion
+  - Priority updates with automatic queue reordering
+  - Job retrieval (all jobs and highest priority job)
+  - Job deletion (single and bulk operations)
+  - Queue management and ordering logic
+  - Integration with repository layer for data persistence
+
+- **PriorityQueueRepository**  
+  Data access layer:
+  - In-memory storage of job queue
+  - CRUD operations for job data
+  - Queue sorting and ordering algorithms
+  - Data consistency management
+
+- **Flask API Routes**  
+  HTTP endpoint management:
+  - RESTful API endpoint definitions
+  - Request validation and response formatting
+  - Error handling and status code management
+  - CORS support for web UI integration
+
+- **Configuration Management**  
+  Service configuration:
+  - YAML-based configuration loading
+  - Environment-specific settings
+  - Logging configuration and setup
+
+## Class Diagram
+
+```mermaid
+classDiagram
+    class PriorityQueueManager {
+        - repository
+        - logger
+
+        + add_job()
+        + update_job_priority()
+        + get_all_jobs()
+        + get_highest_priority_job()
+        + delete_job()
+        + delete_multiple_jobs()
+        - _reorder_queue()
     }
-  ]
-}
+
+    class PriorityQueueRepository {
+        - jobs_storage
+        - job_counter
+
+        + add_job()
+        + update_job_priority()
+        + delete_job()
+        + delete_multiple_jobs()
+        + get_all_jobs()
+        + get_highest_priority_job()
+        + sort_jobs_by_priority()
+    }
+
+    class JobRequestDTO {
+        + modelId
+        + printerId
+        + priority
+    }
+
+    class JobResponseDTO {
+        + id
+        + modelId
+        + assignedPrinterId
+        + priority
+        + status
+        + submittedAt
+        + updatedAt
+    }
+
+    class FlaskApp {
+        + register_blueprints()
+        + setup_error_handlers()
+        + health_check()
+    }
+
+    PriorityQueueManager --> PriorityQueueRepository : uses
+    PriorityQueueManager --> JobRequestDTO : processes
+    PriorityQueueManager --> JobResponseDTO : creates
+    FlaskApp --> PriorityQueueManager : uses
 ```
 
----
+## Folder Structure
 
-## Data Transfer Objects (DTOs)
-
-Defined using Python `@dataclass` for clarity and type safety.
-
-### `JobRequestDTO`
-```python
-@dataclass
-class JobRequestDTO:
-    modelId: str
-    printerId: Optional[str] = None
-    priority: int = 0
-```
-
-### `JobResponseDTO`
-```python
-@dataclass
-class JobResponseDTO:
-    id: str
-    modelId: str
-    assignedPrinterId: Optional[str] = None
-    priority: int
-    status: str  # pending, queued, in_progress, completed, failed
-    submittedAt: datetime
-    updatedAt: datetime
-```
-
----
-
-## Core Logic – PriorityQueueService
-
-The `PriorityQueueService` encapsulates all core operations for managing and prioritizing jobs.
-
-```python
-class PriorityQueueService:
-
-    def add_job(self, model_id: str, printer_id: str = None, priority: int = 0):
-        # Adds a new job to the queue with optional printer and priority
-
-    def update_job_priority(self, job_id: str, new_priority: int):
-        # Updates the priority of an existing job and reorders the queue
-
-    def delete_job(self, job_id: str):
-        # Deletes a single job by ID
-
-    def delete_multiple_jobs(self, job_ids: list[str]):
-        # Bulk delete of multiple jobs
-
-    def get_all_jobs(self) -> list:
-        # Returns all jobs sorted by priority
-
-    def get_job_by_id(self, job_id: str) -> dict:
-        # Returns a job by its ID
-
-    def reorder_queue(self):
-        # Sorts the job queue after priority updates
-
-    def assign_printer_to_job(self, job_id: str, printer_id: str):
-        # Assigns a printer to a job
-
-    def update_job_status(self, job_id: str, status: str):
-        # Updates the job status (e.g., pending → in_progress)
-
-    def get_next_job(self) -> dict:
-        # Returns the highest priority job ready for processing
-```
-
----
-
-## Project Structure
-
-```
-priority-queue-management/
+```text
+priority_queue_manager/
 ├── app/
-│   ├── dto/
-│   │   ├── job_request_dto.py
-│   │   ├── job_response_dto.py
-│   ├── routes/
-│   │   ├── job_routes.py
-│   ├── services/
-│   │   ├── priority_queue_service.py
-│   ├── config/
-│   │   ├── service_conf.yaml
-│   ├── main.py
+│   ├── api/                           # HTTP API layer
+│   │   ├── __init__.py
+│   │   └── routes.py                  # Flask API endpoint definitions
+│   │
+│   ├── config/                        # Configuration management
+│   │   ├── config.yaml                # Service configuration
+│   │   └── priority_queue_config.yaml # Queue-specific settings
+│   │
+│   ├── dto/                           # Data Transfer Objects
+│   │   ├── __init__.py
+│   │   ├── job_request_dto.py         # Job creation request schema
+│   │   ├── job_response_dto.py        # Job response schema
+│   │   └── priority_update_dto.py     # Priority update request schema
+│   │
+│   ├── model/                         # Core business logic
+│   │   ├── __init__.py
+│   │   └── priority_queue_service.py  # Main queue management service
+│   │
+│   ├── persistence/                   # Data access layer
+│   │   ├── __init__.py
+│   │   └── repository.py              # Job storage and retrieval
+│   │
+│   └── main.py                        # Service entrypoint and Flask app setup
 │
-├── tests/
-│   ├── test_priority_queue.py
+├── config.yaml/                       # Additional configuration
+├── data/                              # Data storage directory
 │
+├── test/                              # Testing components
+│   └── priority_tester.py             # Service integration tests
+│
+├── howtodo.md                         # Implementation guidance
+├── requirements.txt
 ├── Dockerfile
-├── README.md
-└── requirements.txt
+└── README.md
 ```
 
----
+- **app/**  
+  Main application code.
+  - **api/**: Flask API implementation with all REST endpoints and error handling.
+  - **config/**: Configuration management including service and queue-specific settings.
+  - **dto/**: Data Transfer Objects for request/response schemas and validation.
+  - **model/**: Core business logic including the main `priority_queue_service.py` with queue management algorithms.
+  - **persistence/**: Data access layer with repository pattern implementation for job storage.
+  - **main.py**: Service entrypoint, Flask app initialization, and configuration loading.
 
-## Testing
+- **test/**  
+  Testing components including integration tests for queue operations.
 
-All tests are located in the `tests/` directory. Use `fake_api_response.py` for mocking HTTP responses and testing the service layer in isolation.
+- **howtodo.md**  
+  Implementation guidance and technical specifications.
 
----
+## Local
 
-## Docker Support
+### Local Run
 
-To build and run locally via Docker:
+Move to the `priority_queue_manager` directory:
 
 ```bash
-docker build -t priority-queue .
-docker run -p 8080:8080 priority-queue
+cd IoT_Project/priority_queue_manager
 ```
 
----
+Install dependencies:
 
-## Job Status Lifecycle
+```bash
+pip install -r requirements.txt
+```
 
-Jobs may have one of the following statuses:
+Run the service locally:
 
-- `pending`
-- `queued`
-- `in_progress`
-- `completed`
-- `failed`
+```bash
+python3 -m app.main
+```
 
----
+The service will start the Flask application and be available at the configured port (default: 8080).
 
-## Ownership
+### Local Test
 
-This microservice is maintained by the **Backend Team**. For integration or support, please reach out through internal channels. It is intended for internal use only by the Job Handler and Web UI.
+To test the HTTP API endpoints:
+
+#### Create a new job:
+```bash
+curl -X POST http://localhost:8080/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"modelId": "model-123", "priority": 5}'
+```
+
+#### Get all jobs:
+```bash
+curl http://localhost:8080/jobs
+```
+
+#### Update job priority:
+```bash
+curl -X PUT http://localhost:8080/jobs/job-123 \
+  -H "Content-Type: application/json" \
+  -d '{"priority": 10}'
+```
+
+#### Get highest priority job (consumer pattern):
+```bash
+curl http://localhost:8080/prioritary_job
+```
+
+#### Delete a job:
+```bash
+curl -X DELETE http://localhost:8080/jobs/job-123
+```
+
+#### Health check:
+```bash
+curl http://localhost:8080/health
+```
+
+You can also run the integration test:
+
+```bash
+cd IoT_Project/priority_queue_manager/test
+python3 priority_tester.py
+```
+
+## Docker
+
+Build the Docker image:
+
+```bash
+docker build -t priority_queue_manager-image .
+```
+
+Run the container:
+
+```bash
+docker run --name priority_queue_manager-container \
+    -p 8080:8080 \
+    -v ${PWD}/app/config:/app/config \
+    -v ${PWD}/data:/app/data \
+    --network composed-mqtt-project_iot_network \
+    --restart always \
+    priority_queue_manager-image
+```
+
+- `-d`: Runs the container in detached mode (omitted for debugging purposes).
+- `--name priority_queue_manager-container`: Names the container for easy reference.
+- `-p 8080:8080`: Maps the container's port 8080 to the host for HTTP API access.
+- `-v ...`: Mounts configuration and data directories for persistence.
+- `--network composed-mqtt-project_iot_network`: Connects to the project's Docker network.
+- `--restart always`: Ensures automatic restart if the container stops.
+- `priority_queue_manager-image`: The Docker image to use.
+
+The HTTP API will be available at [http://localhost:8080](http://localhost:8080).
+
+To stop and remove the container:
+
+```bash
+docker stop priority_queue_manager-container
+docker rm priority_queue_manager-container
+```
+
+To view logs:
+
+```bash
+docker logs priority_queue_manager-container
+```
+
+To enter the container for debugging:
+
+```bash
+docker exec -it priority_queue_manager-container /bin/bash
+```
+
+## Docker Compose
+
+Follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
+
+The priority queue manager service integrates with the complete IoT system through the Docker Compose configuration, automatically connecting to the API Gateway for web UI integration and providing job management services to the
+

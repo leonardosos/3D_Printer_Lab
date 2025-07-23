@@ -1,284 +1,435 @@
-# Job Handler Microservice
+# Job Handler Service
 
-The `job_handler` microservice is the core orchestration unit in a distributed 3D printing architecture. It assigns print jobs to available printers, tracks their progress, and coordinates tray unloads via robot units.
+## Table of Contents
 
----
+1. [Architecture Position](#architecture-position)
+2. [Communication Protocols](#communication-protocols)
+    - [MQTT Subscriptions](#mqtt-subscriptions)
+    - [MQTT Publications](#mqtt-publications)
+    - [HTTP Communications](#http-communications)
+3. [Job Management Features](#job-management-features)
+4. [Journey](#journey)
+5. [Service Class Structure](#service-class-structure)
+6. [Class Diagram](#class-diagram)
+7. [Folder Structure](#folder-structure)
+8. [Local](#local)
+    - [Local Run](#local-run)
+    - [Local Test](#local-test)
+9. [Docker](#docker)
+10. [Docker Compose](#docker-compose)
 
-## Overview
+## Architecture Position
 
-This service:
+The Job Handler service operates as a central orchestration microservice that:
 
-- Retrieves jobs via HTTP GET from the **Priority Queue Manager**
-- Assigns available printers to new jobs based on priority
-- Publishes assignments to:
-  - The target printer
-  - The printer manager
-- Notifies the **Robot Manager** when a printer finishes a job and needs unloading
-- Monitors MQTT topics for printer and robot progress
-- Maintains internal state of jobs, printers, and assignment lifecycle
+- Manages the complete print job lifecycle from assignment to completion
+- Coordinates communication between Priority Queue Manager, printers, and Robot Management
+- Tracks printer availability and job status via MQTT
+- Ensures efficient utilization of printing resources through intelligent job assignment
 
----
+```text
+┌─────────────────┐    HTTP API         ┌─────────────────┐
+│  Priority       │ ──────────────────► │   Job Handler   │
+│  Queue Manager  │ GET /prioritary_job │                 │
+└─────────────────┘                     │                 │
+                                        │                 │
+┌─────────────────┐    MQTT Topics      │                 │
+│  3D Printers    │ ──────────────────► │                 │
+│                 │ device/printer/     │                 │
+└─────────────────┘ {id}/progress       └─────────────────┘
+                                                │ MQTT Topics
+                                                │ Job Assignments
+                                                │ device/printer/
+                                                │ {id}/assignment
+                                                ▼
+                                        ┌─────────────────┐
+                                        │  3D Printers    │
+                                        │                 │
+                                        └─────────────────┘
+                                                │
+                                                │ MQTT Topics
+                                                │ Printer Status
+                                                │ device/printers
+                                                ▼
+                                        ┌─────────────────┐
+                                        │  Robot          │
+                                        │  Management     │
+                                        └─────────────────┘
+                                                │ MQTT Topics
+                                                │ Robot Progress
+                                                │ device/robot/
+                                                │ {id}/progress
+                                                ▼
+                                        ┌─────────────────┐
+                                        │   Job Handler   │
+                                        │   (Feedback)    │
+                                        └─────────────────┘
+```
 
-## Message Formats
+## Communication Protocols
 
-### Jobs Input
+### MQTT Subscriptions
 
-**Source:** HTTP GET `/jobs` from the User Interface  
-**Format:**
+#### Printer Progress Data Input
 
-```json
-{
-  "jobs": [
-    {
-      "id": "job-123",
-      "modelId": "model-456",
-      "assignedPrinterId": null,
-      "priority": 10,
-      "status": "pending",
-      "submittedAt": "2025-06-15T08:30:00Z",
-      "updatedAt": "2025-06-15T08:30:00Z"
+- **Topic**: `device/printer/{printerId}/progress`
+- **Type**: 2.3.3) PrinterProgressDTO
+- **Purpose**: Monitor printer job progress and status changes
+- **QoS**: 0 (frequent updates, loss acceptable)
+
+#### Robot Progress Data Input
+
+- **Topic**: `device/robot/{robotId}/progress`
+- **Type**: 2.5.2) RobotProgressDTO
+- **Purpose**: Monitor robot cleaning completion to mark printers as available
+- **QoS**: 0 (frequent updates, loss acceptable)
+
+### MQTT Publications
+
+#### Job Assignments to Printers
+
+- **Topic**: `device/printer/{printerId}/assignment`
+- **Type**: 2.3.2) PrinterAssignmentDTO
+- **Purpose**: Assign print jobs to available printers
+- **QoS**: 1 (critical assignments must be delivered)
+
+#### Printer Status Updates to Robot Management
+
+- **Topic**: `device/printers`
+- **Type**: 2.5.1) PrinterStatusListDTO
+- **Purpose**: Notify Robot Management when printers need cleaning
+- **QoS**: 0 (status updates, loss acceptable)
+
+### HTTP Communications
+
+#### Job Retrieval from Priority Queue Manager
+
+- **Endpoint**: `GET {queue_manager_url}/prioritary_job`
+- **Type**: JobDTO (Consumer pattern)
+- **Purpose**: Retrieve highest priority job from queue
+- **Method**: Consumer pattern (removes job from queue)
+
+Types defined in [communication.md](../communication.md):
+
+## Job Management Features
+
+### Printer Discovery and Tracking
+
+- **Discovery Phase**: Initial 10-second period to discover available printers from MQTT progress topics
+- **Real-time Tracking**: Continuous monitoring of printer status (idle, printing, awaiting cleaning)
+- **Availability Management**: Dynamic tracking of available printers for job assignment
+
+### Job Assignment Logic
+
+- **Priority-based Assignment**: Assigns highest priority jobs to available printers
+- **Resource Optimization**: Only assigns jobs when both printer and robot resources are available
+- **Assignment Parameters**: Configurable job parameters (layer height, infill, temperatures)
+
+### Progress Monitoring
+
+- **Printer Progress**: Tracks job completion percentage and status changes
+- **Robot Progress**: Monitors cleaning operations to restore printer availability
+- **State Management**: Maintains printer states throughout the complete job lifecycle
+
+### Lifecycle Management
+
+- **Job Completion Detection**: Identifies when printers finish jobs (progress=100, status=idle)
+- **Cleaning Coordination**: Notifies Robot Management for post-job cleaning
+- **Availability Restoration**: Returns cleaned printers to available pool
+
+## Journey
+
+The Job Handler Service follows a continuous job assignment and monitoring workflow:
+
+### 1. Initialization Phase
+
+- Load configuration file with MQTT broker settings and Queue Manager URL
+- Initialize MQTT client for both publishing and subscribing
+- Connect to MQTT broker and subscribe to printer and robot progress topics
+- Initialize **job repository** for tracking printer states and assignments
+- Set up discovery phase timing (default 10 seconds)
+
+### 2. Discovery Phase
+
+- **Printer Detection**: Listen for printer progress messages to identify available printers
+- **Status Collection**: Gather initial status of all printers in the system
+- **Availability Assessment**: Determine which printers are idle and ready for assignments
+- **Discovery Completion**: End discovery phase and log discovered printers
+
+### 3. Main Assignment Loop
+
+- **Availability Check**: Continuously monitor for available printers
+- **Job Retrieval**: Request highest priority job from Priority Queue Manager
+- **Assignment Creation**: Generate assignment DTOs with job parameters and settings
+- **MQTT Publication**: Publish assignments to target printers
+
+### 4. Progress Monitoring Phase
+
+- **Printer Status Tracking**: Monitor job progress and status changes from printers
+- **Completion Detection**: Identify when printers complete jobs (progress=100, status=idle)
+- **Robot Notification**: Notify Robot Management when printers need cleaning
+- **State Updates**: Update internal printer states based on progress messages
+
+### 5. Cleaning Coordination Phase
+
+- **Cleaning Request**: Publish printer status to Robot Management for cleaning assignment
+- **Robot Monitoring**: Track robot progress during cleaning operations
+- **Completion Confirmation**: Wait for robot completion status (status=completed)
+- **Availability Restoration**: Mark cleaned printers as available for new assignments
+
+### 6. Continuous Operation
+
+- **Loop Continuation**: Return to assignment loop for continuous job processing
+- **Error Handling**: Handle communication failures and retry mechanisms
+- **State Consistency**: Maintain consistent internal state across all operations
+
+## Service Class Structure
+
+### Separation of Concerns
+
+The job handler service is organized into several key classes:
+
+- **JobHandler**  
+  Main service class. Handles:
+  - Initialization of MQTT publisher and subscriber
+  - Discovery phase to identify available printers
+  - Main job assignment loop with continuous operation
+  - Processing of printer progress updates to track job completion
+  - Processing of robot progress updates for cleaning completion
+  - Publishing job assignments to printers via MQTT
+  - Publishing printer status updates to Robot Management
+  - HTTP communication with Priority Queue Manager for job retrieval
+  - Service lifecycle management (start, stop, connect, disconnect)
+
+- **MQTTPublisher**  
+  Manages outbound MQTT communications:
+  - Publishes job assignments to printer topics
+  - Publishes printer status lists to Robot Management
+  - Handles connection management and error recovery
+
+- **MQTTSubscriber**  
+  Manages inbound MQTT communications:
+  - Subscribes to printer progress topics
+  - Subscribes to robot progress topics
+  - Processes incoming messages and triggers callbacks
+
+- **JobHandlerRepository**  
+  Manages internal state and data persistence:
+  - Tracks available and busy printers
+  - Manages printer-job associations
+  - Handles printer state transitions
+  - Provides state query methods
+
+## Class Diagram
+
+```mermaid
+classDiagram
+    class JobHandler {
+        - mqtt_publisher
+        - mqtt_subscriber
+        - repository
+        - queue_manager_url
+
+        + start()
+        + discovery_phase()
+        + main_loop()
+        + assign_job_to_printer()
+        + on_printer_progress()
+        + on_robot_progress()
     }
-  ]
-}
+
+    class MQTTPublisher {
+        + publish_assignment()
+        + publish_printers_list()
+        + connect()
+        + disconnect()
+    }
+
+    class MQTTSubscriber {
+        + subscribe_printer_progress()
+        + subscribe_robot_progress()
+        + connect()
+        + disconnect()
+    }
+
+    class JobHandlerRepository {
+        + get_available_printers()
+        + mark_printer_busy()
+        + mark_printer_awaiting_cleaning()
+        + mark_printer_available()
+        + add_available_printer()
+    }
+
+    JobHandler --> MQTTPublisher : uses
+    JobHandler --> MQTTSubscriber : uses
+    JobHandler --> JobHandlerRepository : uses
 ```
 
----
+## Folder Structure
 
-### Job Assignment Output
-
-**Topic:** `device/printer/<printer-id>/assignement`
-
-```json
-{
-  "jobId": "job-123",
-  "modelUrl": "models/model-456.gcode",
-  "filamentType": "PLA",
-  "estimatedTime": 3600,
-  "priority": 10,
-  "assignedAt": "2025-06-15T08:30:00Z",
-  "parameters": {
-    "layerHeight": 0.2,
-    "infill": 20,
-    "nozzleTemp": 210,
-    "bedTemp": 60
-  }
-}
-```
-
----
-
-### Printer Status Update to Robot Manager
-
-**Topic:** `device/printers`
-
-```json
-{
-  "printers": [
-    { "printerId": "printer-1", "status": "work", "timestamp": "2025-07-09T10:00:00Z" },
-    { "printerId": "printer-2", "status": "finish", "timestamp": "2025-07-09T10:00:00Z" },
-    { "printerId": "printer-3", "status": "work", "timestamp": "2025-07-09T10:00:00Z" }
-  ]
-}
-```
-
----
-
-### Printer Progress Input
-
-**Topic:** `device/printer/<printer-id>/progress`
-
-```json
-{
-  "printerId": "printer-1",
-  "jobId": "job-123",
-  "status": "printing",
-  "progress": 42,
-  "timestamp": "2025-06-15T08:32:00Z"
-}
-```
-
----
-
-### Robot Progress Input
-
-**Topic:** `device/robot/<robot-id>/progress`
-
-```json
-{
-  "robotId": "rob-1",
-  "action": "pick",
-  "status": "in_progress",
-  "timestamp": "2025-06-15T08:32:10Z"
-}
-```
-
----
-
-## Architecture
-
-### DTOs
-
-Located in `app/dto/`, used for data deserialization:
-
-```python
-@dataclass
-class jobsDTO:
-    jobs: list
-
-@dataclass
-class assignementDTO:
-    jobId: str
-    modelUrl: str
-    filamentType: str
-    estimatedTime: int
-    priority: int
-    assignedAt: float
-    parameters: dict
-
-@dataclass
-class assignedPrinterDTO:
-    printers: list
-
-@dataclass
-class printerProgressDTO:
-    printerId: str
-    jobId: str
-    status: str
-    progress: int
-    timestamp: float
-
-@dataclass
-class robotProgressDTO:
-    robotId: str
-    jobId: str
-    action: str
-    status: str
-    timestamp: float
-```
-
----
-
-### JobHandler Logic
-
-Main logic is encapsulated in `JobHandler`:
-
-```python
-class JobHandler:
-
-    def __init__(self, printer_repository, robot_manager_client, mqtt_publisher): 
-      # Initializes the job handler with the printer repository, robot manager client, and MQTT publisher
-
-    def assign_job_to_printer(self, job_id: str): 
-      # Assigns a job to an available printer that has a clean and ready plate
-
-    def receive_printer_progress(self, progress_dto):
-      # Receives and stores the printer's progress as a percentage of the job completion
-
-    def handle_printer_idle(self, printer_id: str): 
-      # Determines whether the printer is idle due to finishing a print or because it hasn’t been assigned a job yet, and updates its status accordingly
-
-    def receive_robot_progress(self, progress_dto): 
-      # Receives and stores the robot's progress in cleaning the plate
-
-    def notify_robot_manager_of_printer_to_unload(self, printer_id: str):
-      # Publishes the printer ID to the robot manager's priority queue for unloading
-
-    def mark_printer_as_busy_with_job(self, printer_id: str, job_id: str):
-      # Marks the printer as busy and associates it with the given job
-
-    def mark_printer_as_available(self, printer_id: str): 
-      # Marks the printer as available and adds it back to the available printers list
-
-    def get_available_printer(self) -> str: 
-      # Retrieves and removes an available printer from the available printers list
-
-    def get_job_associated_with_printer(self, printer_id: str) -> str: 
-      # Returns the job ID currently assigned to the specified printer
-
-    def get_status(self) -> dict: 
-      # Returns the current status of all printers: available, working, or waiting for plate cleaning
-
-    
-```
-
----
-
-## Internal Workflow
-
-1. **Initialization**  
-   - Fetch current printers from MQTT `progress` topics
-   - Populate available printers and job tracking
-
-2. **Assignment Flow**  
-   - Triggered at startup, periodically, or after a job completes
-   - Retrieves all pending jobs via HTTP
-   - For each job:
-     - Finds a printer-robot pair
-     - Creates assignment
-     - Publishes to printer and robot manager
-     - Sends DELETE to Priority Queue Manager (by subJobId)
-
-3. **Progress Monitoring**  
-   - Listens to:
-     - Printer progress (to detect job completion)
-     - Robot progress (to reinsert printer in available pool)
-
----
-
-## Directory Structure
-
-```
+```text
 job_handler/
 ├── app/
-│   ├── dto/
-│   │   ├── jobs_dto.py
-│   │   ├── assignement_dto.py
-│   │   ├── assigned_printer_dto.py
-│   │   ├── printer_progress_dto.py
-│   │   ├── robot_progress_dto.py
-│   ├── model/
-│   │   └── job_handler.py
+│   ├── model/                    # Core business logic
+│   │   └── job_handler.py        # Main JobHandler service class
+│   │
+│   ├── dto/                      # Data Transfer Objects (MQTT schemas)
+│   │   ├── job_dto.py            # Job data structure
+│   │   ├── assignment_dto.py     # Job assignment to printers
+│   │   ├── printer_progress_dto.py  # Printer progress updates
+│   │   ├── robot_progress_dto.py    # Robot progress updates
+│   │   ├── printer_list_dto.py      # Printer status lists
+│   │   └── assigned_printer_dto.py  # Printer assignment tracking
+│   │
+│   ├── mqtt/                        # MQTT communication layer
+│   │   ├── publisher.py            # MQTT message publishing
+│   │   └── subscriber.py           # MQTT message subscription
+│   │
 │   ├── persistence/
-│   │   └── repository.py
-│   ├── api/
-│   │   └── routes.py
-│   ├── mqtt/
-│   │   ├── subscriber.py
-│   │   └── publisher.py
-│   ├── main.py
+│   │   └── repository.py           # Data persistence and state management
+│   │
+│   ├── api/                        # API routes (if needed for testing)
+│   │   └── routes.py               # FastAPI routes for testing
+│   │
+│   └── main.py                     # Service entrypoint
+│
+├── config/
+│   └── job_handler_config.yaml    # Service configuration
+│
+├── config.yaml/                   # Additional configuration directory
+│
+├── tests/                         # Test files and command references
+│   └── command lines.md           # Testing commands and examples
+│
 ├── requirements.txt
 ├── Dockerfile
+├── new readme.md                  # Alternative documentation
+└── README.md                      # This documentation file
 ```
 
----
+- **app/**  
+  Main application code.
+  - **model/**: Core business logic, including `job_handler.py` (main service orchestrator).
+  - **dto/**: Data Transfer Objects for MQTT messages and HTTP APIs, including job assignments, progress updates, and printer status.
+  - **mqtt/**: MQTT communication layer with publisher and subscriber implementations.
+  - **persistence/**: Repository pattern implementation for state management and data persistence.
+  - **api/**: Optional FastAPI routes for testing and debugging.
+  - **main.py**: Service entrypoint with configuration loading and service startup.
 
-## Docker Usage
+- **config/**  
+  Configuration files for MQTT settings and service parameters.
+- **tests/**  
+  Testing documentation and command-line examples.
 
-To build and run the container:
+## Local
+
+### Local Run
+
+Move to the `job_handler` directory:
 
 ```bash
-docker build -t job_handler .
-docker run -d --name job_handler job_handler
+cd IoT_Project/job_handler
 ```
 
----
-
-## Installation
-
-Install Python dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+Run the service locally:
 
-## Final Notes
+```bash
+python3 -m app.main
+```
 
-- All JSON formats are represented using Python dataclasses
-- Printers are marked `F` (Free) or `O` (Occupied)
-- Assignments only happen if a printer and a robot are both available
-- Assignments are published via MQTT and logged internally
-- System is reactive: new jobs are fetched and assigned upon printer/robot availability
+You can also specify a custom configuration file:
 
-Feel free to extend this README with error handling, API tests, or deployment scripts.
+```bash
+python3 -m app.main --config config/job_handler_config.yaml
+```
+
+For test mode (config validation only):
+
+```bash
+python3 -m app.main --test
+```
+
+### Local Test
+
+The service includes several testing approaches:
+
+#### Testing Commands
+
+Refer to [`tests/command lines.md`](tests/command%20lines.md) for detailed testing commands and examples.
+
+#### Integration Testing
+
+- **Priority Queue Manager Integration**: Test job retrieval from queue manager
+- **MQTT Communication**: Test printer assignment and progress monitoring
+- **Robot Coordination**: Test cleaning workflow coordination
+
+#### Manual Testing
+
+You can manually test the service by:
+
+1. Starting the Priority Queue Manager with test jobs
+2. Running printer simulators that publish progress updates
+3. Running robot simulators for cleaning operations
+4. Monitoring MQTT topics for published assignments
+
+## Docker
+
+Build the Docker image:
+
+```bash
+docker build -t job-handler-image .
+```
+
+Run the container:
+
+```bash
+docker run --name job-handler-container \
+    -p 8110:8110 \
+    --network composed-mqtt-project_iot_network \
+    --restart always \
+    job-handler-image
+```
+
+- `--name job-handler-container`: Names the container for easy reference.
+- `-p 8110:8110`: Maps the container's port 8110 to the host (if API endpoints are exposed).
+- `--network composed-mqtt-project_iot_network`: Connects the container to the project's Docker network for MQTT and HTTP communication.
+- `--restart always`: Ensures the container restarts automatically if stopped.
+- `job-handler-image`: The Docker image to use.
+
+To stop and remove the container:
+
+```bash
+docker stop job-handler-container
+docker rm job-handler-container
+```
+
+To view logs:
+
+```bash
+docker logs job-handler-container
+```
+
+To enter the container for debugging:
+
+```bash
+docker exec -it job-handler-container /bin/bash
+```
+
+## Docker Compose
+
+Follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
+
+The Job Handler service integrates with the complete system through Docker Compose, ensuring proper network connectivity with:
+
+- **MQTT Broker**: For printer and robot communication
+- **Priority Queue Manager**: For job retrieval via HTTP
+- **Robot Management**: For cleaning coordination
+- **3D Printers**: For job assignment and progress monitoring
+
+The service configuration is managed through Docker environment variables and mounted configuration files for seamless deployment

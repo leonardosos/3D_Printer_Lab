@@ -1,7 +1,7 @@
 import os
 import logging
 import yaml
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from werkzeug.exceptions import HTTPException
 from logging.handlers import RotatingFileHandler
 
@@ -84,7 +84,7 @@ def handle_exception(e):
                 "message": e.description
             }
         }
-        return jsonify(response), e.code
+        return make_response(jsonify(response), e.code)
     
     # For other exceptions, return a 500 error
     response = {
@@ -94,7 +94,7 @@ def handle_exception(e):
             "details": str(e) if app.config['DEBUG'] else None
         }
     }
-    return jsonify(response), 500
+    return make_response(jsonify(response), 500)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])

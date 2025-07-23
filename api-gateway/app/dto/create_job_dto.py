@@ -17,9 +17,7 @@ class CreateJobRequestDTO:
         
         if self.printerId is not None and not isinstance(self.printerId, str):
             raise ValueError("printerId must be a string if provided")
-        
-        if not isinstance(self.priority, int):
-            raise ValueError("priority must be an integer")
+
 
 @dataclass
 class CreateJobResponseDTO:

@@ -31,8 +31,9 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_001
+      - PRINTER_ID=printer-1
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -48,8 +49,9 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_002
+      - PRINTER_ID=printer-2
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -65,8 +67,9 @@ services:
     volumes:
       - ./st_printer/target_printer_mqtt_config.yaml:/app/printer_mqtt_config.yaml
     environment:
-      - PRINTER_ID=printer_003
+      - PRINTER_ID=printer-3
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     depends_on:
@@ -84,6 +87,8 @@ services:
       - ./web-ui/target_web_conf.yaml:/app/web_conf.yaml
     environment:
       - DEBUG=True
+      - TZ=Europe/Berlin
+      - RELOAD_TIME_MS=10000 # 10 seconds
     networks:
       - iot_network
     restart: always
@@ -106,6 +111,7 @@ services:
       - timer_hear=61
       - DEBUG=False
       - DEBUG_COMMUNICATION=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -132,6 +138,7 @@ services:
       - DEBUG_COMMUNICATION=True
       - DEBUG_ALERTS=True
       - DEBUG_ANALYSIS=False
+      - TZ=Europe/Berlin
     restart: always
     depends_on:
       - broker
@@ -148,6 +155,8 @@ services:
     volumes:
       - ./api-gateway/config:/app/config
       - ./api-gateway/logs:/app/logs
+    environment:
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: unless-stopped
@@ -165,6 +174,7 @@ services:
       - ROBOT_ID=rob-1
       - MQTT_BROKER_HOST=broker
       - MQTT_BROKER_PORT=1883
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -186,12 +196,104 @@ services:
       - CONFIG_PATH=/app/app/config.yaml
       - MQTT_BROKER_HOST=broker
       - MQTT_BROKER_PORT=1883
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
     depends_on:
       - broker
       - robot
+
+### Printer Monitoring Service
+
+  printer-monitoring:
+    build:
+      context: ./printer_monitoring
+      dockerfile: Dockerfile
+    container_name: printer_monitoring-container
+    ports:
+      - "8110:8110"
+    volumes:
+      - ./printer_monitoring/target_mqtt_config.yaml:/app/mqtt_config.yaml
+      - ./printer_monitoring/target_web_conf.yaml:/app/web_config.yaml
+      - ./printer_monitoring/app/persistence/save:/app/persistence/save
+    networks:
+      - iot_network
+    environment:
+      - timer_hear=61
+      - DEBUG=False
+      - DEBUG_COMMUNICATION=True
+      - TZ=Europe/Berlin
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+
+### Fan Controller Service
+
+  fan-controller:
+    build:
+      context: ./fan_controller
+      dockerfile: Dockerfile
+    container_name: fan-controller-container
+    ports:
+      - "8150:8150"
+    volumes:
+      - ./fan_controller/config/fan_controller_config.yaml:/app/fan_controller_config.yaml
+    environment:
+      - CONFIG_PATH=/app/fan_controller_config.yaml
+      - TZ=Europe/Berlin
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+
+### Priority Queue Manager Service
+
+  priority-queue-manager:
+    build:
+      context: ./priority_queue_manager
+      dockerfile: Dockerfile
+    container_name: priority-queue-manager-container
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./priority_queue_manager/data:/app/data
+    environment:
+      - CONFIG_PATH=/app/config/priority_queue_config.yaml
+      - DEBUG=True
+      - TZ=Europe/Berlin
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+
+
+### Job Handler Service
+
+  job-handler:
+    build:
+      context: ./job_handler
+      dockerfile: Dockerfile
+    container_name: job-handler-container
+    ports:
+      - "8115:8115"
+    volumes:
+      - ./job_handler/config/job_handler_config.yaml:/app/job_handler_config.yaml
+    environment:
+      - CONFIG_PATH=/app/job_handler_config.yaml
+      - TZ=Europe/Berlin
+    networks:
+      - iot_network
+    restart: always
+    depends_on:
+      - broker
+      - api-gateway
+      - priority-queue-manager
+
 
   ### Fan Unit Service
   fan-unit:
@@ -200,10 +302,11 @@ services:
       dockerfile: Dockerfile
     container_name: fan-unit-container
     volumes:
-      - ./fan_unit/app/config.yaml:/app/app/config.yaml
+      - ./fan_controller/config/fan_controller_config.yaml:/app/fan_controller_config.yaml
     environment:
       - FAN_ID=fan1
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -220,6 +323,7 @@ services:
       - ./room_temperature_sensor/config:/app/config
     environment:
       - DEBUG=True
+      - TZ=Europe/Berlin
     networks:
       - iot_network
     restart: always
@@ -229,3 +333,6 @@ services:
 networks:
   iot_network:
     driver: bridge
+
+
+

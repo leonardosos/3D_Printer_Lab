@@ -1,0 +1,6 @@
+mqtt:
+  host: "broker"
+  port: 1883
+
+queue_manager:
+  url: "http://priority-queue-manager:8090"

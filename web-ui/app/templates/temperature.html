@@ -69,7 +69,9 @@
             <div class="sensor-card">
                 <div class="sensor-title">{{ sensor.name }}</div>
                 <div class="sensor-value">{{ sensor.value }}&#8451;</div>
-                <div class="sensor-meta">Last updated: {{ sensor.last_updated }}</div>
+                <div class="sensor-meta">
+                    Last updated: {{ sensor.last_updated }}
+                </div>
             </div>
             {% endfor %}
         </div>

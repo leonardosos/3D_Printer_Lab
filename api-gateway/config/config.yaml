@@ -25,7 +25,7 @@ services:
       get_status: '/printers/status'
 
 logging:
-  level: 'INFO'  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: 'DEBUG'  # Can be DEBUG, INFO, WARNING, ERROR, CRITICAL
   file: 'logs/api-gateway.log'
   format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
   max_size: 10485760  # 10MB

@@ -1,0 +1,10 @@
+web:
+  host1: "api-gateway"
+  port: 8080
+  debug: true
+
+job:
+  host2: "job-handler"
+  port: 8115
+  debug: true
+
