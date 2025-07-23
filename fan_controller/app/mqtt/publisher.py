@@ -47,7 +47,7 @@ class MqttPublisher:
 
     def _publish(self, topic, payload, sync=False):
         try:
-            result = self.client.publish(topic, payload, 0)
+            result = self.client.publish(topic, payload, 1)
             if sync:
                 result.wait_for_publish()
             logging.info("Published to %s: %s", topic, payload)

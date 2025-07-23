@@ -1,14 +1,16 @@
+from random import randint
 from typing import List, Optional
 from app.dto.job_request_dto import JobRequestDTO
 from app.dto.job_response_dto import JobResponseDTO
 from datetime import datetime, timezone
-import uuid
+
 import logging
 
 class PriorityQueueRepository:
     def __init__(self):
         # In-memory storage for jobs
         self._jobs: List[JobResponseDTO] = []
+        self._job_counter = 0  # Counter for job IDs starting from 0. Not implemented in this version.
         self._logger = logging.getLogger(__name__)
         self._logger.info("PriorityQueueRepository initialized")
 
@@ -16,7 +18,8 @@ class PriorityQueueRepository:
         """
         Add a new job to the repository
         """
-        job_id = f"job-{uuid.uuid4()}"
+        
+        job_id = f"{job_request.modelId}-{randint(10,99)}{randint(10,99)}"
         now = datetime.now(timezone.utc)
         
         new_job = JobResponseDTO(

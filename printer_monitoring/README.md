@@ -1,239 +1,391 @@
-# Printer Monitoring Microservice
+# Printer Monitoring Service
 
-The `printer_monitoring` microservice collects and aggregates real-time status data from 3D printers and related jobs. It listens for MQTT messages from the printer and job assignment systems, organizes the data, and serves it via a RESTful HTTP GET endpoint. The system has been refactored for better modularity using a repository-service architecture.
+## Table of Contents
 
----
+1. [Architecture Position](#architecture-position)
+2. [Communication Protocols](#communication-protocols)
+    - [MQTT Subscriptions](#mqtt-subscriptions)
+    - [HTTP API Endpoints](#http-api-endpoints)
+3. [Monitoring Features](#monitoring-features)
+4. [Journey](#journey)
+5. [Service Class Structure](#service-class-structure)
+6. [Class Diagram](#class-diagram)
+7. [Folder Structure](#folder-structure)
+8. [Local](#local)
+    - [Local Run](#local-run)
+    - [Local Test](#local-test)
+9. [Docker](#docker)
+10. [Docker Compose](#docker-compose)
 
-## Overview
+## Architecture Position
 
-### Inputs (via MQTT)
+The Printer Monitoring service operates as a hybrid MQTT/HTTP microservice that:
 
-Data is received from:
+- Subscribes to real-time progress data from 3D printers and robots
+- Aggregates and stores printer status information
+- Serves consolidated monitoring data via REST API endpoints
+- Maintains historical status records for audit and analysis
 
-- **Printer Progress:** `device/printer/-id-/progress`
-- **Robot Progress:** `device/robot/-id-/progress`
-- **Job Assignment:** `device/printer/-id-/assignement`
-
-### Output (via HTTP)
-
-The system serves monitoring data on:
-
-- **Endpoint:** `GET /printer/status`
-
-Returns the current status of all active printers with relevant job data.
-
----
-
-## Message Formats
-
-### Printer Progress (MQTT)
-
-**Topic:** `device/printer/-id-/progress`
-
-```json
-{
-  "printerId": "printer-1",
-  "jobId": "job-123",
-  "status": "printing",
-  "progress": 42,
-  "timestamp": "2025-06-15T08:32:00Z"
-}
+```text
+┌─────────────────┐    MQTT Topics      ┌─────────────────┐
+│  3D Printers    │ ──────────────────► │   Printer       │
+│                 │ device/printer/     │   Monitoring    │
+│                 │ {id}/progress       │                 │
+└─────────────────┘                     │                 │
+                                        │                 │
+┌─────────────────┐    MQTT Topics      │                 │
+│  Robot System   │ ──────────────────► │                 │
+│                 │ device/robot/       │                 │
+│                 │ {id}/progress       │                 │
+└─────────────────┘                     └─────────────────┘
+                                                │ HTTP API
+                                                │ GET /printer/status
+                                                │
+                                                ▼
+┌─────────────────┐    HTTP Requests    ┌─────────────────┐
+│   Web UI /      │ ◄─────────────────  │   API Gateway   │
+│   API Gateway   │                     │                 │
+└─────────────────┘                     └─────────────────┘
 ```
 
-### Robot Progress (MQTT)
+## Communication Protocols
 
-**Topic:** `device/robot/-id-/progress`
+### MQTT Subscriptions
 
-```json
-{
-  "robotId": "rob-1",
-  "action": "pick",
-  "status": "in_progress",
-  "timestamp": "2025-06-15T08:32:10Z"
-}
-```
+#### Printer Progress Data Input
 
-### Job Assignment (MQTT)
+- **Topic**: `device/printer/{printerId}/progress`
+- **Type**: 2.2.2) PrinterProgress
+- **Purpose**: Monitor individual printer job progress and status
+- **QoS**: 0 (fire and forget)
 
-**Topic:** `device/printer/-id-/assignement`
+#### Robot Progress Data Input
 
-```json
-{
-  "jobId": "job-123",
-  "modelUrl": "models/model-456.gcode",
-  "filamentType": "PLA",
-  "estimatedTime": 3600,
-  "priority": 10,
-  "assignedAt": "2025-06-15T08:30:00Z",
-  "parameters": {
-    "layerHeight": 0.2,
-    "infill": 20,
-    "nozzleTemp": 210,
-    "bedTemp": 60
-  }
-}
-```
+- **Topic**: `device/robot/{robotId}/progress`
+- **Type**: 2.3.2) RobotProgress
+- **Purpose**: Monitor robot operations and coordination status
+- **QoS**: 0 (fire and forget)
 
-### Monitoring Output (HTTP GET)
+### HTTP API Endpoints
 
-**Endpoint:** `/printer/status`
+#### Printer Status Monitoring
 
-```json
-{
-  "printers": [
-    {
-      "printerId": "printer-1",
-      "status": "printing",
-      "currentJobId": "job-123",
-      "modelUrl": "models/model-456.gcode",
-      "progress": 42,
-      "temperature": 205.3,
-      "lastUpdated": "2025-06-15T08:31:15Z"
+- **Endpoint**: `GET /printer/status`
+- **Type**: 1.3.1) PrinterStatus[]
+- **Purpose**: Provide consolidated real-time printer monitoring data
+- **Response Format**: JSON array of printer status objects
+
+Types defined in [communication.md](../communication.md):
+
+## Monitoring Features
+
+### Real-time Status Aggregation
+
+- **Printer Status Tracking**: Monitors current job progress, printer status, and last update timestamps
+- **Multi-printer Support**: Handles multiple concurrent printer operations
+- **Status Consolidation**: Aggregates printer progress data with job assignment information
+- **Robot Coordination**: Tracks robot operations related to printer management
+
+### Data Persistence
+
+- **Status History**: Maintains historical records of all printer status updates
+- **CSV Export**: Periodic export of status history for analysis and reporting
+- **In-memory Storage**: Fast access to current printer states
+
+### Job Assignment Integration
+
+- **Job Tracking**: Associates printer progress with specific job assignments
+- **Model Information**: Links printer status to print job details (model URL, parameters)
+- **Progress Monitoring**: Real-time tracking of print job completion percentages
+
+## Journey
+
+The Printer Monitoring Service follows a continuous data aggregation and serving workflow:
+
+### 1. Initialization Phase
+
+- Load web and MQTT configuration files
+- Initialize MQTT client and connect to broker
+- Subscribe to printer and robot progress topics
+- Initialize status history storage
+- Set up HTTP API endpoints using Flask
+- Start periodic CSV dump process
+
+### 2. Data Collection Phase
+
+- **Printer Progress Monitoring**: Continuously receive progress updates from active printers
+- **Robot Status Monitoring**: Track robot operations and coordination activities
+- **Data Validation**: Validate incoming progress data for completeness and accuracy
+- **Status Aggregation**: Combine progress data with job assignment information
+
+### 3. Data Processing Phase
+
+- **Status Updates**: Update in-memory printer status records
+- **Historical Logging**: Store status updates with timestamps for audit trail
+- **Data Consolidation**: Merge printer progress with job metadata
+- **Status Calculation**: Determine overall printer farm status and utilization
+
+### 4. API Service Phase
+
+- **Request Handling**: Process HTTP GET requests for printer status
+- **Data Serialization**: Convert internal status objects to API response format
+- **Real-time Response**: Provide up-to-date printer monitoring information
+- **Cross-Origin Support**: Handle CORS for web UI integration
+
+### 5. Persistence Management
+
+- **Periodic Export**: Regular CSV dumps of status history
+- **Data Cleanup**: Manage storage of completed job records
+- **Historical Analysis**: Maintain data for performance analysis and reporting
+
+## Service Class Structure
+
+### Separation of Concerns
+
+The printer monitoring service is organized into several key classes:
+
+- **PrinterMonitoringService**  
+  Main service class. Handles:
+  - MQTT client initialization and subscription management
+  - Processing incoming printer and robot progress messages
+  - Maintaining in-memory status storage and historical records
+  - Printer discovery and status aggregation
+  - Periodic CSV export for data persistence
+  - Service lifecycle management (start, stop, connect, disconnect)
+
+- **ApiEndpoint**  
+  Manages HTTP API functionality:
+  - Flask application setup and configuration
+  - REST endpoint definitions and routing
+  - Request processing and response formatting
+  - CORS handling for web UI integration
+  - Configuration loading and management
+
+- **MQTTClient**  
+  Handles MQTT communications:
+  - Broker connection management
+  - Topic subscription and message handling
+  - Message validation and parsing
+  - Connection lifecycle management
+
+- **StatusHistory**  
+  Manages data persistence:
+  - Historical status record storage
+  - CSV export functionality
+  - Data retention and cleanup
+
+## Class Diagram
+
+```mermaid
+classDiagram
+    class PrinterMonitoringService {
+        - mqtt_client
+        - status_history
+        - printers_status
+
+        + start()
+        + _on_progress()
+        + get_status_api_response()
+        + periodic_csv_dump()
     }
-  ]
-}
+
+    class ApiEndpoint {
+        - app
+        - config
+        - monitoring_service
+
+        + setup_routes()
+        + start()
+        + load_config()
+    }
+
+    class MQTTClient {
+        + connect()
+        + subscribe()
+        + loop_start()
+        + loop_stop()
+    }
+
+    class StatusHistory {
+        + add_record()
+        + export_csv()
+        + get_history()
+    }
+
+    class PrinterProgressDTO {
+        + printerId
+        + jobId
+        + status
+        + progress
+        + timestamp
+    }
+
+    class MonitoringDTO {
+        + printers
+        + lastUpdated
+    }
+
+    PrinterMonitoringService --> MQTTClient : uses
+    PrinterMonitoringService --> StatusHistory : uses
+    PrinterMonitoringService --> PrinterProgressDTO : processes
+    PrinterMonitoringService --> MonitoringDTO : creates
+    ApiEndpoint --> PrinterMonitoringService : uses
 ```
 
----
+## Folder Structure
 
-## Core Components
-
-### Service Layer: `PrinterMonitoringService`
-
-Implemented in `app/model/monitoring.py`. Responsibilities include:
-
-- Aggregating printer and job data from the repository
-- Constructing `MonitoringDTO` objects
-- Exposing `on_printer_progress` and `on_job_assignement` entry points
-- Cleanup of completed jobs
-
-```python
-def get_monitoring_dto(self) -> MonitoringDTO:
-    # Aggregates printer and job info into a MonitoringDTO
-```
-
-### Persistence Layer: `PrinterMonitoringRepository`
-
-Responsible for in-memory storage and retrieval of printers and jobs.
-
-```python
-def get_printers(self) -> List[PrinterProgressDTO]
-def get_jobs(self) -> List[JobDTO]
-def add_or_update_printer(dto)
-def add_or_update_job(dto)
-```
-
-### API
-
-Implemented via FastAPI in `app/api/routes.py`, exposing:
-
-- `GET /printer/status` — returns the monitoring status via the `PrinterMonitoringService`
-
-### MQTT Subscriber
-
-Listens for MQTT messages and passes them to the appropriate service method (`on_printer_progress`, `on_job_assignement`).
-
----
-
-## DTO Definitions
-
-Located in `app/dto/`:
-
-```python
-@dataclass
-class PrinterProgressDTO:
-    printerId: str
-    jobId: str
-    status: str
-    progress: int
-    timestamp: float
-
-@dataclass
-class JobDTO:
-    jobId: str
-    modelUrl: str
-    filamentType: str
-    estimatedTime: int
-    priority: int
-    assignedAt: float
-    parameters: dict
-
-@dataclass
-class PrinterStatusDTO:
-    printerId: str
-    status: str
-    currentJobId: str
-    modelUrl: str
-    progress: int
-    temperature: float
-    lastUpdated: str
-
-@dataclass
-class MonitoringDTO:
-    printers: List[PrinterStatusDTO]
-```
-
----
-
-## Entry Point (`main.py`)
-
-Handles FastAPI initialization, MQTT subscriber startup, and example standalone mode:
-
-- Launches MQTT subscriber
-- Injects service via dependency
-- On `__main__`, runs a test with dummy data and optionally starts the API
-
----
-
-## Directory Structure
-
-```
+```text
 printer_monitoring/
 ├── app/
-│   ├── dto/
-│   │   ├── printer_progress_dto.py
-│   │   ├── robot_progress_dto.py
-│   │   ├── job_dto.py
-│   │   ├── monitoring_dto.py
-│   ├── model/
-│   │   ├── monitoring.py
-│   ├── persistence/
-│   │   └── repository.py
-│   ├── api/
-│   │   └── routes.py
-│   ├── mqtt/
-│   │   └── subscriber.py
-│   ├── main.py
+│   ├── dto/                           # Data Transfer Objects
+│   │   ├── printer_progress_dto.py    # Printer progress message schema
+│   │   └── monitoring_dto.py          # API response schema
+│   │
+│   ├── http/                          # HTTP API components
+│   │   ├── __init__.py
+│   │   └── api_endpoint.py            # Flask API endpoint definitions
+│   │
+│   ├── models/                        # Core business logic
+│   │   ├── __init__.py
+│   │   └── printer_monitoring_service.py  # Main monitoring service
+│   │
+│   ├── mqtt/                          # MQTT client components
+│   │   ├── __init__.py
+│   │   ├── client.py                  # MQTT client wrapper
+│   │   └── subscriber.py              # MQTT message subscription
+│   │
+│   ├── persistence/                   # Data persistence layer
+│   │   ├── __init__.py
+│   │   ├── status_history.py          # Status history management
+│   │   └── save/                      # Persistent storage
+│   │       └── status_history.csv     # Historical status data
+│   │
+│   ├── services/                      # Utility services
+│   │   ├── __init__.py
+│   │   └── discover_printers.py       # Network printer discovery
+│   │
+│   ├── main.py                        # Service entrypoint
+│   ├── mqtt_config.yaml               # MQTT configuration for local run
+│   └── web_config.yaml                # HTTP API configuration
+│
+├── config.yaml/                       # Additional configuration
+├── target_mqtt_config.yaml            # MQTT configuration for Docker
+├── target_web_conf.yaml               # Web configuration for Docker
+│
 ├── requirements.txt
 ├── Dockerfile
+└── README.md
 ```
 
----
+- **app/**  
+  Main application code.
+  - **dto/**: Data Transfer Objects for MQTT messages and API responses.
+  - **http/**: HTTP API implementation using Flask, including endpoint definitions and configuration.
+  - **models/**: Core business logic, including the main `printer_monitoring_service.py`.
+  - **mqtt/**: MQTT client implementation for receiving printer and robot progress updates.
+  - **persistence/**: Data storage management, including status history and CSV export functionality.
+  - **services/**: Utility services like printer discovery.
+  - **main.py**: Service entrypoint and initialization.
+  - **mqtt_config.yaml**: MQTT broker configuration for local development.
+  - **web_config.yaml**: HTTP API server configuration.
 
-## Docker Usage
+- **target_mqtt_config.yaml** & **target_web_conf.yaml**  
+  Docker-specific configurations for MQTT and HTTP services.
 
-To build and run the container:
+## Local
+
+### Local Run
+
+Move to the `printer_monitoring` directory:
 
 ```bash
-docker build -t printer_monitoring .
-docker run -d --name printer_monitoring -p 8000:8000 printer_monitoring
+cd IoT_Project/printer_monitoring
 ```
 
----
+Install dependencies:
 
-## Known Limitations / Future Improvements
+```bash
+pip install -r requirements.txt
+```
 
-- Currently supports only one active job per printer (1:1 mapping)
-- Data persistence is in-memory; no database support
-- No real-time push (e.g., WebSocket) to frontend
-- Robot progress data is not yet linked in monitoring output
+Run the service locally:
 
----
+```bash
+python3 -m app.main
+```
 
-## Final Notes
+The service will start both MQTT subscription and HTTP API server. The API will be available at the configured port (default: 8080).
 
-- The system follows a clean architecture: DTOs, services, repositories, API, and MQTT all separated.
-- Can be extended easily with historical logging, WebSocket updates, or database support.
-- Designed for robust read-only status querying via REST API.
+### Local Test
 
----
+To test the HTTP API endpoint:
+
+```bash
+curl http://localhost:8080/printer/status
+```
+
+To test MQTT integration, ensure the MQTT broker is running and printers are publishing progress data to the monitored topics.
+
+You can also test with example data by publishing to the MQTT topics:
+
+```bash
+# Example: Publish printer progress
+mosquitto_pub -h localhost -t "device/printer/printer-1/progress" \
+  -m '{"printerId": "printer-1", "jobId": "job-123", "status": "printing", "progress": 42, "timestamp": "1642234567"}'
+```
+
+## Docker
+
+Build the Docker image:
+
+```bash
+docker build -t printer_monitoring-image .
+```
+
+Run the container:
+
+```bash
+docker run --name printer_monitoring-container \
+    -p 8080:8080 \
+    -v ${PWD}/target_mqtt_config.yaml:/app/mqtt_config.yaml \
+    -v ${PWD}/target_web_conf.yaml:/app/web_config.yaml \
+    -v ${PWD}/app/persistence/save:/app/persistence/save \
+    --network composed-mqtt-project_iot_network \
+    --restart always \
+    printer_monitoring-image
+```
+
+- `-d`: Runs the container in detached mode (omitted for debugging purposes).
+- `--name printer_monitoring-container`: Names the container for easy reference.
+- `-p 8080:8080`: Maps the container's port 8080 to the host for HTTP API access.
+- `-v ...`: Mounts configuration files and persistence directory for status history.
+- `--network composed-mqtt-project_iot_network`: Connects to the project's Docker network for MQTT communication.
+- `--restart always`: Ensures automatic restart if the container stops.
+- `printer_monitoring-image`: The Docker image to use.
+
+The HTTP API will be available at [http://localhost:8080](http://localhost:8080).
+
+To stop and remove the container:
+
+```bash
+docker stop printer_monitoring-container
+docker rm printer_monitoring-container
+```
+
+To view logs:
+
+```bash
+docker logs printer_monitoring-container
+```
+
+To enter the container for debugging:
+
+```bash
+docker exec -it printer_monitoring-container /bin/bash
+```
+
+## Docker Compose
+
+Follow the main readme instructions in the root directory of the project. ([main readme](../README.md))
+
+The printer monitoring service integrates with the complete IoT system through the Docker Compose configuration, automatically connecting to the MQTT broker and exposing the HTTP API through

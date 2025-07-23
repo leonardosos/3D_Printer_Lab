@@ -238,7 +238,7 @@ services:
     ports:
       - "8150:8150"
     volumes:
-      - ./fan_controller/config.yaml:/app/fan_controller_config.yaml
+      - ./fan_controller/config/fan_controller_config.yaml:/app/fan_controller_config.yaml
     environment:
       - CONFIG_PATH=/app/fan_controller_config.yaml
       - TZ=Europe/Berlin
@@ -281,7 +281,7 @@ services:
     ports:
       - "8115:8115"
     volumes:
-      - ./job_handler/config.yaml:/app/job_handler_config.yaml
+      - ./job_handler/config/job_handler_config.yaml:/app/job_handler_config.yaml
     environment:
       - CONFIG_PATH=/app/job_handler_config.yaml
       - TZ=Europe/Berlin

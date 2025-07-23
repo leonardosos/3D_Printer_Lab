@@ -24,7 +24,7 @@ class JobHandler:
             self.on_robot_progress
         )
         self.queue_manager_url = queue_manager_url
-        self.discovery_time = 60  # seconds
+        self.discovery_time = 10  # seconds
 
     def start(self):
         logging.info("Starting JobHandler...")
@@ -79,7 +79,7 @@ class JobHandler:
             jobId=job.id,
             modelUrl=f"models/{job.modelId}.gcode",
             filamentType="PLA",  # Example, adjust as needed
-            estimatedTime=np.random.randint(3300, 3900),
+            estimatedTime=np.random.randint(30, 90),
             priority=job.priority,
             assignedAt=job.submittedAt if isinstance(job.submittedAt, str) else job.submittedAt.isoformat(),
             parameters={"layerHeight": 0.2, "infill": 20, "nozzleTemp": 210, "bedTemp": 60}
