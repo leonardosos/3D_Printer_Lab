@@ -6,7 +6,7 @@ import logging
 # Create blueprint
 api_bp = Blueprint('api', __name__)
 
-# Initialize service (singleton pattern)
+# Initialize service 
 service = PriorityQueueManager()
 
 # Configure logging
