@@ -47,11 +47,6 @@ Leonardo:
 - [Anomaly Detection (AT)](anomaly_detection/README.md)
 - [Printer (ST)](st_printer/README.md)
 - [Web Interface (GUI)](web-ui/README.md)
-- [mqtt-broker](mqtt-broker/README.md)
-- [mqtt-tester](mqtt-tester/README.md)
-
-- [ ] Porte di comunicazione tutte diverse??
-- [ ] web server position against api gateway
 
 Simone:
 
@@ -67,13 +62,6 @@ Lorenzo:
 - printer monitoring
 - fan controller
 - priority queue management
-
-memo lorenzo:
-
-- aggiungere delete al queue manager - job handler\
-- cambiare robot communica jobid
-- rob robot -> robot
-- update communication on the local readmes
 
 ## Project Structure
 
