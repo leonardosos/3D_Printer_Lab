@@ -155,7 +155,7 @@ The Fan Controller Service follows a reactive control and safety workflow:
 
 The fan controller service is organized into several key classes:
 
-- **FanController**  
+- **FanController**
   Main controller class for individual fans. Handles:
   - Processing incoming status messages (heat level updates)
   - Processing incoming emergency messages (overheat, thermal runaway, solved)

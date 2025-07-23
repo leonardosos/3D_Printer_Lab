@@ -7,7 +7,7 @@ from app.dto.printer_list_dto import PrintersList
 import datetime
 
 class MQTTPublisher:
-    def __init__(self, broker_host: str, broker_port: int, qos: int = 0):
+    def __init__(self, broker_host: str, broker_port: int, qos: int = 1):
         self.broker_host = broker_host
         self.broker_port = broker_port
         self.qos = qos
