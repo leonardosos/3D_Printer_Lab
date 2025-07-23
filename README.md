@@ -138,13 +138,15 @@ Returning to **PQM**, it sends files to be printed when requested by the **Job H
 
 The **robot**, once it receives the coordinates, autonomously navigates to the target printer, collects the printed object, and updates **PM** and **JH** with its status for monitoring and coordination.
 
+In [this graph](flowchart/categorized_flowchart.mmd) you can observe the microservice structure divided by main categories
+
 ### Devices Table
 
 | Device      | Number | Sensor | Actuator | Read                                    | Write                                   |
 |-------------|--------|--------|----------|----------------------------------------|-----------------------------------------|
 | 3D Printer  | 3 (dynamic)     | Yes    | Yes      | - Print assignments<br>- Job commands  | - Temperature data<br>- Print progress<br>- Status updates |
 | Room        | 1 (fixed)     | Yes    | No       | N/A                                    | - Temperature readings |
-| Robot       | 1 (dynamic)     | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
+| Robot       | 1 (fixed)     | Yes    | Yes      | - Movement coordinates<br>- Job tasks  | - Progress updates<br>- Position status<br>- Completion signals |
 | Fan         | 1 (fixed)     | No     | Yes      | - Speed commands| N/A   |
 
 ### Temperature range
