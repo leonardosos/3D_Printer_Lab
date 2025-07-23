@@ -57,7 +57,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
 - `id` - string
 - `modelId` - string
 - `assignedPrinterId?` - string|null
-- `priority` - number
+- `priority` - string
 - `status` - "pending" | "queued" | "in_progress" | "completed" | "failed"
 - `submittedAt` - string (ISO 8601)
 - `updatedAt` - string (ISO 8601)
@@ -71,7 +71,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
       "id": "job-123",
       "modelId": "model-456",
       "assignedPrinterId": null,
-      "priority": 10,
+      "priority": "10",
       "status": "pending",
       "submittedAt": "2025-06-15T08:30:00Z",
       "updatedAt": "2025-06-15T08:30:00Z"
@@ -86,9 +86,9 @@ Every microservice or device can validate incoming JSON against the appropriate 
 
 ```json
 {
-  "modelId": "string",
-  "printerId?": "string",    // optional preferred printer
-  "priority?": "number"      // default = 0
+  "modelId": string,
+  "printerId?": string,    // optional preferred printer
+  "priority?": string      // default = 0
 }
 ```
 
@@ -101,7 +101,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
 **Example request:**
 
 ```json
-{ "modelId": "model-789", "priority": 5 }
+{ "modelId": "model-789", "priority": "5" }
 ```
 
 #### 1.1.3 PUT /jobs/{jobId}
@@ -110,7 +110,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
 
 ```json
 {
-  "priority?": "number",     // update job priority
+  "priority?": string,     // update job priority
 }
 ```
 
@@ -123,7 +123,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
 **Example request:**
 
 ```json
-{ "priority": 15 }
+{ "priority": "15" }
 ```
 
 **Example response:**
@@ -134,7 +134,7 @@ Every microservice or device can validate incoming JSON against the appropriate 
     "id": "job-123",
     "modelId": "model-456",
     "assignedPrinterId": null,
-    "priority": 15,
+    "priority": "15",
     "status": "pending",
     "submittedAt": "2025-06-15T08:30:00Z",
     "updatedAt": "2025-06-15T08:35:00Z"
