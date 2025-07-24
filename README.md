@@ -25,6 +25,7 @@
         - [Docker Compose Test (only MQTT Broker)](#docker-compose-test-only-mqtt-broker)
     - [MQTT Broker - Eclipse Mosquitto](#mqtt-broker---eclipse-mosquitto)
 7. [Meeting Notes](#meeting-notes)
+8. [Professor Repos](#professor-repos)
 
 ---
 ---
@@ -336,3 +337,7 @@ See the [mqtt-tester/README.md](mqtt-tester/README.md) for more details on how t
 ## Meeting Notes
 
 - [First Meeting (26-06-2025) Notes](meeting_notes/first_meeting.md)
+
+## Professor Repos
+
+- https://github.com/Distributed-IoT-Software-Arch-Course
